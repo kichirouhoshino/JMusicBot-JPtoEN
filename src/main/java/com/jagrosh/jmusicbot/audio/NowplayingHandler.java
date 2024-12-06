@@ -155,7 +155,7 @@ public class NowplayingHandler {
             if (track != null && bot.getJDA().getGuilds().stream().filter(g -> Objects.requireNonNull(g.getSelfMember().getVoiceState()).inAudioChannel()).count() <= 1)
 
                 if (track.getInfo().uri.matches(".*stream.gensokyoradio.net/.*")) {
-                    bot.getJDA().getPresence().setActivity(Activity.listening("幻想郷ラジオ"));
+                    bot.getJDA().getPresence().setActivity(Activity.listening("Gensokyo Radio"));
                 } else {
                     bot.getJDA().getPresence().setActivity(Activity.listening(track.getInfo().title));
                 }

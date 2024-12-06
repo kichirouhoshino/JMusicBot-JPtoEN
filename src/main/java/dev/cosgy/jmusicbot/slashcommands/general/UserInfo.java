@@ -21,13 +21,13 @@ public class UserInfo extends SlashCommand {
 
     public UserInfo() {
         this.name = "userinfo";
-        this.help = "指定したユーザーに関する情報を表示します";
-        this.arguments = "<ユーザー>";
+        this.help = "Displays information about the specified user";
+        this.arguments = "<user>";
         this.guildOnly = true;
         this.category = new Category("General");
 
         List<OptionData> options = new ArrayList<>();
-        options.add(new OptionData(OptionType.USER, "user", "ユーザー", true));
+        options.add(new OptionData(OptionType.USER, "user", "User", true));
         this.options = options;
 
     }
@@ -42,18 +42,18 @@ public class UserInfo extends SlashCommand {
         String GUILD_JOIN_DATE = memb.getTimeJoined().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"));
         String DISCORD_JOINED_DATE = memb.getUser().getTimeCreated().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"));
         String ID = memb.getUser().getId();
-        String STATUS = memb.getOnlineStatus().getKey().replace("offline", ":x: オフライン").replace("dnd", ":red_circle: 起こさないで").replace("idle", "退席中").replace("online", ":white_check_mark: オンライン");
+        String STATUS = memb.getOnlineStatus().getKey().replace("offline", ":x: Offline").replace("dnd", ":red_circle: Do not disturb").replace("idle", "Idle").replace("online", ":white_check_mark: Online");
         String ROLES;
         String GAME;
         String AVATAR = memb.getUser().getAvatarUrl();
 
-        log.debug("\nユーザー名:" + memb.getEffectiveName() + "\n" +
-                "タグ:" + memb.getUser().getDiscriminator() + "\n" +
-                "ギルド参加日時:"
+        log.debug("\nUsername: " + memb.getEffectiveName() + "\n" +
+                "Tag: " + memb.getUser().getDiscriminator() + "\n" +
+                "Guild join date: "
                 + memb.getUser().getTimeCreated()
                 .format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")) + "\n" +
-                "ユーザーID:" + memb.getUser().getId() + "\n" +
-                "オンライン状態:" + memb.getOnlineStatus());
+                "User ID: " + memb.getUser().getId() + "\n" +
+                "Online status: " + memb.getOnlineStatus());
 
         try {
             GAME = memb.getActivities().toString();
@@ -69,28 +69,28 @@ public class UserInfo extends SlashCommand {
         if (ROLES.length() > 0)
             ROLES = ROLES.substring(0, ROLES.length() - 2);
         else
-            ROLES = "このサーバーには役職が存在しません";
+            ROLES = "No roles in this server";
 
         if (AVATAR == null) {
-            AVATAR = "アイコンなし";
+            AVATAR = "No avatar";
         }
 
-        eb.setAuthor(memb.getUser().getName() + TAG + " のユーザー情報", null, null)
-                .addField(":pencil2: 名前/ニックネーム", "**" + NAME + "**", true)
+        eb.setAuthor(memb.getUser().getName() + TAG + "'s user info", null, null)
+                .addField(":pencil2: Name/Nickname", "**" + NAME + "**", true)
                 .addField(":link: DiscordTag", "**" + TAG + "**", true)
                 .addField(":1234: ID", "**" + ID + "**", true)
                 .addBlankField(false)
-                .addField(":signal_strength: 現在のステータス", "**" + STATUS + "**", true)
-                .addField(":video_game: プレイ中のゲーム", "**" + GAME + "**", true)
-                .addField(":tools: 役職", "**" + ROLES + "**", true)
+                .addField(":signal_strength: Current status", "**" + STATUS + "**", true)
+                .addField(":video_game: Playing", "**" + GAME + "**", true)
+                .addField(":tools: Roles", "**" + ROLES + "**", true)
                 .addBlankField(false)
-                .addField(":inbox_tray: サーバー参加日", "**" + GUILD_JOIN_DATE + "**", true)
-                .addField(":beginner: アカウント作成日", "**" + DISCORD_JOINED_DATE + "**", true)
+                .addField(":inbox_tray: Server join date", "**" + GUILD_JOIN_DATE + "**", true)
+                .addField(":beginner: Account created on", "**" + DISCORD_JOINED_DATE + "**", true)
                 .addBlankField(false)
-                .addField(":frame_photo: アイコンURL", AVATAR, false);
+                .addField(":frame_photo: Avatar URL", AVATAR, false);
 
-        if (!AVATAR.equals("アイコンなし")) {
-            eb.setAuthor(memb.getUser().getName() + TAG + " のユーザー情報", null, AVATAR);
+        if (!AVATAR.equals("No avatar")) {
+            eb.setAuthor(memb.getUser().getName() + TAG + "'s user info", null, AVATAR);
         }
 
         event.replyEmbeds(eb.build()).queue();
@@ -109,7 +109,7 @@ public class UserInfo extends SlashCommand {
                     memb = FinderUtil.findMembers(event.getArgs(), event.getGuild()).get(0);
                 }
             } catch (Exception e) {
-                event.reply("ユーザー \"" + event.getArgs() + "\" は見つかりませんでした。");
+                event.reply("User \"" + event.getArgs() + "\" not found.");
                 return;
             }
         } else {
@@ -122,18 +122,18 @@ public class UserInfo extends SlashCommand {
         String GUILD_JOIN_DATE = memb.getTimeJoined().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"));
         String DISCORD_JOINED_DATE = memb.getUser().getTimeCreated().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"));
         String ID = memb.getUser().getId();
-        String STATUS = memb.getOnlineStatus().getKey().replace("offline", ":x: オフライン").replace("dnd", ":red_circle: 起こさないで").replace("idle", "退席中").replace("online", ":white_check_mark: オンライン");
+        String STATUS = memb.getOnlineStatus().getKey().replace("offline", ":x: Offline").replace("dnd", ":red_circle: Do not disturb").replace("idle", "Idle").replace("online", ":white_check_mark: Online");
         String ROLES;
         String GAME;
         String AVATAR = memb.getUser().getAvatarUrl();
 
-        log.debug("\nユーザー名:" + memb.getEffectiveName() + "\n" +
-                "タグ:" + memb.getUser().getDiscriminator() + "\n" +
-                "ギルド参加日時:"
+        log.debug("\nUsername: " + memb.getEffectiveName() + "\n" +
+                "Tag: " + memb.getUser().getDiscriminator() + "\n" +
+                "Guild join date: "
                 + memb.getUser().getTimeCreated()
                 .format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")) + "\n" +
-                "ユーザーID:" + memb.getUser().getId() + "\n" +
-                "オンライン状態:" + memb.getOnlineStatus());
+                "User ID: " + memb.getUser().getId() + "\n" +
+                "Online status: " + memb.getOnlineStatus());
 
         try {
             GAME = memb.getActivities().toString();
@@ -149,28 +149,28 @@ public class UserInfo extends SlashCommand {
         if (ROLES.length() > 0)
             ROLES = ROLES.substring(0, ROLES.length() - 2);
         else
-            ROLES = "このサーバーには役職が存在しません";
+            ROLES = "No roles in this server";
 
         if (AVATAR == null) {
-            AVATAR = "アイコンなし";
+            AVATAR = "No avatar";
         }
 
-        eb.setAuthor(memb.getUser().getName() + TAG + " のユーザー情報", null, null)
-                .addField(":pencil2: 名前/ニックネーム", "**" + NAME + "**", true)
+        eb.setAuthor(memb.getUser().getName() + TAG + "'s user info", null, null)
+                .addField(":pencil2: Name/Nickname", "**" + NAME + "**", true)
                 .addField(":link: DiscordTag", "**" + TAG + "**", true)
                 .addField(":1234: ID", "**" + ID + "**", true)
                 .addBlankField(false)
-                .addField(":signal_strength: 現在のステータス", "**" + STATUS + "**", true)
-                .addField(":video_game: プレイ中のゲーム", "**" + GAME + "**", true)
-                .addField(":tools: 役職", "**" + ROLES + "**", true)
+                .addField(":signal_strength: Current status", "**" + STATUS + "**", true)
+                .addField(":video_game: Playing", "**" + GAME + "**", true)
+                .addField(":tools: Roles", "**" + ROLES + "**", true)
                 .addBlankField(false)
-                .addField(":inbox_tray: サーバー参加日", "**" + GUILD_JOIN_DATE + "**", true)
-                .addField(":beginner: アカウント作成日", "**" + DISCORD_JOINED_DATE + "**", true)
+                .addField(":inbox_tray: Server join date", "**" + GUILD_JOIN_DATE + "**", true)
+                .addField(":beginner: Account created on", "**" + DISCORD_JOINED_DATE + "**", true)
                 .addBlankField(false)
-                .addField(":frame_photo: アイコンURL", AVATAR, false);
+                .addField(":frame_photo: Avatar URL", AVATAR, false);
 
-        if (!AVATAR.equals("アイコンなし")) {
-            eb.setAuthor(memb.getUser().getName() + TAG + " のユーザー情報", null, AVATAR);
+        if (!AVATAR.equals("No avatar")) {
+            eb.setAuthor(memb.getUser().getName() + TAG + "'s user info", null, AVATAR);
         }
 
         event.getChannel().sendMessageEmbeds(eb.build()).queue();

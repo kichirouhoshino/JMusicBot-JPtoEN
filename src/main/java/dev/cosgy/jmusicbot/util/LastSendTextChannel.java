@@ -29,10 +29,10 @@ public class LastSendTextChannel implements CommandListener {
     }
 
     public static void SendMessage(Guild guild, String message) {
-        log.debug("メッセージを送信します。");
+        log.debug("Sending message.");
         long textId = GetLastTextId(guild.getIdLong());
         if (textId == 0) {
-            log.debug("チャンネルが保存されていなかったため、メッセージを送信できませんでした。");
+            log.debug("Could not send message because the channel was not saved.");
             return;
         }
         MessageChannel channel = guild.getTextChannelById(textId);

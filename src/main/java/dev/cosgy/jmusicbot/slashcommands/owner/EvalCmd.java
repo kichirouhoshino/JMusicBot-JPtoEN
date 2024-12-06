@@ -36,11 +36,11 @@ public class EvalCmd extends OwnerCommand {
     public EvalCmd(Bot bot) {
         this.bot = bot;
         this.name = "eval";
-        this.help = "nashornコードを実行します";
+        this.help = "Executes Nashorn code";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.guildOnly = false;
         List<OptionData> options = new ArrayList<>();
-        options.add(new OptionData(OptionType.STRING, "code", "実行するコード", true));
+        options.add(new OptionData(OptionType.STRING, "code", "Code to execute", true));
         this.options = options;
     }
 
@@ -53,9 +53,9 @@ public class EvalCmd extends OwnerCommand {
         se.put("guild", event.getGuild());
         se.put("channel", event.getChannel());
         try {
-            event.reply(event.getClient().getSuccess() + " 正常に実行されました:\n```\n" + se.eval(event.getOption("code").getAsString()) + " ```").queue();
+            event.reply(event.getClient().getSuccess() + " Executed successfully:\n```\n" + se.eval(event.getOption("code").getAsString()) + " ```").queue();
         } catch (Exception e) {
-            event.reply(event.getClient().getError() + " 例外が発生しました\n```\n" + e + " ```").queue();
+            event.reply(event.getClient().getError() + " An exception occurred\n```\n" + e + " ```").queue();
         }
     }
 
@@ -68,9 +68,9 @@ public class EvalCmd extends OwnerCommand {
         se.put("guild", event.getGuild());
         se.put("channel", event.getChannel());
         try {
-            event.reply(event.getClient().getSuccess() + " 正常に実行されました:\n```\n" + se.eval(event.getArgs()) + " ```");
+            event.reply(event.getClient().getSuccess() + " Executed successfully:\n```\n" + se.eval(event.getArgs()) + " ```");
         } catch (Exception e) {
-            event.reply(event.getClient().getError() + " 例外が発生しました\n```\n" + e + " ```");
+            event.reply(event.getClient().getError() + " An exception occurred\n```\n" + e + " ```");
         }
     }
 

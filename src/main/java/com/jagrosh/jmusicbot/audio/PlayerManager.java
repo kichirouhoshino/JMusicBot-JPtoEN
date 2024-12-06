@@ -66,12 +66,12 @@ public class PlayerManager extends DefaultAudioPlayerManager {
         source(YoutubeAudioSourceManager.class).setPlaylistPageCount(10);
 
         if (getConfiguration().getOpusEncodingQuality() != 10) {
-            logger.debug("OpusEncodingQuality は、{}(< 10), 品質を10に設定します。", getConfiguration().getOpusEncodingQuality());
+            logger.debug("OpusEncodingQuality is {}, setting quality to 10.", getConfiguration().getOpusEncodingQuality());
             getConfiguration().setOpusEncodingQuality(10);
         }
 
         if (getConfiguration().getResamplingQuality() != AudioConfiguration.ResamplingQuality.HIGH) {
-            logger.debug("ResamplingQuality は {}(HIGHではない), 品質をHIGHに設定します。", getConfiguration().getResamplingQuality().name());
+            logger.debug("ResamplingQuality is {} (not HIGH), setting quality to HIGH.", getConfiguration().getResamplingQuality().name());
             getConfiguration().setResamplingQuality(AudioConfiguration.ResamplingQuality.HIGH);
         }
     }

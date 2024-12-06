@@ -39,8 +39,8 @@ import java.util.List;
 public class SetvcCmd extends AdminCommand {
     public SetvcCmd(Bot bot) {
         this.name = "setvc";
-        this.help = "再生に使用する音声チャンネルを固定します。";
-        this.arguments = "<チャンネル名|NONE|なし>";
+        this.help = "Fix the voice channel used for playback.";
+        this.arguments = "<channel name|NONE>";
         this.aliases = bot.getConfig().getAliases(this.name);
 
         this.children = new SlashCommand[]{new Set(), new None()};
@@ -54,23 +54,23 @@ public class SetvcCmd extends AdminCommand {
     protected void execute(CommandEvent event) {
         Logger log = LoggerFactory.getLogger("SetVcCmd");
         if (event.getArgs().isEmpty()) {
-            event.reply(event.getClient().getError() + "音声チャンネルまたはNONEを含めてください。");
+            event.reply(event.getClient().getError() + "Please include a voice channel or NONE.");
             return;
         }
         Settings s = event.getClient().getSettingsFor(event.getGuild());
         if (event.getArgs().toLowerCase().matches("(none|なし)")) {
             s.setVoiceChannel(null);
-            event.reply(event.getClient().getSuccess() + "音楽はどの音声チャンネルでも再生できます。");
+            event.reply(event.getClient().getSuccess() + "Music can be played in any voice channel.");
         } else {
             List<VoiceChannel> list = FinderUtil.findVoiceChannels(event.getArgs(), event.getGuild());
             if (list.isEmpty())
-                event.reply(event.getClient().getWarning() + "一致する音声チャンネルが見つかりませんでした \"" + event.getArgs() + "\"");
+                event.reply(event.getClient().getWarning() + "No matching voice channel found for \"" + event.getArgs() + "\"");
             else if (list.size() > 1)
                 event.reply(event.getClient().getWarning() + FormatUtil.listOfVChannels(list, event.getArgs()));
             else {
                 s.setVoiceChannel(list.get(0));
-                log.info("音楽チャンネルを設定しました。");
-                event.reply(event.getClient().getSuccess() + "音楽は**" + list.get(0).getAsMention() + "**でのみ再生できるようになりました。");
+                log.info("Music channel has been set.");
+                event.reply(event.getClient().getSuccess() + "Music can now only be played in **" + list.get(0).getAsMention() + "**.");
             }
         }
     }
@@ -78,10 +78,10 @@ public class SetvcCmd extends AdminCommand {
     private static class Set extends AdminCommand {
         public Set() {
             this.name = "set";
-            this.help = "再生に使用する音声チャンネルを設定";
+            this.help = "Set the voice channel for playback.";
 
             List<OptionData> options = new ArrayList<>();
-            options.add(new OptionData(OptionType.CHANNEL, "channel", "音声チャンネル", true));
+            options.add(new OptionData(OptionType.CHANNEL, "channel", "Voice channel", true));
 
             this.options = options;
         }
@@ -89,44 +89,44 @@ public class SetvcCmd extends AdminCommand {
         @Override
         protected void execute(SlashCommandEvent event) {
             if (checkAdminPermission(event.getClient(), event)) {
-                event.reply(event.getClient().getWarning() + "権限がないため実行できません。").queue();
+                event.reply(event.getClient().getWarning() + "You do not have permission to execute this command.").queue();
                 return;
             }
             Settings s = event.getClient().getSettingsFor(event.getGuild());
             Long channel = event.getOption("channel").getAsLong();
 
             if (event.getOption("channel").getChannelType() != ChannelType.VOICE) {
-                event.reply(event.getClient().getError() + "音声チャンネルを設定して下さい").queue();
+                event.reply(event.getClient().getError() + "Please set a voice channel.").queue();
             }
 
             VoiceChannel vc = event.getGuild().getVoiceChannelById(channel);
             s.setVoiceChannel(vc);
-            event.reply(event.getClient().getSuccess() + "音楽は**" + vc.getAsMention() + "**でのみ再生できるようになりました。").queue();
+            event.reply(event.getClient().getSuccess() + "Music can now only be played in **" + vc.getAsMention() + "**.").queue();
         }
     }
 
     private static class None extends AdminCommand {
         public None() {
             this.name = "none";
-            this.help = "再生に使用する音声チャンネルの設定をリセットします。";
+            this.help = "Reset the voice channel setting for playback.";
         }
 
         @Override
         protected void execute(SlashCommandEvent event) {
             if (checkAdminPermission(event.getClient(), event)) {
-                event.reply(event.getClient().getWarning() + "権限がないため実行できません。").queue();
+                event.reply(event.getClient().getWarning() + "You do not have permission to execute this command.").queue();
                 return;
             }
             Settings s = event.getClient().getSettingsFor(event.getGuild());
             s.setVoiceChannel(null);
-            event.reply(event.getClient().getSuccess() + "音楽はどの音声チャンネルでも再生できます。").queue();
+            event.reply(event.getClient().getSuccess() + "Music can be played in any voice channel.").queue();
         }
 
         @Override
         protected void execute(CommandEvent event) {
             Settings s = event.getClient().getSettingsFor(event.getGuild());
             s.setVoiceChannel(null);
-            event.replySuccess("音楽はどの音声チャンネルでも再生できます。");
+            event.replySuccess("Music can be played in any voice channel.");
         }
     }
 }

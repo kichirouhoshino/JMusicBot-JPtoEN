@@ -78,7 +78,7 @@ public class Bot {
     public static void updatePlayStatus(Guild guild, Member selfMember, PlayStatus status) {
         if (!INSTANCE.getConfig().getChangeNickName()) return;
         if (!selfMember.hasPermission(Permission.NICKNAME_CHANGE)) {
-            LoggerFactory.getLogger("UpdName").error("ニックネームを変更できませんでした: 権限が不足しています。");
+            LoggerFactory.getLogger("UpdName").error("Failed to change nickname: Insufficient permissions.");
             return;
         }
 

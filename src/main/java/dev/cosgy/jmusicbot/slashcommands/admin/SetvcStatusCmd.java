@@ -31,19 +31,19 @@ import java.util.Objects;
 public class SetvcStatusCmd extends AdminCommand {
     public SetvcStatusCmd(Bot bot) {
         this.name = "setvcstatus";
-        this.help = "VCステータスに再生中を表示するかを設定します。";
+        this.help = "Set whether or not to display 'Playing' in the VC status.";
         this.arguments = "<true|false>";
         this.aliases = bot.getConfig().getAliases(this.name);
 
         this.options = List.of(
-                new OptionData(OptionType.BOOLEAN, "status", "有効:true 無効:false", true)
+                new OptionData(OptionType.BOOLEAN, "status", "Enabled: true / Disabled: false", true)
         );
     }
 
     @Override
     protected void execute(SlashCommandEvent event) {
         if (checkAdminPermission(event.getClient(), event)) {
-            event.reply(event.getClient().getWarning() + "権限がないため実行できません。").queue();
+            event.reply(event.getClient().getWarning() + "You do not have permission to execute this command.").queue();
             return;
         }
 
@@ -51,27 +51,27 @@ public class SetvcStatusCmd extends AdminCommand {
         Settings s = event.getClient().getSettingsFor(event.getGuild());
         s.setVCStatus(status);
 
-        event.reply(event.getClient().getSuccess() + "VCステータスに再生中を表示するかを`" + status + "`に設定しました。").queue();
+        event.reply(event.getClient().getSuccess() + "The VC status 'Playing' visibility has been set to `" + status + "`.").queue();
     }
 
     @Override
     protected void execute(CommandEvent event) {
 
         if (event.getArgs().isEmpty()) {
-            event.reply(event.getClient().getError() + "trueかfalseを含めてください。");
+            event.reply(event.getClient().getError() + "Please include true or false.");
             return;
         }
 
         Settings s = event.getClient().getSettingsFor(event.getGuild());
 
-        if (event.getArgs().toLowerCase().matches("(false|無効)")) {
+        if (event.getArgs().toLowerCase().matches("(false|disabled)")) {
             s.setVCStatus(false);
-            event.reply(event.getClient().getSuccess() + "VCステータスに再生中を表示しないように設定しました。");
-        }else if(event.getArgs().toLowerCase().matches("(true|有効)")) {
+            event.reply(event.getClient().getSuccess() + "The VC status will no longer display 'Playing'.");
+        } else if (event.getArgs().toLowerCase().matches("(true|enabled)")) {
             s.setVCStatus(true);
-            event.reply(event.getClient().getSuccess() + "VCステータスに再生中を表示するように設定しました。");
-        }else {
-            event.reply(event.getClient().getError() + "trueかfalseを含めてください。");
+            event.reply(event.getClient().getSuccess() + "The VC status will now display 'Playing'.");
+        } else {
+            event.reply(event.getClient().getError() + "Please include true or false.");
         }
     }
 }

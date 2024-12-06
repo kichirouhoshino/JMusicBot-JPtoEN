@@ -74,11 +74,11 @@ public class GensokyoInfoAgent extends Thread {
                     info = new ObjectMapper().readValue(body, ResultSet.class);
                     return info;
                 case 403:
-                    log.info("幻想郷ラジオの情報取得エラー(403)");
+                    log.info("Gensokyo Radio information retrieval error (403)");
                     log.info("Body:{}", res.body());
                     return null;
                 default:
-                    log.info("幻想郷ラジオの情報取得エラー(other)");
+                    log.info("Gensokyo Radio information retrieval error (other)");
                     return null;
             }
 
@@ -95,7 +95,7 @@ public class GensokyoInfoAgent extends Thread {
 
     @Override
     public void run() {
-        log.info("GensokyoInfoAgentを開始しました");
+        log.info("Started GensokyoInfoAgent");
 
         //noinspection InfiniteLoopStatement
         while (true) {

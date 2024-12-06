@@ -78,31 +78,31 @@ public class FormatUtil {
     }
 
     public static String listOfTChannels(List<TextChannel> list, String query) {
-        StringBuilder out = new StringBuilder(" 複数のテキストチャンネルで\"" + query + "\"が一致しました。:");
+        StringBuilder out = new StringBuilder(" The query \"" + query + "\" matched in multiple text channels:");
         for (int i = 0; i < 6 && i < list.size(); i++)
             out.append("\n - ").append(list.get(i).getName()).append(" (<#").append(list.get(i).getId()).append(">)");
         if (list.size() > 6)
-            out.append("\n**と ").append(list.size() - 6).append(" など...**");
+            out.append("\n**and " + (list.size() - 6) + " more...**");
         return out.toString();
     }
 
     public static String listOfVChannels(List<VoiceChannel> list, String query) {
-        StringBuilder outBuilder = new StringBuilder(" 複数のボイスチャンネルで\"" + query + "\"が一致しました。:");
+        StringBuilder outBuilder = new StringBuilder(" The query \"" + query + "\" matched in multiple voice channels:");
         for (int i = 0; i < 6 && i < list.size(); i++)
             outBuilder.append("\n - ").append(list.get(i).getAsMention()).append(" (ID:").append(list.get(i).getId()).append(")");
         String out = outBuilder.toString();
         if (list.size() > 6)
-            out += "\n**と " + (list.size() - 6) + " など...**";
+            out += "\n**and " + (list.size() - 6) + " more...**";
         return out;
     }
 
     public static String listOfRoles(List<Role> list, String query) {
-        StringBuilder outBuilder = new StringBuilder(" 複数のテキストチャンネルで \"" + query + "\"が一致しました。:");
+        StringBuilder outBuilder = new StringBuilder(" The query \"" + query + "\" matched in multiple text channels:");
         for (int i = 0; i < 6 && i < list.size(); i++)
             outBuilder.append("\n - ").append(list.get(i).getName()).append(" (ID:").append(list.get(i).getId()).append(")");
         String out = outBuilder.toString();
         if (list.size() > 6)
-            out += "\n**と " + (list.size() - 6) + " など...**";
+            out += "\n**and " + (list.size() - 6) + " more...**";
         return out;
     }
 

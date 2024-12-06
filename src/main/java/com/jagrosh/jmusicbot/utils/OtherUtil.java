@@ -42,10 +42,10 @@ import java.nio.file.Paths;
  * @author John Grosh <john.a.grosh@gmail.com>
  */
 public class OtherUtil {
-    public final static String NEW_VERSION_AVAILABLE = "利用可能なJMusicBot JPの新しいバージョンがあります!\n"
-            + "現在のバージョン: %s\n"
-            + "最新のバージョン: %s\n\n"
-            + " https://github.com/Cosgy-Dev/MusicBot-JP-java/releases/latest から最新バージョンをダウンロードして下さい。";
+    public final static String NEW_VERSION_AVAILABLE = "A new version of JMusicBot JP is available!\n"
+            + "Current version: %s\n"
+            + "Latest version: %s\n\n"
+            + "Please download the latest version from https://github.com/Cosgy-Dev/MusicBot-JP-java/releases/latest.";
     private final static String WINDOWS_INVALID_PATH = "c:\\windows\\system32\\";
 
     /**
@@ -171,7 +171,7 @@ public class OtherUtil {
         if (JMusicBot.class.getPackage() != null && JMusicBot.class.getPackage().getImplementationVersion() != null)
             return JMusicBot.class.getPackage().getImplementationVersion();
         else
-            return "不明";
+            return "Unknown";
     }
 
     public static String getLatestVersion() {
@@ -197,16 +197,15 @@ public class OtherUtil {
     public static String getUnsupportedBotReason(JDA jda)
     {
         if (jda.getSelfUser().getFlags().contains(User.UserFlag.VERIFIED_BOT))
-            return "検証済みボットのため、JMusicBot JPを使用することはサポートされていません。\n" +
-                    "VCで音楽を再生するため、権利問題が発生する可能性がある為ご理解とご協力をお願いします。";
+            return "Using JMusicBot JP is not supported for verified bots.\n" +
+                    "To play music in VC, there may be potential copyright issues, so we ask for your understanding and cooperation.";
 
         ApplicationInfo info = jda.retrieveApplicationInfo().complete();
         if (info.isBotPublic())
-            return "公開ボットのため、JMusicBot JPを使用することはサポートされていません。\n" +
-                    "デベロッパーポータルで「PUBLIC BOT」を無効にしてください。\n" +
+            return "Using JMusicBot JP is not supported for public bots.\n" +
+                    "Please disable 'PUBLIC BOT' in the Developer Portal.\n" +
                     "https://discord.com/developers/applications/" + info.getId() + "/bot\n" +
-                    "VCで音楽を再生するため、権利問題が発生する可能性がある為ご理解とご協力をお願いします。";
-
+                    "To play music in VC, there may be potential copyright issues, so we ask for your understanding and cooperation.";
         return null;
     }
 }

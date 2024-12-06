@@ -115,14 +115,14 @@ public class MaintenanceInfo {
                     .setColor(Color.orange)
                     .setDescription(InfoResult.Content);
             if (!InfoResult.StartTime.equals("")) {
-                ebuilder.addField("開始時刻:", InfoResult.StartTime, false);
+                ebuilder.addField("Start Time:", InfoResult.StartTime, false);
             }
             if (!InfoResult.EndTime.equals("")) {
-                ebuilder.addField("終了時刻:", InfoResult.EndTime, false);
+                ebuilder.addField("End Time:", InfoResult.EndTime, false);
             }
-            ebuilder.addField("更新日時:", InfoResult.LastUpdate, false)
-                    .addField("現在時刻", sdf.format(NowTime), false)
-                    .setFooter("※メンテナンス期間は予定なく変更する場合があります。", null);
+            ebuilder.addField("Last Update:", InfoResult.LastUpdate, false)
+                    .addField("Current Time", sdf.format(NowTime), false)
+                    .setFooter("※Maintenance periods may change without notice.", null);
             event.getChannel().sendMessage(builder.addEmbeds(ebuilder.build()).build()).complete();
             s.setAnnounce(AnnounceID);
         }
@@ -164,14 +164,14 @@ public class MaintenanceInfo {
                     .setColor(Color.orange)
                     .setDescription(InfoResult.Content);
             if (!InfoResult.StartTime.equals("")) {
-                ebuilder.addField("開始時刻:", InfoResult.StartTime, false);
+                ebuilder.addField("Start Time:", InfoResult.StartTime, false);
             }
             if (!InfoResult.EndTime.equals("")) {
-                ebuilder.addField("終了時刻:", InfoResult.EndTime, false);
+                ebuilder.addField("End Time:", InfoResult.EndTime, false);
             }
-            ebuilder.addField("更新日時:", InfoResult.LastUpdate, false)
-                    .addField("現在時刻", sdf.format(NowTime), false)
-                    .setFooter("※メンテナンス期間は予定なく変更する場合があります。", null);
+            ebuilder.addField("Last Update:", InfoResult.LastUpdate, false)
+                    .addField("Current Time", sdf.format(NowTime), false)
+                    .setFooter("※Maintenance periods may change without notice.", null);
             event.getChannel().sendMessage(builder.addEmbeds(ebuilder.build()).build()).complete();
             s.setAnnounce(AnnounceID);
         }

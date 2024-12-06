@@ -39,7 +39,7 @@ public class GUI extends JFrame {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setTitle("JMusicBot JP");
         JTabbedPane tabs = new JTabbedPane();
-        tabs.add("コンソール", console);
+        tabs.add("Console", console);
         getContentPane().add(tabs);
         pack();
         setLocationRelativeTo(null);

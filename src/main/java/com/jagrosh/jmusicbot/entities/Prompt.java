@@ -41,7 +41,7 @@ public class Prompt {
 
     public Prompt(String title, String noguiMessage, boolean nogui, boolean noprompt) {
         this.title = title;
-        this.noguiMessage = noguiMessage == null ? "noguiモードに切り替えます。 -nogui=trueフラグを含めることで、手動でnoguiモードで起動できます。" : noguiMessage;
+        this.noguiMessage = noguiMessage == null ? "Switching to nogui mode. You can manually start in nogui mode by including the -nogui=true flag." : noguiMessage;
         this.nogui = nogui;
         this.noprompt = noprompt;
     }
@@ -102,7 +102,7 @@ public class Prompt {
                     return scanner.nextLine();
                 return null;
             } catch (Exception e) {
-                alert(Level.ERROR, title, "コマンドラインから入力を読み込めません。");
+                alert(Level.ERROR, title, "Unable to read input from the command line.");
                 e.printStackTrace();
                 return null;
             }

@@ -72,13 +72,13 @@ public class SpotifyCmd extends MusicCommand {
         super(bot);
         this.name = "spotify";
         this.arguments = "<title|URL|subcommand>";
-        this.help = "指定された曲を再生します";
+        this.help = "Plays the specified track";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.beListening = true;
         this.bePlaying = false;
 
         List<OptionData> options = new ArrayList<>();
-        options.add(new OptionData(OptionType.STRING, "tracklink", "Spotifyの曲のURL", true));
+        options.add(new OptionData(OptionType.STRING, "tracklink", "URL of the Spotify track", true));
         this.options = options;
 
         builder = new OrderedMenu.Builder()
@@ -88,14 +88,14 @@ public class SpotifyCmd extends MusicCommand {
                 .setEventWaiter(bot.getWaiter())
                 .setTimeout(1, TimeUnit.MINUTES);
 
-        // Spotify のユーザー名とパスワードを取得
-        String clientId  = bot.getConfig().getSpotifyClientId();
-        String clientSecret  = bot.getConfig().getSpotifyClientSecret();
+        // Retrieve Spotify username and password
+        String clientId = bot.getConfig().getSpotifyClientId();
+        String clientSecret = bot.getConfig().getSpotifyClientSecret();
 
-        if(clientId.isEmpty() || clientSecret.isEmpty()){
+        if (clientId.isEmpty() || clientSecret.isEmpty()) {
             return;
         }
-        // ACCESS_TOKEN の発行
+        // Issue ACCESS_TOKEN
         accessToken = getAccessToken(clientId, clientSecret);
     }
 
@@ -103,12 +103,12 @@ public class SpotifyCmd extends MusicCommand {
     public void doCommand(SlashCommandEvent event) {
         String trackUrl = event.getOption("tracklink").getAsString();
 
-        if(accessToken == null){
-            event.reply("このコマンドは使用できません。このコマンドを有効にするにはボットの所有者による設定が必要です。").queue();
+        if (accessToken == null) {
+            event.reply("This command is unavailable. Configuration by the bot owner is required to enable this command.").queue();
             return;
         }
 
-        // アクセストークンが有効期限切れの場合は再度発行する
+        // Renew the access token if it has expired
         if (System.currentTimeMillis() >= accessTokenExpirationTime) {
             String clientId = bot.getConfig().getSpotifyClientId();
             String clientSecret = bot.getConfig().getSpotifyClientSecret();
@@ -116,7 +116,7 @@ public class SpotifyCmd extends MusicCommand {
         }
 
         if (!isSpotifyTrackUrl(trackUrl)) {
-            event.reply("Error: 指定されたURLはSpotifyの曲のURLではありません").queue();
+            event.reply("Error: The specified URL is not a Spotify track URL").queue();
             return;
         }
 
@@ -124,7 +124,7 @@ public class SpotifyCmd extends MusicCommand {
         String endpoint = "https://api.spotify.com/v1/tracks/" + trackId;
 
         HttpRequest request = HttpRequest.newBuilder()
-                .header("Authorization", "Bearer "+ accessToken)
+                .header("Authorization", "Bearer " + accessToken)
                 .header("Accept-Language", "en")
                 .GET()
                 .uri(URI.create(endpoint))
@@ -138,10 +138,10 @@ public class SpotifyCmd extends MusicCommand {
             String artistName = json.getJSONArray("artists").getJSONObject(0).getString("name");
             String albumImageUrl = json.getJSONObject("album").getJSONArray("images").getJSONObject(0).getString("url");
 
-            // Audio Features エンドポイントを使用して曲の情報を取得
+            // Use the Audio Features endpoint to retrieve track information
             endpoint = "https://api.spotify.com/v1/audio-features/" + trackId;
             request = HttpRequest.newBuilder()
-                    .header("Authorization", "Bearer "+ accessToken)
+                    .header("Authorization", "Bearer " + accessToken)
                     .GET()
                     .uri(URI.create(endpoint))
                     .build();
@@ -163,7 +163,7 @@ public class SpotifyCmd extends MusicCommand {
 
             event.getTextChannel().sendMessageEmbeds(embed.build()).queue();
 
-            event.reply("`[" + trackName + "]`を読み込み中です…").queue(m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), "ytmsearch:"+trackName + " " + artistName, new SlashResultHandler(m, event)));
+            event.reply("Loading `[" + trackName + "]`...").queue(m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), "ytmsearch:" + trackName + " " + artistName, new SlashResultHandler(m, event)));
         } catch (IOException | InterruptedException e) {
             event.reply("Error: " + e.getMessage()).queue();
         }
@@ -172,17 +172,17 @@ public class SpotifyCmd extends MusicCommand {
     @Override
     public void doCommand(CommandEvent event) {
         if (event.getArgs().isEmpty()) {
-            event.reply(event.getClient().getError() + " 再生リスト名を含めてください。");
+            event.reply(event.getClient().getError() + " Please include the playlist name.");
             return;
         }
         String trackUrl = event.getArgs();
 
-        if(accessToken == null){
-            event.reply("このコマンドは使用できません。このコマンドを有効にするにはボットの所有者による設定が必要です。");
+        if (accessToken == null) {
+            event.reply("This command is unavailable. Configuration by the bot owner is required to enable this command.");
             return;
         }
 
-        // アクセストークンが有効期限切れの場合は再度発行する
+        // Renew the access token if it has expired
         if (System.currentTimeMillis() >= accessTokenExpirationTime) {
             String clientId = bot.getConfig().getSpotifyClientId();
             String clientSecret = bot.getConfig().getSpotifyClientSecret();
@@ -190,7 +190,7 @@ public class SpotifyCmd extends MusicCommand {
         }
 
         if (!isSpotifyTrackUrl(trackUrl)) {
-            event.reply("Error: 指定されたURLはSpotifyの曲のURLではありません");
+            event.reply("Error: The specified URL is not a Spotify track URL");
             return;
         }
 
@@ -198,7 +198,7 @@ public class SpotifyCmd extends MusicCommand {
         String endpoint = "https://api.spotify.com/v1/tracks/" + trackId;
 
         HttpRequest request = HttpRequest.newBuilder()
-                .header("Authorization", "Bearer "+ accessToken)
+                .header("Authorization", "Bearer " + accessToken)
                 .header("Accept-Language", "en")
                 .GET()
                 .uri(URI.create(endpoint))
@@ -212,10 +212,10 @@ public class SpotifyCmd extends MusicCommand {
             String artistName = json.getJSONArray("artists").getJSONObject(0).getString("name");
             String albumImageUrl = json.getJSONObject("album").getJSONArray("images").getJSONObject(0).getString("url");
 
-            // Audio Features エンドポイントを使用して曲の情報を取得
+            // Use the Audio Features endpoint to retrieve track information
             endpoint = "https://api.spotify.com/v1/audio-features/" + trackId;
             request = HttpRequest.newBuilder()
-                    .header("Authorization", "Bearer "+ accessToken)
+                    .header("Authorization", "Bearer " + accessToken)
                     .GET()
                     .uri(URI.create(endpoint))
                     .build();
@@ -237,7 +237,7 @@ public class SpotifyCmd extends MusicCommand {
 
             event.getTextChannel().sendMessageEmbeds(embed.build()).queue();
 
-            event.reply("`[" + trackName + "]`を読み込み中です…", m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), "ytmsearch:"+trackName + " " + artistName, new ResultHandler(m, event)));
+            event.reply("Loading `[" + trackName + "]`...", m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), "ytmsearch:" + trackName + " " + artistName, new ResultHandler(m, event)));
         } catch (IOException | InterruptedException e) {
             event.reply("Error: " + e.getMessage());
         }
@@ -296,35 +296,35 @@ public class SpotifyCmd extends MusicCommand {
         @Override
         public void trackLoaded(AudioTrack track) {
             if (bot.getConfig().isTooLong(track)) {
-                event.getHook().sendMessage(FormatUtil.filter(event.getClient().getWarning() + "**" + track.getInfo().title + "**`は許可されている最大長より長いです。"
+                event.getHook().sendMessage(FormatUtil.filter(event.getClient().getWarning() + "**" + track.getInfo().title + "**` exceeds the allowed maximum length. "
                         + FormatUtil.formatTime(track.getDuration()) + "` > `" + bot.getConfig().getMaxTime() + "`")).queue();
                 return;
             }
             AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
             int pos = handler.addTrack(new QueuedTrack(track, event.getUser())) + 1;
             event.getHook().sendMessage(FormatUtil.filter(event.getClient().getSuccess() + "**" + track.getInfo().title
-                    + "**(`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "を追加しました。"
-                    : "を" + pos + "番目の再生待ちに追加しました。"))).queue();
+                    + "**(`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "has been added."
+                    : " has been added to the queue at position " + pos + "."))).queue();
         }
 
         @Override
         public void playlistLoaded(AudioPlaylist playlist) {
             builder.setColor(event.getGuild().getSelfMember().getColor())
-                    .setText(FormatUtil.filter(event.getClient().getSuccess() + "検索結果:"))
+                    .setText(FormatUtil.filter(event.getClient().getSuccess() + "Search results:"))
                     .setChoices()
                     .setSelection((msg, i) ->
                     {
                         AudioTrack track = playlist.getTracks().get(i - 1);
                         if (bot.getConfig().isTooLong(track)) {
-                            event.getHook().sendMessage(event.getClient().getWarning() + "**" + track.getInfo().title + "**`は許可されている最大長よりも長いです。"
+                            event.getHook().sendMessage(event.getClient().getWarning() + "**" + track.getInfo().title + "**` exceeds the allowed maximum length. "
                                     + FormatUtil.formatTime(track.getDuration()) + "` > `" + bot.getConfig().getMaxTime() + "`").queue();
                             return;
                         }
                         AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
                         int pos = handler.addTrack(new QueuedTrack(track, event.getUser())) + 1;
                         event.getHook().sendMessage(event.getClient().getSuccess() + "**" + track.getInfo().title
-                                + "**(`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "を追加しました。"
-                                : " を" + pos + "番目の再生待ちに追加しました。 ")).queue();
+                                + "**(`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "has been added."
+                                : " has been added to the queue at position " + pos + ".")).queue();
                     })
                     .setCancel((msg) -> {
                     })
@@ -346,9 +346,9 @@ public class SpotifyCmd extends MusicCommand {
         public void loadFailed(FriendlyException throwable) {
 
             if (throwable.severity == FriendlyException.Severity.COMMON)
-                event.getHook().sendMessage(event.getClient().getError() + " 読み込み中にエラーが発生しました: " + throwable.getMessage()).queue();
+                event.getHook().sendMessage(event.getClient().getError() + " An error occurred while loading: " + throwable.getMessage()).queue();
             else
-                event.getHook().sendMessage(event.getClient().getError() + " 読み込み中にエラーが発生しました").queue();
+                event.getHook().sendMessage(event.getClient().getError() + " An error occurred while loading").queue();
         }
     }
 
@@ -364,40 +364,38 @@ public class SpotifyCmd extends MusicCommand {
         @Override
         public void trackLoaded(AudioTrack track) {
             if (bot.getConfig().isTooLong(track)) {
-                m.editMessage(FormatUtil.filter(event.getClient().getWarning() + "**" + track.getInfo().title + "**`は許可されている最大長より長いです。"
+                m.editMessage(FormatUtil.filter(event.getClient().getWarning() + "**" + track.getInfo().title + "**` exceeds the allowed maximum length. "
                         + FormatUtil.formatTime(track.getDuration()) + "` > `" + bot.getConfig().getMaxTime() + "`")).queue();
                 return;
             }
             AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
             int pos = handler.addTrack(new QueuedTrack(track, event.getAuthor())) + 1;
             m.editMessage(FormatUtil.filter(event.getClient().getSuccess() + "**" + track.getInfo().title
-                    + "**(`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "を追加しました。"
-                    : "を" + pos + "番目の再生待ちに追加しました。"))).queue();
+                    + "**(`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "has been added."
+                    : " has been added to the queue at position " + pos + "."))).queue();
         }
 
         @Override
         public void playlistLoaded(AudioPlaylist playlist) {
             builder.setColor(event.getSelfMember().getColor())
-                    .setText(FormatUtil.filter(event.getClient().getSuccess() + "検索結果:"))
+                    .setText(FormatUtil.filter(event.getClient().getSuccess() + "Search results:"))
                     .setChoices()
-                    .setSelection((msg, i) ->
-                    {
+                    .setSelection((msg, i) -> {
                         AudioTrack track = playlist.getTracks().get(i - 1);
                         if (bot.getConfig().isTooLong(track)) {
-                            event.replyWarning("この曲 (**" + track.getInfo().title + "**) は、許容される最大長より長いです。: `"
+                            event.replyWarning("This track (**" + track.getInfo().title + "**) exceeds the allowed maximum length: `"
                                     + FormatUtil.formatTime(track.getDuration()) + "` > `" + bot.getConfig().getMaxTime() + "`");
                             return;
                         }
                         AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
                         int pos = handler.addTrack(new QueuedTrack(track, event.getAuthor())) + 1;
                         event.replySuccess("**" + FormatUtil.filter(track.getInfo().title)
-                                + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "の再生を開始します。"
-                                : "を" + pos + "番目の再生待ちに追加しました。"));
+                                + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "playback will start."
+                                : " has been added to the queue at position " + pos + "."));
                     })
                     .setCancel((msg) -> {
                     })
-                    .setUsers(event.getAuthor())
-            ;
+                    .setUsers(event.getAuthor());
             for (int i = 0; i < 4 && i < playlist.getTracks().size(); i++) {
                 AudioTrack track = playlist.getTracks().get(i);
                 builder.addChoices("`[" + FormatUtil.formatTime(track.getDuration()) + "]` [**" + track.getInfo().title + "**](" + track.getInfo().uri + ")");
@@ -407,16 +405,16 @@ public class SpotifyCmd extends MusicCommand {
 
         @Override
         public void noMatches() {
-            m.editMessage(FormatUtil.filter(event.getClient().getWarning() + " 曲を検索しましたが見つかりませんでした。 `")).queue();
+            m.editMessage(FormatUtil.filter(event.getClient().getWarning() + " No matches found for the searched track.")).queue();
         }
 
         @Override
         public void loadFailed(FriendlyException throwable) {
 
             if (throwable.severity == FriendlyException.Severity.COMMON)
-                m.editMessage(event.getClient().getError() + " 読み込み中にエラーが発生しました: " + throwable.getMessage()).queue();
+                m.editMessage(event.getClient().getError() + " An error occurred while loading: " + throwable.getMessage()).queue();
             else
-                m.editMessage(event.getClient().getError() + " 読み込み中にエラーが発生しました").queue();
+                m.editMessage(event.getClient().getError() + " An error occurred while loading").queue();
         }
     }
 }

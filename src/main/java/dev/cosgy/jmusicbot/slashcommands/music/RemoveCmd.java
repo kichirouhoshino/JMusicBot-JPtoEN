@@ -37,13 +37,13 @@ public class RemoveCmd extends MusicCommand {
     public RemoveCmd(Bot bot) {
         super(bot);
         this.name = "remove";
-        this.help = "再生待ちから曲を削除します";
-        this.arguments = "<再生待ち番号|すべて|ALL>";
+        this.help = "Removes a song from the queue";
+        this.arguments = "<queue number|all|ALL>";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.beListening = true;
         this.bePlaying = true;
         List<OptionData> options = new ArrayList<>();
-        options.add(new OptionData(OptionType.STRING, "input", "再生待ち番号|すべて|ALL", true));
+        options.add(new OptionData(OptionType.STRING, "input", "queue number|all|ALL", true));
         this.options = options;
     }
 
@@ -51,15 +51,15 @@ public class RemoveCmd extends MusicCommand {
     public void doCommand(CommandEvent event) {
         AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
         if (handler.getQueue().isEmpty()) {
-            event.replyError("再生待ちには何もありません。");
+            event.replyError("There is nothing in the queue.");
             return;
         }
         if (event.getArgs().toLowerCase().matches("(all|すべて)")) {
             int count = handler.getQueue().removeAll(event.getAuthor().getIdLong());
             if (count == 0)
-                event.replyWarning("再生待ちに曲がありません。");
+                event.replyWarning("There are no songs in the queue.");
             else
-                event.replySuccess(count + "曲を削除しました。");
+                event.replySuccess(count + " songs removed.");
             return;
         }
         int pos;
@@ -69,7 +69,7 @@ public class RemoveCmd extends MusicCommand {
             pos = 0;
         }
         if (pos < 1 || pos > handler.getQueue().size()) {
-            event.replyError(String.format("1から%sまでの有効な数字を入力してください!", handler.getQueue().size()));
+            event.replyError(String.format("Please provide a valid number between 1 and %s!", handler.getQueue().size()));
             return;
         }
         Settings settings = event.getClient().getSettingsFor(event.getGuild());
@@ -79,7 +79,7 @@ public class RemoveCmd extends MusicCommand {
         QueuedTrack qt = handler.getQueue().get(pos - 1);
         if (qt.getIdentifier() == event.getAuthor().getIdLong()) {
             handler.getQueue().remove(pos - 1);
-            event.replySuccess("**" + (qt.getTrack().getInfo().uri.contains("https://stream.gensokyoradio.net/") ? "幻想郷ラジオ" : qt.getTrack().getInfo().title) + "**をキューから削除しました。");
+            event.replySuccess("Removed **" + (qt.getTrack().getInfo().uri.contains("https://stream.gensokyoradio.net/") ? "Gensokyo Radio" : qt.getTrack().getInfo().title) + "** from the queue.");
         } else if (isDJ) {
             handler.getQueue().remove(pos - 1);
             User u;
@@ -88,10 +88,10 @@ public class RemoveCmd extends MusicCommand {
             } catch (Exception e) {
                 u = null;
             }
-            event.replySuccess("**" + qt.getTrack().getInfo().title
-                    + "**を再生待ちから削除しました。\n(この曲は" + (u == null ? "誰かがリクエストしました。" : "**" + u.getName() + "**がリクエストしました。") + ")");
+            event.replySuccess("Removed **" + qt.getTrack().getInfo().title
+                    + "** from the queue.\n(This song was requested by " + (u == null ? "someone." : "**" + u.getName() + "**.") + ")");
         } else {
-            event.replyError("**" + (qt.getTrack().getInfo().uri.contains("https://stream.gensokyoradio.net/") ? "幻想郷ラジオ" : qt.getTrack().getInfo().title) + "** を削除できませんでした。理由: DJ権限を持っていますか？自分のリクエスト以外は削除できません。");
+            event.replyError("Cannot remove **" + (qt.getTrack().getInfo().uri.contains("https://stream.gensokyoradio.net/") ? "Gensokyo Radio" : qt.getTrack().getInfo().title) + "**. Reason: Do you have DJ permissions? You can only remove your own requests.");
         }
     }
 
@@ -99,16 +99,16 @@ public class RemoveCmd extends MusicCommand {
     public void doCommand(SlashCommandEvent event) {
         AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
         if (handler.getQueue().isEmpty()) {
-            event.reply(event.getClient().getError() + "再生待ちには何もありません。").queue();
+            event.reply(event.getClient().getError() + "There is nothing in the queue.").queue();
             return;
         }
 
         if (event.getOption("input").getAsString().toLowerCase().matches("(all|すべて)")) {
             int count = handler.getQueue().removeAll(event.getUser().getIdLong());
             if (count == 0)
-                event.reply(event.getClient().getWarning() + "再生待ちに曲がありません。").queue();
+                event.reply(event.getClient().getWarning() + "There are no songs in the queue.").queue();
             else
-                event.reply(event.getClient().getSuccess() + count + "曲を削除しました。").queue();
+                event.reply(event.getClient().getSuccess() + count + " songs removed.").queue();
             return;
         }
         int pos;
@@ -118,7 +118,7 @@ public class RemoveCmd extends MusicCommand {
             pos = 0;
         }
         if (pos < 1 || pos > handler.getQueue().size()) {
-            event.reply(event.getClient().getError() + String.format("1から%sまでの有効な数字を入力してください!", handler.getQueue().size())).queue();
+            event.reply(event.getClient().getError() + String.format("Please provide a valid number between 1 and %s!", handler.getQueue().size())).queue();
             return;
         }
         Settings settings = event.getClient().getSettingsFor(event.getGuild());
@@ -128,7 +128,7 @@ public class RemoveCmd extends MusicCommand {
         QueuedTrack qt = handler.getQueue().get(pos - 1);
         if (qt.getIdentifier() == event.getUser().getIdLong()) {
             handler.getQueue().remove(pos - 1);
-            event.reply(event.getClient().getSuccess() + "**" + qt.getTrack().getInfo().title + "**をキューから削除しました。").queue();
+            event.reply(event.getClient().getSuccess() + "Removed **" + qt.getTrack().getInfo().title + "** from the queue.").queue();
         } else if (isDJ) {
             handler.getQueue().remove(pos - 1);
             User u;
@@ -137,10 +137,10 @@ public class RemoveCmd extends MusicCommand {
             } catch (Exception e) {
                 u = null;
             }
-            event.reply(event.getClient().getSuccess() + "**" + qt.getTrack().getInfo().title
-                    + "**を再生待ちから削除しました。\n(この曲は" + (u == null ? "誰かがリクエストしました。" : "**" + u.getName() + "**がリクエストしました。") + ")").queue();
+            event.reply(event.getClient().getSuccess() + "Removed **" + qt.getTrack().getInfo().title
+                    + "** from the queue.\n(This song was requested by " + (u == null ? "someone." : "**" + u.getName() + "**.") + ")").queue();
         } else {
-            event.reply(event.getClient().getError() + "**" + qt.getTrack().getInfo().title + "** を削除できませんでした。理由: DJ権限を持っていますか？自分のリクエスト以外は削除できません。").queue();
+            event.reply(event.getClient().getError() + "Cannot remove **" + qt.getTrack().getInfo().title + "**. Reason: Do you have DJ permissions? You can only remove your own requests.").queue();
         }
     }
 }

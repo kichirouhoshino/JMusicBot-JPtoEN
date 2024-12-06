@@ -76,11 +76,11 @@ public class SettingsManager implements GuildSettingsManager {
                 LoggerFactory.getLogger("Settings").info("serversettings.json を" + OtherUtil.getPath("serversettings.json").toAbsolutePath() + "に作成しました。");
                 Files.write(OtherUtil.getPath("serversettings.json"), new JSONObject().toString(4).getBytes());
             } catch(IOException ex) {
-                LoggerFactory.getLogger("Settings").warn("サーバー設定ファイルの作成に失敗しました:"+ex);
+                LoggerFactory.getLogger("Settings").warn("Failed to create server configuration file: " + ex);
             }
             return;
         } catch(IOException | JSONException e) {
-            LoggerFactory.getLogger("Settings").warn("サーバー設定ファイルの読み込みに失敗しました: "+e);
+            LoggerFactory.getLogger("Settings").warn("Failed to load server configuration file: " + e);
         }
     }
 
@@ -136,7 +136,7 @@ public class SettingsManager implements GuildSettingsManager {
         try {
             Files.write(OtherUtil.getPath("serversettings.json"), obj.toString(4).getBytes());
         } catch (IOException ex) {
-            LoggerFactory.getLogger("Settings").warn("ファイルへの書き込みに失敗しました： " + ex);
+            LoggerFactory.getLogger("Settings").warn("Failed to write to file: " + ex);
         }
     }
 }

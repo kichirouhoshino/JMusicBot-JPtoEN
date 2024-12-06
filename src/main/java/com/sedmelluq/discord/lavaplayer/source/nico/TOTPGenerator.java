@@ -110,7 +110,7 @@ public class TOTPGenerator {
     public static void main(String[] args) {
         // Example usage
         Scanner scanner = new Scanner(System.in);
-        System.out.println("二段階認証のシークレットキーを入力してください。");
+        System.out.println("Please enter the two-factor authentication secret key.");
         String secretKey = scanner.next(); // Sample Base32 secret key
 
         Timer timer = new Timer();

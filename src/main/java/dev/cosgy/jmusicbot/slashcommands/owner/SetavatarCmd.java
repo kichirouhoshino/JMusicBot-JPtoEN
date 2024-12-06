@@ -35,12 +35,12 @@ import java.util.List;
 public class SetavatarCmd extends OwnerCommand {
     public SetavatarCmd(Bot bot) {
         this.name = "setavatar";
-        this.help = "ボットのアバターを設定します";
+        this.help = "Sets the bot's avatar";
         this.arguments = "<url>";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.guildOnly = false;
         List<OptionData> options = new ArrayList<>();
-        options.add(new OptionData(OptionType.STRING, "image", "画像のURL", true));
+        options.add(new OptionData(OptionType.STRING, "image", "URL of the image", true));
         this.options = options;
 
     }
@@ -50,14 +50,14 @@ public class SetavatarCmd extends OwnerCommand {
         String url = event.getOption("image").getAsString();
         InputStream s = OtherUtil.imageFromUrl(url);
         if (s == null) {
-            event.reply(event.getClient().getError() + " 無効または見つからないURL").queue();
+            event.reply(event.getClient().getError() + " Invalid or not found URL").queue();
         } else {
             try {
                 event.getJDA().getSelfUser().getManager().setAvatar(Icon.from(s)).queue(
-                        v -> event.reply(event.getClient().getSuccess() + "アバターを変更しました。").queue(),
-                        t -> event.reply(event.getClient().getError() + "アバターを設定できませんでした。").queue());
+                        v -> event.reply(event.getClient().getSuccess() + "Avatar has been changed.").queue(),
+                        t -> event.reply(event.getClient().getError() + "Could not set the avatar.").queue());
             } catch (IOException e) {
-                event.reply(event.getClient().getError() + " 提供されたURLから読み込めませんでした。").queue();
+                event.reply(event.getClient().getError() + " Could not read from the provided URL.").queue();
             }
         }
     }
@@ -74,14 +74,14 @@ public class SetavatarCmd extends OwnerCommand {
             url = event.getArgs();
         InputStream s = OtherUtil.imageFromUrl(url);
         if (s == null) {
-            event.reply(event.getClient().getError() + " 無効または見つからないURL");
+            event.reply(event.getClient().getError() + " Invalid or not found URL");
         } else {
             try {
                 event.getSelfUser().getManager().setAvatar(Icon.from(s)).queue(
-                        v -> event.reply(event.getClient().getSuccess() + "アバターを変更しました。"),
-                        t -> event.reply(event.getClient().getError() + "アバターを設定できませんでした。"));
+                        v -> event.reply(event.getClient().getSuccess() + "Avatar has been changed."),
+                        t -> event.reply(event.getClient().getError() + "Could not set the avatar."));
             } catch (IOException e) {
-                event.reply(event.getClient().getError() + " 提供されたURLから読み込めませんでした。");
+                event.reply(event.getClient().getError() + " Could not read from the provided URL.");
             }
         }
     }
