@@ -49,7 +49,7 @@ public class QueueCmd extends MusicCommand {
     public QueueCmd(Bot bot) {
         super(bot);
         this.name = "queue";
-        this.help = "Show songs in queue";
+        this.help = "Displays the list of songs in the queue";
         this.arguments = "[page]";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.bePlaying = true;
