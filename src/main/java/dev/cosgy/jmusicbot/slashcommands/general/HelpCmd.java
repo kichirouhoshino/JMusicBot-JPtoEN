@@ -16,15 +16,21 @@
 
 package dev.cosgy.jmusicbot.slashcommands.general;
 
-import com.jagrosh.jdautilities.command.Command;
+//import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
-import net.dv8tion.jda.api.entities.channel.ChannelType;
+//import net.dv8tion.jda.api.entities.channel.ChannelType;
 
-import java.util.List;
-import java.util.Objects;
+//import java.util.List;
+//import java.util.Objects;
+
+/*
+    The /help command and slashcommand is currently broken as the resulting message
+    exceeds Discord's 1000-character limit.
+    This is yet to be fixed upstream.
+*/
 
 public class HelpCmd extends SlashCommand {
     public Bot bot;
@@ -38,6 +44,7 @@ public class HelpCmd extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
+        /*
         StringBuilder builder = new StringBuilder("**" + event.getJDA().getSelfUser().getName() + "** Command List:\n");
         Category category = null;
         List<Command> commands = event.getClient().getCommands();
@@ -56,16 +63,14 @@ public class HelpCmd extends SlashCommand {
             builder.append("\n\nIf you need further help, you can join the official server: ").append(event.getClient().getServerInvite());
 
         event.reply(builder.toString()).queue();
-
-        /*event.reply(builder.toString(), unused ->
-        {
-            if (event.isFromType(ChannelType.TEXT))
-                event.reactSuccess();
-        }, t -> event.replyWarning("Unable to send help due to blocked direct messages."));
-         */
+        */
+        event.reply("The help command is currently broken upstream." +
+                "\nTo see available commands, type / in chat and select the bot on the left side.")
+                .queue();
     }
 
     public void execute(CommandEvent event) {
+        /*
         StringBuilder builder = new StringBuilder("**" + event.getJDA().getSelfUser().getName() + "** Command List:\n");
         Category category = null;
         List<Command> commands = event.getClient().getCommands();
@@ -92,5 +97,8 @@ public class HelpCmd extends SlashCommand {
         } else {
             event.reply(builder.toString());
         }
+         */
+        event.reply("The help command is currently broken upstream." +
+                        "\nTo see available commands, type / in chat and select the bot on the left side.");
     }
 }

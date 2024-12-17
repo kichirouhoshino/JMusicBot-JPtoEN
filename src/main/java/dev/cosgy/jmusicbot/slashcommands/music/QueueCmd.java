@@ -49,7 +49,7 @@ public class QueueCmd extends MusicCommand {
     public QueueCmd(Bot bot) {
         super(bot);
         this.name = "queue";
-        this.help = "Displays the list of songs in the queue";
+        this.help = "Show songs in queue";
         this.arguments = "[page]";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.bePlaying = true;
@@ -128,7 +128,7 @@ public class QueueCmd extends MusicCommand {
             }
             MessageCreateData nonowp = ah.getNoMusicPlaying(event.getJDA());
             MessageEditData built = new MessageEditBuilder()
-                    .setContent(client.getWarning() + " There are no songs in the queue.")
+                    .setContent(event.getClient().getWarning() + " There are no songs in the queue.")
                     .setEmbeds((nowp == null ? nonowp : nowp).getEmbeds().get(0)).build();
             m.editOriginal(built).queue();
             return;

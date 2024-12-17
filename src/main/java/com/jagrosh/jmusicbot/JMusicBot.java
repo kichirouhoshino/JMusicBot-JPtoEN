@@ -62,7 +62,7 @@ public class JMusicBot {
             Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_ATTACH_FILES, Permission.MESSAGE_MANAGE, Permission.MESSAGE_EXT_EMOJI,
             Permission.VOICE_CONNECT, Permission.VOICE_SPEAK, Permission.NICKNAME_CHANGE, Permission.VOICE_SET_STATUS};
     public final static GatewayIntent[] INTENTS = {GatewayIntent.DIRECT_MESSAGES, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.MESSAGE_CONTENT}; // , GatewayIntent.MESSAGE_CONTENT
-    public static boolean CHECK_UPDATE = true;
+    public static boolean CHECK_UPDATE = false; // Forced to false as I do not control the remote code for version checking
     public static boolean COMMAND_AUDIT_ENABLED = false;
 
     /**
@@ -267,7 +267,7 @@ public class JMusicBot {
             JDA jda = JDABuilder.create(config.getToken(), Arrays.asList(INTENTS))
                     .enableCache(CacheFlag.MEMBER_OVERRIDES, CacheFlag.VOICE_STATE)
                     .disableCache(CacheFlag.ACTIVITY, CacheFlag.CLIENT_STATUS, CacheFlag.EMOJI, CacheFlag.ONLINE_STATUS)
-                    .setActivity(nogame ? null : Activity.playing("ロード中..."))
+                    .setActivity(nogame ? null : Activity.playing("Loading..."))
                     .setStatus(config.getStatus() == OnlineStatus.INVISIBLE || config.getStatus() == OnlineStatus.OFFLINE
                             ? OnlineStatus.INVISIBLE : OnlineStatus.DO_NOT_DISTURB)
                     .addEventListeners(cb.build(), waiter, new Listener(bot))
@@ -289,8 +289,8 @@ public class JMusicBot {
             // message content intent
             /*if(!"@mention".equals(config.getPrefix()))
             {
-                prompt.alert(Prompt.Level.INFO, "JMusicBot", "現在、カスタム接頭辞が設定されています。 "
-                        + "カスタム接頭辞が機能しない場合は、「MESSAGE CONTENT INTENT」が有効になっていることを確認してください。"
+                prompt.alert(Prompt.Level.INFO, "JMusicBot", "A custom prefix is currently set. "
+                        + "If the custom prefix does not work, make sure that 'MESSAGE CONTENT INTENT' is enabled. "
                         + "https://discord.com/developers/applications/" + jda.getSelfUser().getId() + "/bot");
             }*/
 

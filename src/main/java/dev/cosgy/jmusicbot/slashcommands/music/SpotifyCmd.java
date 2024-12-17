@@ -148,7 +148,8 @@ public class SpotifyCmd extends MusicCommand {
 
             response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             json = new JSONObject(response.body());
-            double trackColor = json.getDouble("valence");
+            // Use a default value when valence key does not exist
+            double trackColor = json.has("valence") ? json.getDouble("valence") : 0.5;
 
             int hue = (int) (trackColor * 360);
             Color color = Color.getHSBColor((float) hue / 360, 1.0f, 1.0f);
@@ -222,7 +223,8 @@ public class SpotifyCmd extends MusicCommand {
 
             response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             json = new JSONObject(response.body());
-            double trackColor = json.getDouble("valence");
+            // Use a default value when valence key does not exist
+            double trackColor = json.has("valence") ? json.getDouble("valence") : 0.5;
 
             int hue = (int) (trackColor * 360);
             Color color = Color.getHSBColor((float) hue / 360, 1.0f, 1.0f);
