@@ -51,12 +51,9 @@ public class PlayerManager extends DefaultAudioPlayerManager {
         registerSourceManager(new YoutubeAudioSourceManager(/*allowSearch:*/ true, new Client[] { new Music(),
                 new TvHtml5Embedded(),
                 new AndroidMusic(),
-                new AndroidTestsuite(),
                 new Web(),
                 new WebEmbedded(),
                 new Android(),
-                new AndroidLite(),
-                new MediaConnect(),
                 new Ios()
         }));
 
