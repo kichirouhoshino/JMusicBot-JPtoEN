@@ -27,7 +27,7 @@ public class MylistCmd extends MusicCommand {
         super(bot);
         this.guildOnly = false;
         this.name = "mylist";
-        this.arguments = "<append|delete|make|all>";
+        this.arguments = "<append|delete|make|all|show>";
         this.help = "自分専用の再生リストを管理";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.children = new MusicCommand[]{
@@ -35,7 +35,8 @@ public class MylistCmd extends MusicCommand {
                 new MakelistCmd(bot),
                 new DeletelistCmd(bot),
                 new AppendlistCmd(bot),
-                new ListCmd(bot)
+                new ListCmd(bot),
+                new ShowTracksCmd(bot)
         };
     }
 
@@ -51,6 +52,84 @@ public class MylistCmd extends MusicCommand {
 
     @Override
     public void doCommand(SlashCommandEvent slashCommandEvent) {
+    }
+
+    public static class ShowTracksCmd extends MusicCommand {
+        public ShowTracksCmd(Bot bot) {
+            super(bot);
+            this.name = "show";
+            this.help = "指定したマイリスト内の曲を表示";
+            this.arguments = "<name>";
+            this.guildOnly = false;
+            this.ownerCommand = false;
+
+            List<OptionData> options = new ArrayList<>();
+            options.add(new OptionData(OptionType.STRING, "name", "プレイリスト名", true));
+            this.options = options;
+        }
+
+        @Override
+        public void doCommand(CommandEvent event) {
+            String userId = event.getAuthor().getId();
+            String playlistName = event.getArgs().trim();
+
+            if (playlistName.isEmpty()) {
+                event.reply(event.getClient().getError() + " プレイリスト名を指定してください。");
+                return;
+            }
+
+            MylistLoader.Playlist playlist = bot.getMylistLoader().getPlaylist(userId, playlistName);
+            if (playlist == null) {
+                event.reply(event.getClient().getError() + " マイリスト `" + playlistName + "` が見つかりませんでした。");
+                return;
+            }
+
+            if (playlist.getTracks().isEmpty()) {
+                event.reply(event.getClient().getWarning() + " マイリスト `" + playlistName + "` に曲がありません。");
+                return;
+            }
+
+            StringBuilder builder = new StringBuilder(event.getClient().getSuccess() + " マイリスト `" + playlistName + "` 内の曲:\n");
+            for (int i = 0; i < playlist.getTracks().size(); i++) {
+                builder.append(i + 1).append(". ").append(playlist.getTracks().get(i).getInfo().title).append("\n");
+            }
+
+            if (builder.length() > 2000) {
+                builder.setLength(1997); // Discordのメッセージ制限を超えないようにする
+                builder.append("...");
+            }
+
+            event.reply(builder.toString());
+        }
+
+        @Override
+        public void doCommand(SlashCommandEvent event) {
+            String userId = event.getUser().getId();
+            String playlistName = event.getOption("name").getAsString();
+
+            MylistLoader.Playlist playlist = bot.getMylistLoader().getPlaylist(userId, playlistName);
+            if (playlist == null) {
+                event.reply(event.getClient().getError() + " マイリスト `" + playlistName + "` が見つかりませんでした。").queue();
+                return;
+            }
+
+            if (playlist.getTracks().isEmpty()) {
+                event.reply(event.getClient().getWarning() + " マイリスト `" + playlistName + "` に曲がありません。").queue();
+                return;
+            }
+
+            StringBuilder builder = new StringBuilder(event.getClient().getSuccess() + " マイリスト `" + playlistName + "` 内の曲:\n");
+            for (int i = 0; i < playlist.getTracks().size(); i++) {
+                builder.append(i + 1).append(". ").append(playlist.getTracks().get(i).getInfo().title).append("\n");
+            }
+
+            if (builder.length() > 2000) {
+                builder.setLength(1997); // Discordのメッセージ制限を超えないようにする
+                builder.append("...");
+            }
+
+            event.reply(builder.toString()).queue();
+        }
     }
 
 

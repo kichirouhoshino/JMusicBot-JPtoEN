@@ -19,6 +19,7 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
+import com.jagrosh.jmusicbot.playlist.PlaylistLoader;
 import com.jagrosh.jmusicbot.playlist.PlaylistLoader.Playlist;
 import dev.cosgy.jmusicbot.slashcommands.DJCommand;
 import dev.cosgy.jmusicbot.util.StackTraceUtil;
@@ -38,14 +39,15 @@ public class PlaylistCmd extends DJCommand {
         super(bot);
         this.guildOnly = true;
         this.name = "playlist";
-        this.arguments = "<append|delete|make>";
+        this.arguments = "<append|delete|make|show>";
         this.help = "再生リスト管理";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.children = new DJCommand[]{
                 new ListCmd(bot),
                 new AppendlistCmd(bot),
                 new DeletelistCmd(bot),
-                new MakelistCmd(bot)
+                new MakelistCmd(bot),
+                new ShowTracksCmd(bot)
         };
     }
 
@@ -62,6 +64,87 @@ public class PlaylistCmd extends DJCommand {
     @Override
     public void doCommand(SlashCommandEvent slashCommandEvent) {
         // ここは、実行されません。
+    }
+
+    /**
+     * 新しいサブコマンド: ShowTracksCmd
+     * 指定された再生リスト内の曲を一覧表示します。
+     */
+    public class ShowTracksCmd extends DJCommand {
+        public ShowTracksCmd(Bot bot) {
+            super(bot);
+            this.name = "show";
+            this.help = "指定した再生リスト内の曲を表示";
+            this.arguments = "<name>";
+            this.guildOnly = true;
+
+            List<OptionData> options = new ArrayList<>();
+            options.add(new OptionData(OptionType.STRING, "name", "プレイリスト名", true));
+            this.options = options;
+        }
+
+        @Override
+        public void doCommand(CommandEvent event) {
+            String guildId = event.getGuild().getId();
+            String playlistName = event.getArgs().trim();
+
+            if (playlistName.isEmpty()) {
+                event.reply(event.getClient().getError() + " プレイリスト名を指定してください。");
+                return;
+            }
+
+            PlaylistLoader.Playlist playlist = bot.getPlaylistLoader().getPlaylist(guildId, playlistName);
+            if (playlist == null) {
+                event.reply(event.getClient().getError() + " 再生リスト `" + playlistName + "` が見つかりませんでした。");
+                return;
+            }
+
+            if (playlist.getItems().isEmpty()) {
+                event.reply(event.getClient().getWarning() + " 再生リスト `" + playlistName + "` に曲がありません。");
+                return;
+            }
+
+            StringBuilder builder = new StringBuilder(event.getClient().getSuccess() + " 再生リスト `" + playlistName + "` 内の曲:\n");
+            for (int i = 0; i < playlist.getItems().size(); i++) {
+                builder.append(i + 1).append(". ").append(playlist.getItems().get(i)).append("\n");
+            }
+
+            if (builder.length() > 2000) {
+                builder.setLength(1997); // Discordのメッセージ制限に対応
+                builder.append("...");
+            }
+
+            event.reply(builder.toString());
+        }
+
+        @Override
+        public void doCommand(SlashCommandEvent event) {
+            String guildId = event.getGuild().getId();
+            String playlistName = event.getOption("name").getAsString();
+
+            PlaylistLoader.Playlist playlist = bot.getPlaylistLoader().getPlaylist(guildId, playlistName);
+            if (playlist == null) {
+                event.reply(event.getClient().getError() + " 再生リスト `" + playlistName + "` が見つかりませんでした。").queue();
+                return;
+            }
+
+            if (playlist.getItems().isEmpty()) {
+                event.reply(event.getClient().getWarning() + " 再生リスト `" + playlistName + "` に曲がありません。").queue();
+                return;
+            }
+
+            StringBuilder builder = new StringBuilder(event.getClient().getSuccess() + " 再生リスト `" + playlistName + "` 内の曲:\n");
+            for (int i = 0; i < playlist.getItems().size(); i++) {
+                builder.append(i + 1).append(". ").append(playlist.getItems().get(i)).append("\n");
+            }
+
+            if (builder.length() > 2000) {
+                builder.setLength(1997); // Discordのメッセージ制限に対応
+                builder.append("...");
+            }
+
+            event.reply(builder.toString()).queue();
+        }
     }
 
     public class MakelistCmd extends DJCommand {

@@ -33,6 +33,7 @@ import java.util.List;
  * @author John Grosh <john.a.grosh@gmail.com>
  */
 public class PlaylistsCmd extends MusicCommand {
+
     public PlaylistsCmd(Bot bot) {
         super(bot);
         this.name = "playlists";
@@ -40,62 +41,54 @@ public class PlaylistsCmd extends MusicCommand {
         this.aliases = bot.getConfig().getAliases(this.name);
         this.guildOnly = true;
         this.beListening = false;
-        this.children = new MusicCommand[] { new PlayCmd(bot) };
+        this.children = new MusicCommand[]{new PlayCmd(bot)};
     }
 
     @Override
     public void doCommand(CommandEvent event) {
-        String guildID = event.getGuild().getId();
-        if (!bot.getPlaylistLoader().folderExists())
-            bot.getPlaylistLoader().createFolder();
-        if (!bot.getPlaylistLoader().folderGuildExists(guildID))
-            bot.getPlaylistLoader().createGuildFolder(guildID);
-        if (!bot.getPlaylistLoader().folderExists()) {
-            event.reply(event.getClient().getWarning() + " 再生リストフォルダが存在しないため作成できませんでした。");
-            return;
-        }
-        if (!bot.getPlaylistLoader().folderGuildExists(guildID)) {
-            event.reply(event.getClient().getWarning() + " このサーバーの再生リストフォルダが存在しないため作成できませんでした。");
-            return;
-        }
-        List<String> list = bot.getPlaylistLoader().getPlaylistNames(guildID);
-        if (list == null)
-            event.reply(event.getClient().getError() + " 利用可能な再生リストを読み込めませんでした。");
-        else if (list.isEmpty())
-            event.reply(event.getClient().getWarning() + " 再生リストフォルダにプレイリストがありません。");
-        else {
-            StringBuilder builder = new StringBuilder(event.getClient().getSuccess() + " 利用可能な再生リスト:\n");
-            list.forEach(str -> builder.append("`").append(str).append("` "));
-            builder.append("\n`").append(event.getClient().getTextualPrefix()).append("play playlist <name>` と入力することで再生リストを再生できます。");
-            event.reply(builder.toString());
-        }
+        handlePlaylistsCommand(event.getGuild().getId(), event, null);
     }
 
     @Override
     public void doCommand(SlashCommandEvent event) {
-        String guildID = event.getGuild().getId();
-        if (!bot.getPlaylistLoader().folderExists())
-            bot.getPlaylistLoader().createFolder();
-        if (!bot.getPlaylistLoader().folderGuildExists(guildID))
-            bot.getPlaylistLoader().createGuildFolder(guildID);
+        handlePlaylistsCommand(event.getGuild().getId(), null, event);
+    }
+
+    private void handlePlaylistsCommand(String guildID, CommandEvent cmdEvent, SlashCommandEvent slashEvent) {
+        ensureFoldersExist(guildID);
+
+        List<String> playlists = bot.getPlaylistLoader().getPlaylistNames(guildID);
+
+        String prefix = (cmdEvent != null ? cmdEvent.getClient().getTextualPrefix() : slashEvent.getClient().getTextualPrefix());
+        String message;
+        if (playlists == null) {
+            message = (cmdEvent != null ? cmdEvent.getClient().getError() : slashEvent.getClient().getError()) + " 利用可能な再生リストを読み込めませんでした。";
+        } else if (playlists.isEmpty()) {
+            message = (cmdEvent != null ? cmdEvent.getClient().getWarning() : slashEvent.getClient().getWarning()) + " 再生リストフォルダにプレイリストがありません。";
+        } else {
+            StringBuilder builder = new StringBuilder((cmdEvent != null ? cmdEvent.getClient().getSuccess() : slashEvent.getClient().getSuccess()) + " 利用可能な再生リスト:\n");
+            playlists.forEach(name -> builder.append("`").append(name).append("` "));
+            builder.append("\n`").append(prefix).append("play playlist <name>` と入力することで再生リストを再生できます。");
+            message = builder.toString();
+        }
+
+        reply(cmdEvent, slashEvent, message);
+    }
+
+    private void ensureFoldersExist(String guildID) {
         if (!bot.getPlaylistLoader().folderExists()) {
-            event.reply(event.getClient().getWarning() + " 再生リストフォルダが存在しないため作成できませんでした。").queue();
-            return;
+            bot.getPlaylistLoader().createFolder();
         }
         if (!bot.getPlaylistLoader().folderGuildExists(guildID)) {
-            event.reply(event.getClient().getWarning() + " このサーバーの再生リストフォルダが存在しないため作成できませんでした。").queue();
-            return;
+            bot.getPlaylistLoader().createGuildFolder(guildID);
         }
-        List<String> list = bot.getPlaylistLoader().getPlaylistNames(guildID);
-        if (list == null)
-            event.reply(event.getClient().getError() + " 利用可能な再生リストを読み込めませんでした。").queue();
-        else if (list.isEmpty())
-            event.reply(event.getClient().getWarning() + " 再生リストフォルダにプレイリストがありません。").queue();
-        else {
-            StringBuilder builder = new StringBuilder(event.getClient().getSuccess() + " 利用可能な再生リスト:\n");
-            list.forEach(str -> builder.append("`").append(str).append("` "));
-            builder.append("\n`").append(event.getClient().getTextualPrefix()).append("play playlist <name>` と入力することで再生リストを再生できます。");
-            event.reply(builder.toString()).queue();
+    }
+
+    private void reply(CommandEvent cmdEvent, SlashCommandEvent slashEvent, String message) {
+        if (cmdEvent != null) {
+            cmdEvent.reply(message); // CommandEventにはqueue()を付けない
+        } else if (slashEvent != null) {
+            slashEvent.reply(message).queue(); // SlashCommandEventにはqueue()を付ける
         }
     }
 
@@ -105,72 +98,58 @@ public class PlaylistsCmd extends MusicCommand {
             this.name = "playlist";
             this.aliases = new String[]{"pl"};
             this.arguments = "<name>";
-            this.help = "提供された再生リストを再生します";
+            this.help = "指定された再生リストを再生します";
             this.beListening = true;
             this.bePlaying = false;
-
-            List<OptionData> options = new ArrayList<>();
-            options.add(new OptionData(OptionType.STRING, "name", "プレイリスト名", true));
-            this.options = options;
         }
 
         @Override
         public void doCommand(CommandEvent event) {
-            String guildId = event.getGuild().getId();
-            if (event.getArgs().isEmpty()) {
-                event.reply(event.getClient().getError() + "再生リスト名を含めてください。");
-                return;
-            }
-            PlaylistLoader.Playlist playlist = bot.getPlaylistLoader().getPlaylist(guildId, event.getArgs());
-            if (playlist == null) {
-                event.replyError("`" + event.getArgs() + ".txt`を見つけられませんでした ");
-                return;
-            }
-            event.getChannel().sendMessage(":calling: 再生リスト **" + event.getArgs() + "**を読み込んでいます... (" + playlist.getItems().size() + " 曲)").queue(m ->
-            {
-                AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
-                playlist.loadTracks(bot.getPlayerManager(), (at) -> handler.addTrack(new QueuedTrack(at, event.getAuthor())), () -> {
-                    StringBuilder builder = new StringBuilder(playlist.getTracks().isEmpty()
-                            ? event.getClient().getWarning() + " 楽曲がロードされていません。"
-                            : event.getClient().getSuccess() + "**" + playlist.getTracks().size() + "**曲読み込みました。");
-                    if (!playlist.getErrors().isEmpty())
-                        builder.append("\n以下の楽曲をロードできませんでした:");
-                    playlist.getErrors().forEach(err -> builder.append("\n`[").append(err.getIndex() + 1).append("]` **").append(err.getItem()).append("**: ").append(err.getReason()));
-                    String str = builder.toString();
-                    if (str.length() > 2000)
-                        str = str.substring(0, 1994) + " (以下略)";
-                    m.editMessage(FormatUtil.filter(str)).queue();
-                });
-            });
+            playPlaylist(event.getGuild().getId(), event.getArgs(), event, null);
         }
 
         @Override
         public void doCommand(SlashCommandEvent event) {
-            String guildId = event.getGuild().getId();
-            if (event.getOption("name") == null) {
-                event.reply(event.getClient().getError() + "再生リスト名を含めてください。").queue();
+            String playlistName = event.getOption("name").getAsString();
+            playPlaylist(event.getGuild().getId(), playlistName, null, event);
+        }
+
+        private void playPlaylist(String guildID, String playlistName, CommandEvent cmdEvent, SlashCommandEvent slashEvent) {
+            if (playlistName == null || playlistName.isEmpty()) {
+                reply(cmdEvent, slashEvent, (cmdEvent != null ? cmdEvent.getClient().getError() : slashEvent.getClient().getError()) + " 再生リスト名を指定してください。");
                 return;
             }
-            PlaylistLoader.Playlist playlist = bot.getPlaylistLoader().getPlaylist(guildId, event.getOption("name").getAsString());
+
+            PlaylistLoader.Playlist playlist = bot.getPlaylistLoader().getPlaylist(guildID, playlistName);
             if (playlist == null) {
-                event.reply("`" + event.getOption("name").getAsString() + ".txt`を見つけられませんでした ");
+                reply(cmdEvent, slashEvent, (cmdEvent != null ? cmdEvent.getClient().getError() : slashEvent.getClient().getError()) + " 再生リスト `" + playlistName + "` が見つかりませんでした。");
                 return;
             }
-            event.getChannel().sendMessage(":calling: 再生リスト **" + event.getOption("name").getAsString() + "**を読み込んでいます... (" + playlist.getItems().size() + " 曲)").queue(m ->
-            {
-                AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
-                playlist.loadTracks(bot.getPlayerManager(), (at) -> handler.addTrack(new QueuedTrack(at, event.getUser())), () -> {
-                    StringBuilder builder = new StringBuilder(playlist.getTracks().isEmpty()
-                            ? event.getClient().getWarning() + " 楽曲がロードされていません。"
-                            : event.getClient().getSuccess() + "**" + playlist.getTracks().size() + "**曲読み込みました。");
-                    if (!playlist.getErrors().isEmpty())
-                        builder.append("\n以下の楽曲をロードできませんでした:");
-                    playlist.getErrors().forEach(err -> builder.append("\n`[").append(err.getIndex() + 1).append("]` **").append(err.getItem()).append("**: ").append(err.getReason()));
-                    String str = builder.toString();
-                    if (str.length() > 2000)
-                        str = str.substring(0, 1994) + " (以下略)";
-                    m.editMessage(FormatUtil.filter(str)).queue();
-                });
+
+            reply(cmdEvent, slashEvent, (cmdEvent != null ? cmdEvent.getClient().getSuccess() : slashEvent.getClient().getSuccess()) + ":calling: 再生リスト **" + playlistName + "** を読み込んでいます... (" + playlist.getItems().size() + " 曲)");
+
+            AudioHandler handler = (AudioHandler) (cmdEvent != null
+                    ? cmdEvent.getGuild().getAudioManager().getSendingHandler()
+                    : slashEvent.getGuild().getAudioManager().getSendingHandler());
+
+            playlist.loadTracks(bot.getPlayerManager(), track -> handler.addTrack(new QueuedTrack(track, cmdEvent != null ? cmdEvent.getAuthor() : slashEvent.getUser())), () -> {
+                StringBuilder builder = new StringBuilder();
+                if (playlist.getTracks().isEmpty()) {
+                    builder.append((cmdEvent != null ? cmdEvent.getClient().getWarning() : slashEvent.getClient().getWarning())).append(" 楽曲がロードされていません。");
+                } else {
+                    builder.append((cmdEvent != null ? cmdEvent.getClient().getSuccess() : slashEvent.getClient().getSuccess())).append(" **").append(playlist.getTracks().size()).append("** 曲をロードしました。");
+                }
+                if (!playlist.getErrors().isEmpty()) {
+                    builder.append("\n以下の楽曲をロードできませんでした:");
+                    playlist.getErrors().forEach(error -> builder.append("\n`[").append(error.getIndex() + 1).append("]` **").append(error.getItem()).append("**: ").append(error.getReason()));
+                }
+
+                String result = FormatUtil.filter(builder.toString());
+                if (result.length() > 2000) {
+                    result = result.substring(0, 1994) + " (以下略)";
+                }
+
+                reply(cmdEvent, slashEvent, result);
             });
         }
     }
