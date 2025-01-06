@@ -18,12 +18,9 @@ MusicBot uses a simple and user-friendly UI. Both setup and launch are easy.
 * Translated all strings (and some comments), reference.conf and this README from Japanese to English
 * Modified the code for reading config.txt to accept settings from both JP and this fork
 * Fix spotify command not working when "valence" value is empty.
-* Lower JDA version due to .isVoice() being deprecated.
-### ToDo
-* Fix weird strings due to translation
 ### What I can't fix
-* The help command is broken due to Discord's 1000-character limit. This requires rewriting the whole HelpCmd file,
-which obviously I won't do. For now, running the command tells the user to look at slash commands instead.
+* The help command is broken due to Discord's 1000-character limit. This is yet to be fixed upstream.
+* Commands that uses the .isVoice() method from JDA will refuse to work. Also isn't fixed upstream. The Queue command is affected by this.
 
 [![Setup](http://i.imgur.com/VvXYp5j.png)](https://www.cosgy.dev/2019/09/06/jmusicbot-setup/)
 

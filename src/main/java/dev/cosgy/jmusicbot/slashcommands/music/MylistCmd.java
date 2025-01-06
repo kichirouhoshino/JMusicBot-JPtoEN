@@ -27,7 +27,7 @@ public class MylistCmd extends MusicCommand {
         super(bot);
         this.guildOnly = false;
         this.name = "mylist";
-        this.arguments = "<append|delete|make|all>";
+        this.arguments = "<append|delete|make|all|show>";
         this.help = "Manage your personal playlist";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.children = new MusicCommand[]{
@@ -35,14 +35,16 @@ public class MylistCmd extends MusicCommand {
                 new MakelistCmd(bot),
                 new DeletelistCmd(bot),
                 new AppendlistCmd(bot),
-                new ListCmd(bot)
+                new ListCmd(bot),
+                new ShowTracksCmd(bot)
         };
     }
 
     @Override
     public void doCommand(CommandEvent event) {
 
-        StringBuilder builder = new StringBuilder(event.getClient().getWarning() + " Mylist management command:\n");        for (Command cmd : this.children)
+        StringBuilder builder = new StringBuilder(event.getClient().getWarning() + " マイリスト管理コマンド:\n");
+        for (Command cmd : this.children)
             builder.append("\n`").append(event.getClient().getPrefix()).append(name).append(" ").append(cmd.getName())
                     .append(" ").append(cmd.getArguments() == null ? "" : cmd.getArguments()).append("` - ").append(cmd.getHelp());
         event.reply(builder.toString());
@@ -52,6 +54,71 @@ public class MylistCmd extends MusicCommand {
     public void doCommand(SlashCommandEvent slashCommandEvent) {
     }
 
+    public static class ShowTracksCmd extends MusicCommand {
+        public ShowTracksCmd(Bot bot) {
+            super(bot);
+            this.name = "show";
+            this.help = "Displays the tracks in the specified playlist";
+            this.arguments = "<name>";
+            this.guildOnly = false;
+            this.ownerCommand = false;
+            List<OptionData> options = new ArrayList<>();
+            options.add(new OptionData(OptionType.STRING, "name", "Playlist name", true));
+            this.options = options;
+        }
+
+        @Override
+        public void doCommand(CommandEvent event) {
+            String userId = event.getAuthor().getId();
+            String playlistName = event.getArgs().trim();
+            if (playlistName.isEmpty()) {
+                event.reply(event.getClient().getError() + " Please specify the playlist name.");
+                return;
+            }
+            MylistLoader.Playlist playlist = bot.getMylistLoader().getPlaylist(userId, playlistName);
+            if (playlist == null) {
+                event.reply(event.getClient().getError() + " The playlist `" + playlistName + "` could not be found.");
+                return;
+            }
+            if (playlist.getTracks().isEmpty()) {
+                event.reply(event.getClient().getWarning() + " There are no tracks in the playlist `" + playlistName + "`.");
+                return;
+            }
+            StringBuilder builder = new StringBuilder(event.getClient().getSuccess() + " Tracks in the playlist `" + playlistName + "`:\n");
+            for (int i = 0; i < playlist.getTracks().size(); i++) {
+                builder.append(i + 1).append(". ").append(playlist.getTracks().get(i).getInfo().title).append("\n");
+            }
+            if (builder.length() > 2000) {
+                builder.setLength(1997); // Ensure it does not exceed Discord's message limit
+                builder.append("...");
+            }
+            event.reply(builder.toString());
+        }
+
+        @Override
+        public void doCommand(SlashCommandEvent event) {
+            String userId = event.getUser().getId();
+            String playlistName = event.getOption("name").getAsString();
+            MylistLoader.Playlist playlist = bot.getMylistLoader().getPlaylist(userId, playlistName);
+            if (playlist == null) {
+                event.reply(event.getClient().getError() + " The playlist `" + playlistName + "` could not be found.").queue();
+                return;
+            }
+            if (playlist.getTracks().isEmpty()) {
+                event.reply(event.getClient().getWarning() + " There are no tracks in the playlist `" + playlistName + "`").queue();
+                return;
+            }
+            StringBuilder builder = new StringBuilder(event.getClient().getSuccess() + " Tracks in the playlist `" + playlistName + "`:\n");
+            for (int i = 0; i < playlist.getTracks().size(); i++) {
+                builder.append(i + 1).append(". ").append(playlist.getTracks().get(i).getInfo().title).append("\n");
+            }
+            if (builder.length() > 2000) {
+                builder.setLength(1997); // Ensure it does not exceed Discord's message limit
+                builder.append("...");
+            }
+            event.reply(builder.toString()).queue();
+        }
+    }
 
     public class PlayCmd extends MusicCommand {
         public PlayCmd(Bot bot) {

@@ -44,7 +44,6 @@ public class HelpCmd extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        /*
         StringBuilder builder = new StringBuilder("**" + event.getJDA().getSelfUser().getName() + "** Command List:\n");
         Category category = null;
         List<Command> commands = event.getClient().getCommands();
@@ -63,14 +62,9 @@ public class HelpCmd extends SlashCommand {
             builder.append("\n\nIf you need further help, you can join the official server: ").append(event.getClient().getServerInvite());
 
         event.reply(builder.toString()).queue();
-        */
-        event.reply("The help command is currently broken upstream." +
-                "\nTo see available commands, type / in chat and select the bot on the left side.")
-                .queue();
     }
 
     public void execute(CommandEvent event) {
-        /*
         StringBuilder builder = new StringBuilder("**" + event.getJDA().getSelfUser().getName() + "** Command List:\n");
         Category category = null;
         List<Command> commands = event.getClient().getCommands();
@@ -97,8 +91,5 @@ public class HelpCmd extends SlashCommand {
         } else {
             event.reply(builder.toString());
         }
-         */
-        event.reply("The help command is currently broken upstream." +
-                        "\nTo see available commands, type / in chat and select the bot on the left side.");
     }
 }

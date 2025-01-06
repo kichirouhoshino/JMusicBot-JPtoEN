@@ -207,7 +207,6 @@ public class JMusicBot {
             //add(new RepeatCmd(bot));
             add(new RepeatCmd(bot));
             add(new SkipToCmd(bot));
-            add(new PlaylistCmd(bot));
             add(new ForceToEnd(bot));
             add(new StopCmd(bot));
             //add(new VolumeCmd(bot));
