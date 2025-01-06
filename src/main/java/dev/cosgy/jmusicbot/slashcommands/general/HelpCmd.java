@@ -16,21 +16,15 @@
 
 package dev.cosgy.jmusicbot.slashcommands.general;
 
-//import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
-//import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 
-//import java.util.List;
-//import java.util.Objects;
-
-/*
-    The /help command and slashcommand is currently broken as the resulting message
-    exceeds Discord's 1000-character limit.
-    This is yet to be fixed upstream.
-*/
+import java.util.List;
+import java.util.Objects;
 
 public class HelpCmd extends SlashCommand {
     public Bot bot;
