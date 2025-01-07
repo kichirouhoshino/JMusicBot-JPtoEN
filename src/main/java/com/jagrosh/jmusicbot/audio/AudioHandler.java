@@ -284,8 +284,11 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
                 eb.addField("Listener", Integer.toString(GensokyoInfoAgent.getInfo().getServerinfo().getListeners()), true)
                         .setColor(new Color(66, 16, 80))
                         .setFooter("Content is provided by gensokyoradio.net.\n" +
-                            "The GR logo is a trademark of Gensokyo Radio.");
-
+                            "The GR logo is a trademark of Gensokyo Radio." +
+                              "\nGensokyo Radio is © LunarSpotlight.", null);
+                        if(manager.getBot().getConfig().useNPImages()){
+                            eb.setImage(albumArt);
+                        }
                  */
             }
 
