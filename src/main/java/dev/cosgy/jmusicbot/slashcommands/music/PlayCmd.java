@@ -98,7 +98,7 @@ public class PlayCmd extends MusicCommand {
                 return;
             }
 
-            // キャッシュの読み込み機構
+            // Cache loading mechanism
             if (bot.getCacheLoader().cacheExists(event.getGuild().getId())) {
                 List<Cache> data = bot.getCacheLoader().GetCache(event.getGuild().getId());
 
@@ -186,7 +186,7 @@ public class PlayCmd extends MusicCommand {
                 return;
             }
 
-            // キャッシュの読み込み機構
+            // Cache loading mechanism
             if (bot.getCacheLoader().cacheExists(event.getGuild().getId())) {
                 List<Cache> data = bot.getCacheLoader().GetCache(event.getGuild().getId());
 
@@ -277,8 +277,8 @@ public class PlayCmd extends MusicCommand {
             int pos = handler.addTrack(new QueuedTrack(track, event.getUser())) + 1;
 
             // Output MSG ex:
-            // <タイトル><(長さ)> を追加しました。
-            // <タイトル><(長さ)> を再生待ちの<再生待ち番号>番目に追加しました。
+            // Added <title><(length)>.
+            // Added <title><(length)> to <playback queue number> in the queue.
             String addMsg = FormatUtil.filter(event.getClient().getSuccess() + " **" + (track.getInfo().uri.matches(".*stream.gensokyoradio.net/.*") ? "Gensokyo Radio" : track.getInfo().title)
                     + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "has been added." : "has been added at position " + pos + " in the queue."));
             if (playlist == null || !event.getGuild().getSelfMember().hasPermission(event.getTextChannel(), Permission.MESSAGE_ADD_REACTION)) {
@@ -383,8 +383,8 @@ public class PlayCmd extends MusicCommand {
             int pos = handler.addTrack(new QueuedTrack(track, event.getAuthor())) + 1;
 
             // Output MSG ex:
-            // <タイトル><(長さ)> を追加しました。
-            // <タイトル><(長さ)> を再生待ちの<再生待ち番号>番目に追加しました。
+            // Added <title><(length)>.
+            // Added <title><(length)> to <playback queue number> in the queue.
             String addMsg = FormatUtil.filter(event.getClient().getSuccess() + " **" + (track.getInfo().uri.contains("https://stream.gensokyoradio.net/") ? "Gensokyo Radio" : track.getInfo().title)
                     + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "has been added." : "has been added at position " + pos + " in the queue. "));
             if (playlist == null || !event.getSelfMember().hasPermission(event.getTextChannel(), Permission.MESSAGE_ADD_REACTION))
@@ -520,7 +520,7 @@ public class PlayCmd extends MusicCommand {
                     return;
                 }
 
-                // キャッシュの読み込み機構
+                // Cache loading mechanism
                 if (bot.getCacheLoader().cacheExists(event.getGuild().getId())) {
                     List<Cache> data = bot.getCacheLoader().GetCache(event.getGuild().getId());
 

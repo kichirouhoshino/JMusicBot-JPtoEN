@@ -42,14 +42,15 @@ public class SettingsManager implements GuildSettingsManager {
             loadedSettings.keySet().forEach((id) -> {
                 JSONObject o = loadedSettings.getJSONObject(id);
 
-                // 以前の(boolean型)バージョンをサポートするための
+                // to support previous (boolean type) versions.
                 try {
                     if (o.getBoolean("repeat")) {
                         o.put("repeat", RepeatMode.ALL);
                     } else {
                         o.put("repeat", RepeatMode.OFF);
                     }
-                    //バグで誤った値を入れていたのでその数値を正しいものに変更するため
+                    // I had entered an incorrect value due to a bug,
+                    // so I wanted to change that value to the correct value.
                     if (o.getInt("announce") == 50) {
                         o.put("announce", 0);
                     }
@@ -85,10 +86,10 @@ public class SettingsManager implements GuildSettingsManager {
     }
 
     /**
-     * ギルドのnull以外の設定を取得します
+     * Get the non-null setting of the guild
      *
-     * @param guild 設定を取得するギルド
-     * @return the 既存の設定、またはそのギルドの新しい設定
+     * @param guild the guild to get the settings for
+     * @return the existing configuration or new configuration for that guild
      */
     @Override
     public Settings getSettings(Guild guild) {

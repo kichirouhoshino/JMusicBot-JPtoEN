@@ -121,7 +121,7 @@ public class NowplayingHandler {
             }
         }
 
-        // ボイスチャンネルステータスの更新
+        // Voice channel status updates
         GuildVoiceState vChan = guild.getSelfMember().getVoiceState();
 
         if(vChan == null || !vChan.inAudioChannel()){
@@ -150,7 +150,7 @@ public class NowplayingHandler {
 
     // "event"-based methods
     public void onTrackUpdate(long guildId, AudioTrack track, AudioHandler handler) {
-        // 該当する場合はボットステータスを更新します
+        // Update bot status if applicable
         if (bot.getConfig().getSongInStatus()) {
             if (track != null && bot.getJDA().getGuilds().stream().filter(g -> Objects.requireNonNull(g.getSelfMember().getVoiceState()).inAudioChannel()).count() <= 1)
 
@@ -163,7 +163,7 @@ public class NowplayingHandler {
                 bot.resetGame();
         }
 
-        // 該当する場合はチャネルトピックを更新します
+        // Update channel topic if applicable
         updateTopic(guildId, handler, false);
     }
 

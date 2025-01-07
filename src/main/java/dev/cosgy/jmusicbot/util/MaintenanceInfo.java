@@ -46,7 +46,7 @@ public class MaintenanceInfo {
     public String LastUpdate;
 
     public static boolean Verification() throws IOException {
-        //アナウンスを行うか確認
+        // Confirm whether to make an announcement
         ObjectMapper mapper = new ObjectMapper();
         root = mapper.readTree(new URL("https://cosgy.dev/botinfo/info.json"));
         return root.get("setting").get(0).get("Announce").asBoolean();
@@ -60,7 +60,7 @@ public class MaintenanceInfo {
 
         MaintenanceInfo Info = new MaintenanceInfo();
 
-        //臨時メンテナンスか確認
+        // Check if there is temporary maintenance
         if (root.get("setting").get(0).get("emergency").asBoolean()) {
             Info.Title = root.get("emergencyInfo").get(0).get("Title").asText();
             Info.Content = root.get("emergencyInfo").get(0).get("Content").asText();

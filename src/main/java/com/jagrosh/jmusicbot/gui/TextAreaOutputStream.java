@@ -57,7 +57,7 @@ public class TextAreaOutputStream extends OutputStream {
     }
 
     /**
-     * 現在のコンソールテキスト領域をクリアします。
+     * Clears the current console text area.
      */
     public synchronized void clear() {
         if (appender != null) {

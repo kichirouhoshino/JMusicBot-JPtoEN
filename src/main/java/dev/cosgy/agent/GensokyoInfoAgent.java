@@ -49,8 +49,8 @@ public class GensokyoInfoAgent extends Thread {
                     return info;
                 }
             }
-            // XMLの取得元URL設定
-            //URL url = new URL("https://gensokyoradio.net/xml");
+            // XML acquisition source URL setting
+            // URL url = new URL("https://gensokyoradio.net/xml");
 
             System.setProperty("http.agent", "Chrome");
 
@@ -70,7 +70,7 @@ public class GensokyoInfoAgent extends Thread {
 
             switch (res.statusCode()) {
                 case 200:
-                    // HTTP レスポンスの JSON を ResultSet クラスにマッピング
+                    // Mapping the JSON of the HTTP response to the ResultSet class
                     info = new ObjectMapper().readValue(body, ResultSet.class);
                     return info;
                 case 403:
@@ -102,8 +102,8 @@ public class GensokyoInfoAgent extends Thread {
 
             try {
                 sleep(1000);
-                // 現在再生中の曲が終わるまで幻想郷ラジオに曲の情報をリクエストしない。
-                // DDos攻撃になってしまうので...
+                // Do not request song information from Gensokyo Radio until the currently playing song ends.
+                // This will result in a DDOS attack...
                 if (info != null) {
                     info.getSongtimes().setPlayed(info.getSongtimes().getPlayed() + 1);
                 }

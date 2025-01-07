@@ -96,7 +96,7 @@ public class NicoAudioTrack extends DelegatedAudioTrack {
 
                 Process process = runtime.exec(command);
 
-                // エラーストリームを読み取るためのスレッドを作成
+                // Create a thread to read the error stream
                 new Thread(() -> {
                     try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
                         String line;
@@ -108,7 +108,7 @@ public class NicoAudioTrack extends DelegatedAudioTrack {
                     }
                 }).start();
 
-                // 標準出力ストリームを読み取るためのスレッドを作成
+                // Create a thread to read the standard output stream
                 new Thread(() -> {
                     try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                         String line;

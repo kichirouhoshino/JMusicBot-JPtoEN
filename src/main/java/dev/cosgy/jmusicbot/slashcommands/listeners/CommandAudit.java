@@ -15,7 +15,7 @@ public class CommandAudit implements CommandListener {
      * by a {@link CommandEvent CommandEvent}.
      *
      * @param event   The CommandEvent that triggered the Command
-     * @param command 実行されたコマンドオブジェクト
+     * @param command executed command object
      */
     @Override
     public void onCommand(CommandEvent event, Command command) {

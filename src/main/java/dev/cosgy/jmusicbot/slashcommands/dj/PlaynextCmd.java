@@ -104,8 +104,8 @@ public class PlaynextCmd extends DJCommand {
                     + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "was added to the queue." : "was added to position " + pos + " in the queue."));
             m.editOriginal(addMsg).queue();
 
-            //log.info(event.getGuild().getName() + track.getInfo().title
-            //        + "(" + FormatUtil.formatTime(track.getDuration()) + ") " + (pos == 0 ? "を再生待ちに追加しました。" : "を" + pos + "番目の再生待ちに追加しました。"));
+            // log.info(event.getGuild().getName() + track.getInfo().title
+            // + "(" + FormatUtil.formatTime(track.getDuration()) + ") " + (pos == 0 ? "added to the playback queue." : "added to the playback queue at position " + pos + "."));
 
         }
 
@@ -168,8 +168,8 @@ public class PlaynextCmd extends DJCommand {
                     + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "was added to the queue." : "was added to position " + pos + " in the queue."));
             m.editMessage(addMsg).queue();
 
-            //log.info(event.getGuild().getName() + track.getInfo().title
-            //        + "(" + FormatUtil.formatTime(track.getDuration()) + ") " + (pos == 0 ? "を再生待ちに追加しました。" : "を" + pos + "番目の再生待ちに追加しました。"));
+            // log.info(event.getGuild().getName() + track.getInfo().title
+            // + "(" + FormatUtil.formatTime(track.getDuration()) + ") " + (pos == 0 ? "Added to the playback queue." : "Added to the playback queue at position " + pos + "."));
 
         }
 

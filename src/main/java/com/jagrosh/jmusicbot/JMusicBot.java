@@ -166,7 +166,7 @@ public class JMusicBot {
             cb.setServerInvite("https://discord.gg/MjNfC6TK2y");
         }
 
-        // スラッシュコマンドの実装
+        // Implementing the slash command
         List<SlashCommand> slashCommandList = new ArrayList<>() {{
             add(new HelpCmd(bot));
             add(aboutCommand);

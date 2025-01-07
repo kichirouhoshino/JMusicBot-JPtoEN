@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 
 public class LastSendTextChannel implements CommandListener {
-    // ギルドIDでテキストチャンネルのIDを持ってきます。
+    // Bring the text channel ID with the guild ID.
     private static final HashMap<Long, Long> textChannel = new HashMap<>();
     static Logger log = LoggerFactory.getLogger("LastSendTextChannel");
 

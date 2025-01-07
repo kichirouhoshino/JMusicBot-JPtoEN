@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * ユーザーが再生リスト内のトラックを移動できるようにするコマンドです。
+ * A command that allows the user to move tracks within a playlist.
  */
 public class MoveTrackCmd extends DJCommand {
 
