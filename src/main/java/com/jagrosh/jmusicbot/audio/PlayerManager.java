@@ -55,10 +55,14 @@ public class PlayerManager extends DefaultAudioPlayerManager {
                 new Android(),
                 new Ios()));
 
+
         TransformativeAudioSourceManager.createTransforms(bot.getConfig().getTransforms()).forEach(this::registerSourceManager);
         AudioSourceManagers.registerRemoteSources(this);
         AudioSourceManagers.registerLocalSource(this);
+
         source(YoutubeAudioSourceManager.class).setPlaylistPageCount(10);
+        source(YoutubeAudioSourceManager.class).useOauth2(null, false);
+
 
         if (getConfiguration().getOpusEncodingQuality() != 10) {
             logger.debug("OpusEncodingQuality は、{}(< 10), 品質を10に設定します。", getConfiguration().getOpusEncodingQuality());
