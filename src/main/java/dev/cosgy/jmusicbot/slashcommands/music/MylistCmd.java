@@ -43,7 +43,7 @@ public class MylistCmd extends MusicCommand {
     @Override
     public void doCommand(CommandEvent event) {
 
-        StringBuilder builder = new StringBuilder(event.getClient().getWarning() + " マイリスト管理コマンド:\n");
+        StringBuilder builder = new StringBuilder(event.getClient().getWarning() + " Mylist Management Commands:\n");
         for (Command cmd : this.children)
             builder.append("\n`").append(event.getClient().getPrefix()).append(name).append(" ").append(cmd.getName())
                     .append(" ").append(cmd.getArguments() == null ? "" : cmd.getArguments()).append("` - ").append(cmd.getHelp());
