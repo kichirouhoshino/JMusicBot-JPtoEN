@@ -97,8 +97,8 @@ public class HTTPUtil {
     }
 
     public String request() {
-        if (method == null || method.isEmpty()) throw new NullPointerException("メソッドが設定されていません。");
-        if (targetAddress == null || targetAddress.isEmpty()) throw new NullPointerException("URLが設定されていません。");
+        if (method == null || method.isEmpty()) throw new NullPointerException("The method is not set.");
+        if (targetAddress == null || targetAddress.isEmpty()) throw new NullPointerException("The URL is not set.");
 
         String params = "";
 
@@ -165,12 +165,12 @@ public class HTTPUtil {
                     response.close();
                 }
 
-                System.out.println("エラー: " + responseCode + "\n" + sb);
+                System.out.println("Error: " + responseCode + "\n" + sb);
             }
         } catch (MalformedURLException e) {
-            throw new NullPointerException("URLが不正です: " + e.getLocalizedMessage());
+            throw new NullPointerException("The URL is invalid: " + e.getLocalizedMessage());
         } catch (ProtocolException e) {
-            throw new NullPointerException("メソッド名が不正です: " + e.getLocalizedMessage());
+            throw new NullPointerException("The method name is invalid: " + e.getLocalizedMessage());
         } catch (IOException e) {
             StringBuilder sb = new StringBuilder();
             try {
@@ -187,7 +187,7 @@ public class HTTPUtil {
             } catch (Exception ignored) {
             }
 
-            System.out.println("エラーが発生しました: " + e.getLocalizedMessage() + "\n" + sb);
+            System.out.println("An error occurred: " + e.getLocalizedMessage() + "\n" + sb);
         } finally {
             if (connection != null) connection.disconnect();
         }

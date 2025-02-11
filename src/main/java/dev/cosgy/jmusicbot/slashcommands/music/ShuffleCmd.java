@@ -28,7 +28,7 @@ public class ShuffleCmd extends MusicCommand {
     public ShuffleCmd(Bot bot) {
         super(bot);
         this.name = "shuffle";
-        this.help = "追加した曲をシャッフル";
+        this.help = "Shuffle the added tracks";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.beListening = true;
         this.bePlaying = true;
@@ -40,13 +40,13 @@ public class ShuffleCmd extends MusicCommand {
         int s = handler.getQueue().shuffle(event.getAuthor().getIdLong());
         switch (s) {
             case 0:
-                event.replyError("再生待ちに曲がありません!");
+                event.replyError("There are no tracks in the queue!");
                 break;
             case 1:
-                event.replyWarning("再生待ちには現在1曲しかありません!");
+                event.replyWarning("There is currently only one track in the queue!");
                 break;
             default:
-                event.replySuccess("" + s + "曲をシャッフルしました。");
+                event.replySuccess("Shuffled " + s + " tracks.");
                 break;
         }
     }
@@ -57,13 +57,13 @@ public class ShuffleCmd extends MusicCommand {
         int s = handler.getQueue().shuffle(event.getUser().getIdLong());
         switch (s) {
             case 0:
-                event.reply(event.getClient().getError() + "再生待ちに曲がありません!").queue();
+                event.reply(event.getClient().getError() + "There are no tracks in the queue!").queue();
                 break;
             case 1:
-                event.reply(event.getClient().getWarning() + "再生待ちには現在1曲しかありません!").queue();
+                event.reply(event.getClient().getWarning() + "There is currently only one track in the queue!").queue();
                 break;
             default:
-                event.reply(event.getClient().getSuccess() + "" + s + "曲をシャッフルしました。").queue();
+                event.reply(event.getClient().getSuccess() + "Shuffled " + s + " tracks.").queue();
                 break;
         }
     }

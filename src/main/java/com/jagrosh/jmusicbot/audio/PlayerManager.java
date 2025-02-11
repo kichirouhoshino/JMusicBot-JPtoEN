@@ -23,6 +23,7 @@ import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.source.nico.NicoAudioSourceManager;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import dev.lavalink.youtube.clients.*;
+import dev.lavalink.youtube.clients.skeleton.Client;
 import net.dv8tion.jda.api.entities.Guild;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,14 +48,14 @@ public class PlayerManager extends DefaultAudioPlayerManager {
             );
         }
 
-        registerSourceManager(new YoutubeAudioSourceManager(true, new Music(),
+        registerSourceManager(new YoutubeAudioSourceManager(/*allowSearch:*/ true, new Client[] { new Music(),
                 new TvHtml5Embedded(),
                 new AndroidMusic(),
                 new Web(),
                 new WebEmbedded(),
                 new Android(),
-                new Ios()));
-
+                new Ios()
+        }));
 
         TransformativeAudioSourceManager.createTransforms(bot.getConfig().getTransforms()).forEach(this::registerSourceManager);
         AudioSourceManagers.registerRemoteSources(this);
@@ -63,14 +64,13 @@ public class PlayerManager extends DefaultAudioPlayerManager {
         source(YoutubeAudioSourceManager.class).setPlaylistPageCount(10);
         source(YoutubeAudioSourceManager.class).useOauth2(null, false);
 
-
         if (getConfiguration().getOpusEncodingQuality() != 10) {
-            logger.debug("OpusEncodingQuality は、{}(< 10), 品質を10に設定します。", getConfiguration().getOpusEncodingQuality());
+            logger.debug("OpusEncodingQuality is {}, setting quality to 10.", getConfiguration().getOpusEncodingQuality());
             getConfiguration().setOpusEncodingQuality(10);
         }
 
         if (getConfiguration().getResamplingQuality() != AudioConfiguration.ResamplingQuality.HIGH) {
-            logger.debug("ResamplingQuality は {}(HIGHではない), 品質をHIGHに設定します。", getConfiguration().getResamplingQuality().name());
+            logger.debug("ResamplingQuality is {} (not HIGH), setting quality to HIGH.", getConfiguration().getResamplingQuality().name());
             getConfiguration().setResamplingQuality(AudioConfiguration.ResamplingQuality.HIGH);
         }
     }

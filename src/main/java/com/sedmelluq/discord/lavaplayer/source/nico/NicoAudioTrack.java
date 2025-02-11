@@ -83,12 +83,12 @@ public class NicoAudioTrack extends DelegatedAudioTrack {
                 String login = "";
                 if (NicoAudioSourceManager.userName != null && NicoAudioSourceManager.password != null) {
                     login += " --username " + NicoAudioSourceManager.userName + " --password " + NicoAudioSourceManager.password;
-                    log.info("ニコニコのログイン情報を使用しました。");
+                    log.info("Niconico login information was used.");
                     if(NicoAudioSourceManager.twofactor != null) {
                         String code = TOTPGenerator.getCode(NicoAudioSourceManager.twofactor);
 
                         login += " --twofactor " + code;
-                        log.info("二段階認証を行いました:{}", code);
+                        log.info("Two-factor authentication was performed:{}", code);
                     }
                 }
 
@@ -96,7 +96,7 @@ public class NicoAudioTrack extends DelegatedAudioTrack {
 
                 Process process = runtime.exec(command);
 
-                // エラーストリームを読み取るためのスレッドを作成
+                // Create a thread to read the error stream
                 new Thread(() -> {
                     try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
                         String line;
@@ -108,7 +108,7 @@ public class NicoAudioTrack extends DelegatedAudioTrack {
                     }
                 }).start();
 
-                // 標準出力ストリームを読み取るためのスレッドを作成
+                // Create a thread to read the standard output stream
                 new Thread(() -> {
                     try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                         String line;

@@ -48,37 +48,37 @@ public class PlaynextCmd extends DJCommand {
         this.loadingEmoji = bot.getConfig().getLoading();
         this.name = "playnext";
         this.arguments = "<title|URL>";
-        this.help = "次に再生する曲を指定します";
+        this.help = "Specify the next song to play";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.beListening = true;
         this.bePlaying = false;
         List<OptionData> options = new ArrayList<>();
-        options.add(new OptionData(OptionType.STRING, "title", "タイトルまたはURL", true));
+        options.add(new OptionData(OptionType.STRING, "title", "Song title or URL", true));
         this.options = options;
     }
 
     @Override
     public void doCommand(CommandEvent event) {
         if (event.getArgs().isEmpty() && event.getMessage().getAttachments().isEmpty()) {
-            event.replyWarning("曲のタイトルまたはURLを入力してください。");
+            event.replyWarning("Please provide the song title or URL.");
             return;
         }
         String args = event.getArgs().startsWith("<") && event.getArgs().endsWith(">")
                 ? event.getArgs().substring(1, event.getArgs().length() - 1)
                 : event.getArgs().isEmpty() ? event.getMessage().getAttachments().get(0).getUrl() : event.getArgs();
-        log.info(event.getGuild().getName() + "で[" + args + "]の読み込みを開始しました。");
-        event.reply(loadingEmoji + "`[" + args + "]`を読み込み中です...", m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), args, new ResultHandler(m, event, false)));
+        log.info("Loading [" + args + "] on " + event.getGuild().getName());
+        event.reply(loadingEmoji + "`[" + args + "]` is being loaded...", m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), args, new ResultHandler(m, event, false)));
     }
 
     @Override
     public void doCommand(SlashCommandEvent event) {
         if (!checkDJPermission(event.getClient(), event)) {
-            event.reply(event.getClient().getWarning() + "権限がないため実行できません。").queue();
+            event.reply(event.getClient().getWarning() + "You don't have permission to execute this command.").queue();
             return;
         }
         String args = event.getOption("title").getAsString();
-        log.info(event.getGuild().getName() + "で[" + args + "]の読み込みを開始しました。");
-        event.reply(loadingEmoji + "`[" + args + "]`を読み込み中です...").queue(m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), args, new SlashResultHandler(m, event, false)));
+        log.info("Loading [" + args + "] on " + event.getGuild().getName());
+        event.reply(loadingEmoji + "`[" + args + "]` is being loaded...").queue(m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), args, new SlashResultHandler(m, event, false)));
     }
 
     private class SlashResultHandler implements AudioLoadResultHandler {
@@ -94,18 +94,18 @@ public class PlaynextCmd extends DJCommand {
 
         private void loadSingle(AudioTrack track) {
             if (bot.getConfig().isTooLong(track)) {
-                m.editOriginal(FormatUtil.filter(event.getClient().getWarning() + "(**" + (track.getInfo().uri.contains("https://stream.gensokyoradio.net/") ? "幻想郷ラジオ" : track.getInfo().title) + "**) このトラックは許可されている最大長よりも長いです: `"
+                m.editOriginal(FormatUtil.filter(event.getClient().getWarning() + "(**" + (track.getInfo().uri.contains("https://stream.gensokyoradio.net/") ? "Gensokyo Radio" : track.getInfo().title) + "**) This track is too long: `"
                         + FormatUtil.formatTime(track.getDuration()) + "` > `" + FormatUtil.formatTime(bot.getConfig().getMaxSeconds() * 1000) + "`")).queue();
                 return;
             }
             AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
             int pos = handler.addTrackToFront(new QueuedTrack(track, event.getUser())) + 1;
-            String addMsg = FormatUtil.filter(event.getClient().getSuccess() + "**" + (track.getInfo().uri.contains("https://stream.gensokyoradio.net/") ? "幻想郷ラジオ" : track.getInfo().title)
-                    + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "を再生待ちに追加しました。" : "を" + pos + "番目の再生待ちに追加しました。"));
+            String addMsg = FormatUtil.filter(event.getClient().getSuccess() + "**" + (track.getInfo().uri.contains("https://stream.gensokyoradio.net/") ? "Gensokyo Radio" : track.getInfo().title)
+                    + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "was added to the queue." : "was added to position " + pos + " in the queue."));
             m.editOriginal(addMsg).queue();
 
-            //log.info(event.getGuild().getName() + track.getInfo().title
-            //        + "(" + FormatUtil.formatTime(track.getDuration()) + ") " + (pos == 0 ? "を再生待ちに追加しました。" : "を" + pos + "番目の再生待ちに追加しました。"));
+            // log.info(event.getGuild().getName() + track.getInfo().title
+            // + "(" + FormatUtil.formatTime(track.getDuration()) + ") " + (pos == 0 ? "added to the playback queue." : "added to the playback queue at position " + pos + "."));
 
         }
 
@@ -129,7 +129,7 @@ public class PlaynextCmd extends DJCommand {
         @Override
         public void noMatches() {
             if (ytsearch)
-                m.editOriginal(FormatUtil.filter(event.getClient().getWarning() + " この検索結果はありません `" + event.getUser() + "`.")).queue();
+                m.editOriginal(FormatUtil.filter(event.getClient().getWarning() + " No search results found for `" + event.getUser() + "`.")).queue();
             else
                 bot.getPlayerManager().loadItemOrdered(event.getGuild(), "ytsearch:" + event.getUser(), new SlashResultHandler(m, event, true));
         }
@@ -137,10 +137,10 @@ public class PlaynextCmd extends DJCommand {
         @Override
         public void loadFailed(FriendlyException throwable) {
             if (throwable.severity == FriendlyException.Severity.COMMON)
-                m.editOriginal(event.getClient().getError() + " 読み込みエラー: " + throwable.getMessage()).queue();
+                m.editOriginal(event.getClient().getError() + " Load error: " + throwable.getMessage()).queue();
             else
-                m.editOriginal(event.getClient().getError() + " 曲の読み込み中にエラーが発生しました。").queue();
-            log.info(event.getGuild().getName() + "で読み込みエラーが発生しました。");
+                m.editOriginal(event.getClient().getError() + " An error occurred while loading the song.").queue();
+            log.info("Load error occurred on " + event.getGuild().getName());
         }
     }
 
@@ -158,18 +158,18 @@ public class PlaynextCmd extends DJCommand {
 
         private void loadSingle(AudioTrack track) {
             if (bot.getConfig().isTooLong(track)) {
-                m.editMessage(FormatUtil.filter(event.getClient().getWarning() + "(**" + (track.getInfo().uri.contains("https://stream.gensokyoradio.net/") ? "幻想郷ラジオ" : track.getInfo().title) + "**) このトラックは許可されている最大長よりも長いです: `"
+                m.editMessage(FormatUtil.filter(event.getClient().getWarning() + "(**" + (track.getInfo().uri.contains("https://stream.gensokyoradio.net/") ? "Gensokyo Radio" : track.getInfo().title) + "**) This track is too long: `"
                         + FormatUtil.formatTime(track.getDuration()) + "` > `" + FormatUtil.formatTime(bot.getConfig().getMaxSeconds() * 1000) + "`")).queue();
                 return;
             }
             AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
             int pos = handler.addTrackToFront(new QueuedTrack(track, event.getAuthor())) + 1;
-            String addMsg = FormatUtil.filter(event.getClient().getSuccess() + "**" + (track.getInfo().uri.contains("https://stream.gensokyoradio.net/") ? "幻想郷ラジオ" : track.getInfo().title)
-                    + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "を再生待ちに追加しました。" : "を" + pos + "番目の再生待ちに追加しました。"));
+            String addMsg = FormatUtil.filter(event.getClient().getSuccess() + "**" + (track.getInfo().uri.contains("https://stream.gensokyoradio.net/") ? "Gensokyo Radio" : track.getInfo().title)
+                    + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "was added to the queue." : "was added to position " + pos + " in the queue."));
             m.editMessage(addMsg).queue();
 
-            //log.info(event.getGuild().getName() + track.getInfo().title
-            //        + "(" + FormatUtil.formatTime(track.getDuration()) + ") " + (pos == 0 ? "を再生待ちに追加しました。" : "を" + pos + "番目の再生待ちに追加しました。"));
+            // log.info(event.getGuild().getName() + track.getInfo().title
+            // + "(" + FormatUtil.formatTime(track.getDuration()) + ") " + (pos == 0 ? "Added to the playback queue." : "Added to the playback queue at position " + pos + "."));
 
         }
 
@@ -193,7 +193,7 @@ public class PlaynextCmd extends DJCommand {
         @Override
         public void noMatches() {
             if (ytsearch)
-                m.editMessage(FormatUtil.filter(event.getClient().getWarning() + " この検索結果はありません `" + event.getArgs() + "`.")).queue();
+                m.editMessage(FormatUtil.filter(event.getClient().getWarning() + " No search results found for `" + event.getArgs() + "`.")).queue();
             else
                 bot.getPlayerManager().loadItemOrdered(event.getGuild(), "ytsearch:" + event.getArgs(), new ResultHandler(m, event, true));
         }
@@ -201,10 +201,10 @@ public class PlaynextCmd extends DJCommand {
         @Override
         public void loadFailed(FriendlyException throwable) {
             if (throwable.severity == FriendlyException.Severity.COMMON)
-                m.editMessage(event.getClient().getError() + " 読み込みエラー: " + throwable.getMessage()).queue();
+                m.editMessage(event.getClient().getError() + " Load error: " + throwable.getMessage()).queue();
             else
-                m.editMessage(event.getClient().getError() + " 曲の読み込み中にエラーが発生しました。").queue();
-            log.info(event.getGuild().getName() + "で読み込みエラーが発生しました。");
+                m.editMessage(event.getClient().getError() + " An error occurred while loading the song.").queue();
+            log.info("Load error occurred on " + event.getGuild().getName());
         }
     }
 }

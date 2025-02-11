@@ -33,7 +33,7 @@ public class ForceskipCmd extends DJCommand {
     public ForceskipCmd(Bot bot) {
         super(bot);
         this.name = "forceskip";
-        this.help = "現在の曲をスキップします";
+        this.help = "Skips the current song";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.bePlaying = true;
     }
@@ -43,20 +43,20 @@ public class ForceskipCmd extends DJCommand {
         AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
         RequestMetadata rm = handler.getRequestMetadata();
         event.reply(event.getClient().getSuccess() + "**" + handler.getPlayer().getPlayingTrack().getInfo().title
-                + "** " + (rm.getOwner() == 0L ? "(自動再生)" : "(**" + rm.user.username + "**がリクエスト)"));
+                + "** " + (rm.getOwner() == 0L ? "(Auto-play)" : "(**" + rm.user.username + "** requested)"));
         handler.getPlayer().stopTrack();
     }
 
     @Override
     public void doCommand(SlashCommandEvent event) {
         if (!checkDJPermission(event.getClient(), event)) {
-            event.reply(event.getClient().getWarning() + "権限がないため実行できません。").queue();
+            event.reply(event.getClient().getWarning() + "You do not have permission to execute this command.").queue();
             return;
         }
         AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
         RequestMetadata rm = handler.getRequestMetadata();
         event.reply(event.getClient().getSuccess() + "**" + handler.getPlayer().getPlayingTrack().getInfo().title
-                + "** " + (rm.getOwner() == 0L ? "(自動再生)" : "(**" + rm.user.username + "**がリクエスト)")).queue();
+                + "** " + (rm.getOwner() == 0L ? "(Auto-play)" : "(**" + rm.user.username + "** requested)")).queue();
         handler.getPlayer().stopTrack();
     }
 }

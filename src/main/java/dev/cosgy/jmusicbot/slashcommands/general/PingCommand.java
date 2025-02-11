@@ -28,14 +28,14 @@ import java.time.temporal.ChronoUnit;
  */
 @CommandInfo(
         name = {"Ping", "Pong"},
-        description = "ボットのレイテンシを確認します"
+        description = "Checks the bot's latency"
 )
 @Author("John Grosh (jagrosh)")
 public class PingCommand extends SlashCommand {
 
     public PingCommand() {
         this.name = "ping";
-        this.help = "ボットのレイテンシをチェックします";
+        this.help = "Checks the bot's latency";
         this.guildOnly = false;
         this.aliases = new String[]{"pong"};
     }

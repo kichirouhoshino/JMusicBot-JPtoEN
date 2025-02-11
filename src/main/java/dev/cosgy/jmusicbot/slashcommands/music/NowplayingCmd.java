@@ -30,7 +30,7 @@ public class NowplayingCmd extends MusicCommand {
     public NowplayingCmd(Bot bot) {
         super(bot);
         this.name = "nowplaying";
-        this.help = "現在再生中の曲を表示します";
+        this.help = "Displays the currently playing track";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
     }
@@ -61,7 +61,7 @@ public class NowplayingCmd extends MusicCommand {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        event.reply("現在再生中の楽曲を表示します...").queue(h -> h.deleteOriginal().queue());
+        event.reply("Displaying the currently playing track...").queue(h -> h.deleteOriginal().queue());
 
         if (m == null) {
             event.getTextChannel().sendMessage(handler.getNoMusicPlaying(event.getJDA())).queue();

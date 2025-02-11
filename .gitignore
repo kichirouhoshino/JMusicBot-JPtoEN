@@ -10,3 +10,4 @@ nb*.xml
 config.txt
 *.jar
 /logs/
+build.sh

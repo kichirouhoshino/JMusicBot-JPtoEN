@@ -30,12 +30,12 @@ import java.util.List;
 public class SkipratioCmd extends AdminCommand {
     public SkipratioCmd(Bot bot) {
         this.name = "setskip";
-        this.help = "サーバー固有のスキップ率を設定";
+        this.help = "Set the skip ratio for the server.";
         this.arguments = "<0 - 100>";
         this.aliases = bot.getConfig().getAliases(this.name);
 
         List<OptionData> options = new ArrayList<>();
-        options.add(new OptionData(OptionType.INTEGER, "percent", "スキップ率", true));
+        options.add(new OptionData(OptionType.INTEGER, "percent", "The skip ratio", true));
 
         this.options = options;
     }
@@ -45,15 +45,15 @@ public class SkipratioCmd extends AdminCommand {
         try {
             int val = Integer.parseInt(event.getOption("percent").getAsString());
             if (val < 0 || val > 100) {
-                event.reply(event.getClient().getError() + "値は、0から100の間でなければなりません。").queue();
+                event.reply(event.getClient().getError() + "The value must be between 0 and 100.").queue();
                 return;
             }
             Settings s = event.getClient().getSettingsFor(event.getGuild());
             s.setSkipRatio(val / 100.0);
 
-            event.reply(event.getClient().getSuccess() + "*" + event.getGuild().getName() + "*のリスナーのスキップ率を" + val + "%に設定しました。").queue();
+            event.reply(event.getClient().getSuccess() + "The skip ratio for listeners in *" + event.getGuild().getName() + "* has been set to " + val + "%.").queue();
         } catch (NumberFormatException ex) {
-            event.reply(event.getClient().getError() + "0～100の整数を入れてください（デフォルトは55）。この数値は、曲をスキップするために投票しなければならないリスニングユーザーの割合です。").queue();
+            event.reply(event.getClient().getError() + "Please enter an integer between 0 and 100 (default is 55). This value determines the percentage of listeners who must vote to skip a track.").queue();
         }
     }
 
@@ -62,15 +62,15 @@ public class SkipratioCmd extends AdminCommand {
         try {
             int val = Integer.parseInt(event.getArgs().endsWith("%") ? event.getArgs().substring(0, event.getArgs().length() - 1) : event.getArgs());
             if (val < 0 || val > 100) {
-                event.replyError("値は、0から100の間でなければなりません。");
+                event.replyError("The value must be between 0 and 100.");
                 return;
             }
             Settings s = event.getClient().getSettingsFor(event.getGuild());
             s.setSkipRatio(val / 100.0);
 
-            event.replySuccess("*" + event.getGuild().getName() + "*のリスナーのスキップ率を" + val + "%に設定しました。");
+            event.replySuccess("The skip ratio for listeners in *" + event.getGuild().getName() + "* has been set to " + val + "%.");
         } catch (NumberFormatException ex) {
-            event.replyError("0～100の整数を入れてください（デフォルトは55）。この数値は、曲をスキップするために投票しなければならないリスニングユーザーの割合です。");
+            event.replyError("Please enter an integer between 0 and 100 (default is 55). This value determines the percentage of listeners who must vote to skip a track.");
         }
     }
 }

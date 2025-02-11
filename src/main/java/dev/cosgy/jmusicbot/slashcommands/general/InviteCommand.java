@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.Permission;
 public class InviteCommand extends SlashCommand {
     public InviteCommand() {
         this.name = "invite";
-        this.help = "Botの招待用URLを表示します。";
+        this.help = "Displays the bot's invite URL.";
         this.guildOnly = false;
         this.aliases = new String[]{"share"};
     }

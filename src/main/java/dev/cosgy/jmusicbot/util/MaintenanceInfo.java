@@ -46,7 +46,7 @@ public class MaintenanceInfo {
     public String LastUpdate;
 
     public static boolean Verification() throws IOException {
-        //アナウンスを行うか確認
+        // Confirm whether to make an announcement
         ObjectMapper mapper = new ObjectMapper();
         root = mapper.readTree(new URL("https://cosgy.dev/botinfo/info.json"));
         return root.get("setting").get(0).get("Announce").asBoolean();
@@ -60,7 +60,7 @@ public class MaintenanceInfo {
 
         MaintenanceInfo Info = new MaintenanceInfo();
 
-        //臨時メンテナンスか確認
+        // Check if there is temporary maintenance
         if (root.get("setting").get(0).get("emergency").asBoolean()) {
             Info.Title = root.get("emergencyInfo").get(0).get("Title").asText();
             Info.Content = root.get("emergencyInfo").get(0).get("Content").asText();
@@ -115,14 +115,14 @@ public class MaintenanceInfo {
                     .setColor(Color.orange)
                     .setDescription(InfoResult.Content);
             if (!InfoResult.StartTime.equals("")) {
-                ebuilder.addField("開始時刻:", InfoResult.StartTime, false);
+                ebuilder.addField("Start Time:", InfoResult.StartTime, false);
             }
             if (!InfoResult.EndTime.equals("")) {
-                ebuilder.addField("終了時刻:", InfoResult.EndTime, false);
+                ebuilder.addField("End Time:", InfoResult.EndTime, false);
             }
-            ebuilder.addField("更新日時:", InfoResult.LastUpdate, false)
-                    .addField("現在時刻", sdf.format(NowTime), false)
-                    .setFooter("※メンテナンス期間は予定なく変更する場合があります。", null);
+            ebuilder.addField("Last Update:", InfoResult.LastUpdate, false)
+                    .addField("Current Time", sdf.format(NowTime), false)
+                    .setFooter("※Maintenance periods may change without notice.", null);
             event.getChannel().sendMessage(builder.addEmbeds(ebuilder.build()).build()).complete();
             s.setAnnounce(AnnounceID);
         }
@@ -164,14 +164,14 @@ public class MaintenanceInfo {
                     .setColor(Color.orange)
                     .setDescription(InfoResult.Content);
             if (!InfoResult.StartTime.equals("")) {
-                ebuilder.addField("開始時刻:", InfoResult.StartTime, false);
+                ebuilder.addField("Start Time:", InfoResult.StartTime, false);
             }
             if (!InfoResult.EndTime.equals("")) {
-                ebuilder.addField("終了時刻:", InfoResult.EndTime, false);
+                ebuilder.addField("End Time:", InfoResult.EndTime, false);
             }
-            ebuilder.addField("更新日時:", InfoResult.LastUpdate, false)
-                    .addField("現在時刻", sdf.format(NowTime), false)
-                    .setFooter("※メンテナンス期間は予定なく変更する場合があります。", null);
+            ebuilder.addField("Last Update:", InfoResult.LastUpdate, false)
+                    .addField("Current Time", sdf.format(NowTime), false)
+                    .setFooter("※Maintenance periods may change without notice.", null);
             event.getChannel().sendMessage(builder.addEmbeds(ebuilder.build()).build()).complete();
             s.setAnnounce(AnnounceID);
         }

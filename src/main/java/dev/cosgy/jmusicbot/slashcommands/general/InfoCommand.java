@@ -22,7 +22,7 @@ public class InfoCommand extends SlashCommand {
 
     public InfoCommand(Bot bot) {
         this.name = "info";
-        this.help = "メンテナンス情報をお知らせします。";
+        this.help = "Provides maintenance information.";
         this.guildOnly = false;
     }
 
@@ -31,7 +31,7 @@ public class InfoCommand extends SlashCommand {
         Calendar Now = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date NowTime = Now.getTime();
-        event.reply("お知らせを受信中...").queue(m -> {
+        event.reply("Receiving announcement...").queue(m -> {
             try {
                 if (MaintenanceInfo.Verification()) {
                     MaintenanceInfo InfoResult = MaintenanceInfo.GetInfo();
@@ -41,17 +41,17 @@ public class InfoCommand extends SlashCommand {
                             .setColor(Color.orange)
                             .setDescription(InfoResult.Content);
                     if (!InfoResult.StartTime.equals("")) {
-                        ebuilder.addField("開始時刻:", InfoResult.StartTime, false);
+                        ebuilder.addField("Start Time:", InfoResult.StartTime, false);
                     }
                     if (!InfoResult.EndTime.equals("")) {
-                        ebuilder.addField("終了時刻:", InfoResult.EndTime, false);
+                        ebuilder.addField("End Time:", InfoResult.EndTime, false);
                     }
-                    ebuilder.addField("更新日時:", InfoResult.LastUpdate, false)
-                            .addField("現在時刻", sdf.format(NowTime), false)
-                            .setFooter("※メンテナンス期間は予定なく変更する場合があります。", null);
+                    ebuilder.addField("Last Updated:", InfoResult.LastUpdate, false)
+                            .addField("Current Time", sdf.format(NowTime), false)
+                            .setFooter("※Maintenance periods may change without notice.", null);
                     m.editOriginalEmbeds(ebuilder.build()).queue();
                 } else {
-                    m.editOriginal("お知らせはありません。").queue();
+                    m.editOriginal("No announcement available.").queue();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -65,7 +65,7 @@ public class InfoCommand extends SlashCommand {
         Calendar Now = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date NowTime = Now.getTime();
-        Message m = event.getChannel().sendMessage("お知らせを受信中...").complete();
+        Message m = event.getChannel().sendMessage("Receiving announcement...").complete();
         try {
             if (MaintenanceInfo.Verification()) {
                 MaintenanceInfo InfoResult = MaintenanceInfo.GetInfo();
@@ -75,22 +75,21 @@ public class InfoCommand extends SlashCommand {
                         .setColor(Color.orange)
                         .setDescription(InfoResult.Content);
                 if (!InfoResult.StartTime.equals("")) {
-                    ebuilder.addField("開始時刻:", InfoResult.StartTime, false);
+                    ebuilder.addField("Start Time:", InfoResult.StartTime, false);
                 }
                 if (!InfoResult.EndTime.equals("")) {
-                    ebuilder.addField("終了時刻:", InfoResult.EndTime, false);
+                    ebuilder.addField("End Time:", InfoResult.EndTime, false);
                 }
-                ebuilder.addField("更新日時:", InfoResult.LastUpdate, false)
-                        .addField("現在時刻", sdf.format(NowTime), false)
-                        .setFooter("※メンテナンス期間は予定なく変更する場合があります。", null);
+                ebuilder.addField("Last Updated:", InfoResult.LastUpdate, false)
+                        .addField("Current Time", sdf.format(NowTime), false)
+                        .setFooter("※Maintenance periods may change without notice.", null);
                 m.editMessageEmbeds(ebuilder.build()).queue();
 
             } else {
-                m.editMessage("お知らせはありません。").queue();
+                m.editMessage("No announcement available.").queue();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 }

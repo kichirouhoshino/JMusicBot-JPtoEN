@@ -49,8 +49,8 @@ public class QueueCmd extends MusicCommand {
     public QueueCmd(Bot bot) {
         super(bot);
         this.name = "queue";
-        this.help = "再生待ちの楽曲一覧を表示します";
-        this.arguments = "[ページ]";
+        this.help = "Displays the list of songs in the queue";
+        this.arguments = "[page]";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.bePlaying = true;
         this.botPermissions = new Permission[]{Permission.MESSAGE_ADD_REACTION, Permission.MESSAGE_EMBED_LINKS};
@@ -89,11 +89,10 @@ public class QueueCmd extends MusicCommand {
             }
             MessageCreateData nonowp = ah.getNoMusicPlaying(event.getJDA());
             MessageCreateData built = new MessageCreateBuilder()
-                    .setContent(event.getClient().getWarning() + " 再生待ちの楽曲はありません。")
+                    .setContent(event.getClient().getWarning() + " There are no songs in the queue.")
                     .setEmbeds((nowp == null ? nonowp : nowp).getEmbeds().get(0)).build();
             MessageCreateData finalNowp = nowp;
-            event.reply(built, m ->
-            {
+            event.reply(built, m -> {
                 if (finalNowp != null)
                     bot.getNowplayingHandler().setLastNPMessage(m);
             });
@@ -111,13 +110,12 @@ public class QueueCmd extends MusicCommand {
                 .setItems(songs)
                 .setUsers(event.getAuthor())
                 .setColor(event.getSelfMember().getColor());
-
         builder.build().paginate(event.getChannel(), pagenum);
     }
 
     @Override
     public void doCommand(SlashCommandEvent event) {
-        InteractionHook m = event.reply("再生待ちを取得しています。").complete();
+        InteractionHook m = event.reply("Retrieving the queue.").complete();
         int pagenum = 1;
         AudioHandler ah = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
         List<QueuedTrack> list = ah.getQueue().getList();
@@ -130,7 +128,7 @@ public class QueueCmd extends MusicCommand {
             }
             MessageCreateData nonowp = ah.getNoMusicPlaying(event.getJDA());
             MessageEditData built = new MessageEditBuilder()
-                    .setContent(event.getClient().getWarning() + " 再生待ちの楽曲はありません。")
+                    .setContent(event.getClient().getWarning() + " There are no songs in the queue.")
                     .setEmbeds((nowp == null ? nonowp : nowp).getEmbeds().get(0)).build();
             m.editOriginal(built).queue();
             return;
@@ -156,14 +154,11 @@ public class QueueCmd extends MusicCommand {
         if (ah.getPlayer().getPlayingTrack() != null) {
             sb.append(ah.getPlayer().isPaused() ? JMusicBot.PAUSE_EMOJI : JMusicBot.PLAY_EMOJI).append(" **")
                     .append(
-                            ah.getPlayer().getPlayingTrack().getInfo().uri.matches(".*stream.gensokyoradio.net/.*") ? "幻想郷ラジオ" :
+                            ah.getPlayer().getPlayingTrack().getInfo().uri.matches(".*stream.gensokyoradio.net/.*") ? "Gensokyo Radio" :
                                     ah.getPlayer().getPlayingTrack().getInfo().title).append("**\n");
         }
-        return FormatUtil.filter(sb.append(success).append(" 再生待ち楽曲一覧 | ").append(songslength)
-                .append(" エントリー | `").append(FormatUtil.formatTime(total)).append("` ")
-                // RepeatMode.OFF - ""
-                // RepeatMode.ALL - QueueCmd.REPEAT_ALL
-                // RepeatMode.SINGLE = QueueCmd.REPEAT_SINGLE
+        return FormatUtil.filter(sb.append(success).append(" Queue song list | ").append(songslength)
+                .append(" entries | `").append(FormatUtil.formatTime(total)).append("` ")
                 .append(repeatmode != RepeatMode.OFF ? "| " + (repeatmode == RepeatMode.ALL ? REPEAT_ALL : REPEAT_SINGLE) : "").toString());
     }
 }

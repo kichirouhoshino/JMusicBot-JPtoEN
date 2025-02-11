@@ -34,12 +34,12 @@ public class NicoSearchCmd extends MusicCommand {
         this.aliases = bot.getConfig().getAliases(this.name);
         this.beListening = true;
         this.bePlaying = false;
-        this.arguments = "<検索語句>";
-        this.help = "指定した文字列を使用してニコニコ動画上の動画を検索します。";
+        this.arguments = "<search term>";
+        this.help = "Searches for videos on Nico Nico Douga using the specified search term.";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
 
         List<OptionData> options = new ArrayList<>();
-        options.add(new OptionData(OptionType.STRING, "input", "検索語句", true));
+        options.add(new OptionData(OptionType.STRING, "input", "Search term", true));
         this.options = options;
     }
 
@@ -47,19 +47,19 @@ public class NicoSearchCmd extends MusicCommand {
     public void doCommand(CommandEvent event) {
         boolean isOwner = event.getAuthor().getIdLong() == bot.getConfig().getOwnerId();
         if (!bot.getConfig().isNicoNicoEnabled()) {
-            event.reply("ニコニコ動画の機能が有効になっていません。\n" +
-                    (isOwner ? "" : "Botの作成者に") + "config.txtの`useniconico = false`を`useniconico = true`に変更" + (isOwner ? "してください" : "するよう頼んでください") + "。");
+            event.reply("Nico Nico Douga feature is not enabled.\n" +
+                    (isOwner ? "" : "Please ask the bot creator to change `useniconico = false` to `useniconico = true` in config.txt. "));
             return;
         }
 
         if (event.getArgs().isEmpty()) {
-            event.reply("使用法: **`" + event.getClient().getPrefix() + this.name + " " + this.arguments + "`**");
+            event.reply("Usage: **`" + event.getClient().getPrefix() + this.name + " " + this.arguments + "`**");
         } else {
-            Message m = event.getChannel().sendMessage(bot.getConfig().getSearching() + " ニコニコ動画で " + event.getArgs() + " を検索しています\n" +
-                    "**(注: 一部再生できない動画があります。)**").complete();
+            Message m = event.getChannel().sendMessage(bot.getConfig().getSearching() + " Searching for " + event.getArgs() + " on Nico Nico Douga\n" +
+                    "**(Note: Some videos may not be playable.)**").complete();
             LinkedList<nicoVideoSearchResult> results = niconicoAPI.searchVideo(event.getArgs(), 5, true);
             if (results.size() == 0) {
-                m.editMessage(event.getArgs() + " の検索結果はありません。").queue();
+                m.editMessage(event.getArgs() + " No results found.").queue();
                 return;
             }
 
@@ -70,7 +70,7 @@ public class NicoSearchCmd extends MusicCommand {
                     .setEventWaiter(bot.getWaiter())
                     .setTimeout(1, TimeUnit.MINUTES)
                     .setCancel(msg -> msg.delete().complete())
-                    .setText(FormatUtil.filter(event.getClient().getSuccess() + "`" + event.getArgs() + "` の検索結果:"))
+                    .setText(FormatUtil.filter(event.getClient().getSuccess() + "`" + event.getArgs() + "` search results:"))
                     .setSelection((msg, sel) -> {
                         nicoVideoSearchResult selectedResultVideo = results.get((sel - 1));
                         System.out.println("URL = " + selectedResultVideo.getWatchUrl() + ", title = " + selectedResultVideo.getTitle());
@@ -86,18 +86,18 @@ public class NicoSearchCmd extends MusicCommand {
     public void doCommand(SlashCommandEvent event) {
         boolean isOwner = event.getUser().getIdLong() == bot.getConfig().getOwnerId();
         if (!bot.getConfig().isNicoNicoEnabled()) {
-            event.reply("ニコニコ動画の機能が有効になっていません。\n" +
-                    (isOwner ? "" : "Botの作成者に") + "config.txtの`useniconico = false`を`useniconico = true`に変更" + (isOwner ? "してください" : "するよう頼んでください") + "。").queue();
+            event.reply("Nico Nico Douga feature is not enabled.\n" +
+                    (isOwner ? "" : "Please ask the bot creator to change `useniconico = false` to `useniconico = true` in config.txt.")).queue();
             return;
         }
 
         String input = event.getOption("input").getAsString();
 
-        event.reply(bot.getConfig().getSearching() + " ニコニコ動画で " + input + " を検索しています\n" +
-                "**(注: 一部再生できない動画があります。)**").queue(m -> {
+        event.reply(bot.getConfig().getSearching() + " Searching for " + input + " on Nico Nico Douga\n" +
+                "**(Note: Some videos may not be playable.)**").queue(m -> {
             LinkedList<nicoVideoSearchResult> results = niconicoAPI.searchVideo(input, 5, true);
             if (results.size() == 0) {
-                m.editOriginal(input + " の検索結果はありません。").queue();
+                m.editOriginal(input + " No results found.").queue();
                 return;
             }
 
@@ -108,7 +108,7 @@ public class NicoSearchCmd extends MusicCommand {
                     .setEventWaiter(bot.getWaiter())
                     .setTimeout(1, TimeUnit.MINUTES)
                     .setCancel(msg -> msg.delete().complete())
-                    .setText(FormatUtil.filter(event.getClient().getSuccess() + "`" + input + "` の検索結果:"))
+                    .setText(FormatUtil.filter(event.getClient().getSuccess() + "`" + input + "` search results:"))
                     .setSelection((msg, sel) -> {
                         nicoVideoSearchResult selectedResultVideo = results.get((sel - 1));
                         System.out.println("URL = " + selectedResultVideo.getWatchUrl() + ", title = " + selectedResultVideo.getTitle());
@@ -137,7 +137,7 @@ public class NicoSearchCmd extends MusicCommand {
         @Override
         public void trackLoaded(AudioTrack track) {
             if (bot.getConfig().isTooLong(track)) {
-                event.reply(FormatUtil.filter(event.getClient().getWarning() + " 楽曲 (**" + track.getInfo().title + "**) は許容されている動画の長さを超えています: `"
+                event.reply(FormatUtil.filter(event.getClient().getWarning() + " Track (**" + track.getInfo().title + "**) exceeds the allowed video length: `"
                         + FormatUtil.formatTime(track.getDuration()) + "` > `" + bot.getConfig().getMaxTime() + "`"));
                 return;
             }
@@ -145,7 +145,7 @@ public class NicoSearchCmd extends MusicCommand {
             AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
             int pos = handler.addTrack(new QueuedTrack(track, event.getAuthor())) + 1;
 
-            event.reply(FormatUtil.filter(String.format("%s %s **%s** (`%s`) を追加しました", event.getClient().getSuccess(), (pos == 0 ? "再生待ちに" : "再生待ち #" + pos + " に"), track.getInfo().title, FormatUtil.formatTime(track.getDuration()))));
+            event.reply(FormatUtil.filter(String.format("%s %s **%s** (`%s`) added to queue", event.getClient().getSuccess(), (pos == 0 ? "added to queue" : "added to queue #" + pos), track.getInfo().title, FormatUtil.formatTime(track.getDuration()))));
         }
 
         /**
@@ -163,7 +163,7 @@ public class NicoSearchCmd extends MusicCommand {
          */
         @Override
         public void noMatches() {
-            event.reply(FormatUtil.filter(event.getClient().getWarning() + " `" + event.getArgs() + "`の検索結果はありません."));
+            event.reply(FormatUtil.filter(event.getClient().getWarning() + " No results found for `" + event.getArgs() + "`."));
         }
 
         /**
@@ -174,9 +174,9 @@ public class NicoSearchCmd extends MusicCommand {
         @Override
         public void loadFailed(FriendlyException exception) {
             if (exception.severity == FriendlyException.Severity.COMMON)
-                event.reply(event.getClient().getError() + " 読み込み中にエラーが発生しました: " + exception.getMessage());
+                event.reply(event.getClient().getError() + " Error occurred while loading: " + exception.getMessage());
             else
-                event.reply(event.getClient().getError() + " 楽曲を読み込み中にエラーが発生しました");
+                event.reply(event.getClient().getError() + " Error occurred while loading track.");
         }
     }
 
@@ -199,7 +199,7 @@ public class NicoSearchCmd extends MusicCommand {
         @Override
         public void trackLoaded(AudioTrack track) {
             if (bot.getConfig().isTooLong(track)) {
-                m.editOriginal(FormatUtil.filter(event.getClient().getWarning() + " 楽曲 (**" + track.getInfo().title + "**) は許容されている動画の長さを超えています: `"
+                m.editOriginal(FormatUtil.filter(event.getClient().getWarning() + " Track (**" + track.getInfo().title + "**) exceeds the allowed video length: `"
                         + FormatUtil.formatTime(track.getDuration()) + "` > `" + bot.getConfig().getMaxTime() + "`")).queue();
                 return;
             }
@@ -207,7 +207,7 @@ public class NicoSearchCmd extends MusicCommand {
             AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
             int pos = handler.addTrack(new QueuedTrack(track, event.getUser())) + 1;
 
-            m.editOriginal(FormatUtil.filter(String.format("%s %s **%s** (`%s`) を追加しました", event.getClient().getSuccess(), (pos == 0 ? "再生待ちに" : "再生待ち #" + pos + " に"), track.getInfo().title, FormatUtil.formatTime(track.getDuration())))).queue();
+            m.editOriginal(FormatUtil.filter(String.format("%s %s **%s** (`%s`) added to queue", event.getClient().getSuccess(), (pos == 0 ? "added to queue" : "added to queue #" + pos), track.getInfo().title, FormatUtil.formatTime(track.getDuration())))).queue();
         }
 
         /**
@@ -225,7 +225,7 @@ public class NicoSearchCmd extends MusicCommand {
          */
         @Override
         public void noMatches() {
-            m.editOriginal(FormatUtil.filter(event.getClient().getWarning() + " `" + event.getOption("input").getAsString() + "`の検索結果はありません.")).queue();
+            m.editOriginal(FormatUtil.filter(event.getClient().getWarning() + " No results found for `" + event.getOption("input").getAsString() + "`")).queue();
         }
 
         /**
@@ -236,9 +236,9 @@ public class NicoSearchCmd extends MusicCommand {
         @Override
         public void loadFailed(FriendlyException exception) {
             if (exception.severity == FriendlyException.Severity.COMMON)
-                m.editOriginal(event.getClient().getError() + " 読み込み中にエラーが発生しました: " + exception.getMessage()).queue();
+                m.editOriginal(event.getClient().getError() + " Error occurred while loading: " + exception.getMessage()).queue();
             else
-                m.editOriginal(event.getClient().getError() + " 楽曲を読み込み中にエラーが発生しました").queue();
+                m.editOriginal(event.getClient().getError() + " Error occurred while loading track.").queue();
         }
     }
 }
