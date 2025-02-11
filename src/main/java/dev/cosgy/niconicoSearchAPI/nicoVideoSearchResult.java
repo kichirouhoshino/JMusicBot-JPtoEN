@@ -185,7 +185,7 @@ public class nicoVideoSearchResult {
             });
 
             nvi.setTags(tags.toArray(new String[]{}));
-            // Bug Fixes: [object#has(String key)] == 公式upの場合、ユーザー関連の情報が取得できないので has を挟む
+            // Bug Fixes: [object#has(String key)] == In the case of "up" formula, user-related information cannot be retrieved, so "has" should be inserted.
             if (object.has("user_icon_url")) nvi.setUploadUserIconUrl(object.getString("user_icon_url"));
             nvi.setWatchUrl(object.getString("watch_url"));
             if (object.has("user_id")) nvi.setUploadUserId(object.getInt("user_id"));

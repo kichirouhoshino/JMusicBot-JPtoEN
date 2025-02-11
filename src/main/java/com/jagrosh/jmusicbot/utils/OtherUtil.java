@@ -49,12 +49,12 @@ public class OtherUtil {
     private final static String WINDOWS_INVALID_PATH = "c:\\windows\\system32\\";
 
     /**
-     * 文字列からパスを取得します
-     * また、system32で起動しようとするWindowsの傾向を修正します
-     * ボットがこのパスにアクセスしようとすると、代わりにjarファイルの場所から開始されます。
+     * Get the path from a string.
+     * It also fixes an issue where Windows has the tendency to try to start in System32.
+     * If a bot tries to access this path, it will start at the location of the jar file instead.
      *
-     * @param path 文字列パス
-     * @return the パスオブジェクト
+     * @param path string path
+     * @return the path object
      */
     public static Path getPath(String path) {
         Path result = Paths.get(path);
@@ -70,11 +70,11 @@ public class OtherUtil {
     }
 
     /**
-     * jarからリソースを文字列としてロードします
+     * Load resources from a jar as a string
      *
-     * @param clazz クラスベースオブジェクト
-     * @param name  リソースの名前
-     * @return リソースの内容を含む文字列
+     * @param clazz class-based object
+     * @param name  Resource Name
+     * @return String containing the contents of the resource
      */
     public static String loadResource(Object clazz, String name) {
         try {
@@ -95,10 +95,10 @@ public class OtherUtil {
     }
 
     /**
-     * URLから画像データをロードします
+     * Load image data from a URL
      *
-     * @param url 画像のURL
-     * @return URLのinputstream
+     * @param url Image URL
+     * @return URL input stream
      */
     public static InputStream imageFromUrl(String url) {
         if (url == null)
@@ -114,7 +114,7 @@ public class OtherUtil {
     }
 
     /**
-     * 文字列からアクティビティを解析します
+     * Parses activity from a string
      *
      * @param game the game, including the action such as 'playing' or 'watching'
      * @return the parsed activity
