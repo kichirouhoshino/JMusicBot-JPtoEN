@@ -21,7 +21,6 @@ import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.settings.Settings;
-import dev.cosgy.jmusicbot.util.MaintenanceInfo;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -53,14 +52,7 @@ public abstract class MusicCommand extends SlashCommand {
 
         Settings settings = event.getClient().getSettingsFor(event.getGuild());
         TextChannel channel = settings.getTextChannel(event.getGuild());
-        if (bot.getConfig().getCosgyDevHost()) {
-            try {
 
-                MaintenanceInfo.CommandInfo(event, event.getClient());
-            } catch (IOException | ParseException e) {
-                e.printStackTrace();
-            }
-        }
         bot.getPlayerManager().setUpHandler(event.getGuild());
         if (bePlaying && !((AudioHandler) event.getGuild().getAudioManager().getSendingHandler()).isMusicPlaying(event.getJDA())) {
             event.reply(event.getClient().getError() + "To use this command, music must be playing.").queue();
@@ -80,7 +72,8 @@ public abstract class MusicCommand extends SlashCommand {
             if (!event.getGuild().getSelfMember().getVoiceState().inAudioChannel()) {
                 try {
                     event.getGuild().getAudioManager().openAudioConnection(userState.getChannel());
-                    event.getGuild().getAudioManager().setSelfDeafened(true);
+                    //event.getGuild().getAudioManager().setSelfDeafened(true);
+                    event.getGuild().getAudioManager().setSelfMuted(false);
                 } catch (PermissionException ex) {
                     event.reply(event.getClient().getError() + String.format("Cannot connect to **%s**!", userState.getChannel().getAsMention())).queue();
                     return;
@@ -98,13 +91,7 @@ public abstract class MusicCommand extends SlashCommand {
     protected void execute(CommandEvent event) {
         Settings settings = event.getClient().getSettingsFor(event.getGuild());
         TextChannel channel = settings.getTextChannel(event.getGuild());
-        if (bot.getConfig().getCosgyDevHost()) {
-            try {
-                MaintenanceInfo.CommandInfo(event);
-            } catch (IOException | ParseException e) {
-                e.printStackTrace();
-            }
-        }
+
         if (channel != null && !event.getTextChannel().equals(channel)) {
             try {
                 event.getMessage().delete().queue();

@@ -28,6 +28,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -208,7 +209,13 @@ public class NicoAudioSourceManager implements AudioSourceManager, HttpConfigura
             if (videoId.matches("so.*")) {
                 uploader = element.select("ch_name").first().text();
             } else {
-                uploader = element.select("user_nickname").first().text();
+                Elements userNicknameElements = element.select("user_nickname");
+                if (!userNicknameElements.isEmpty()) {
+                    uploader = userNicknameElements.first().text();
+                } else {
+                    // Processing when user_nickname does not exist
+                    uploader = "No information";
+                }
             }
             String title = element.selectFirst("title").text();
             String thumbnailUrl = element.selectFirst("thumbnail_url").text();
