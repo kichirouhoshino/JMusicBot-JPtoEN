@@ -213,8 +213,8 @@ public class NicoAudioSourceManager implements AudioSourceManager, HttpConfigura
                 if (!userNicknameElements.isEmpty()) {
                     uploader = userNicknameElements.first().text();
                 } else {
-                    // Processing when user_nickname does not exist
-                    uploader = "No information";
+                    // user_nicknameが存在しない場合の処理
+                    uploader = "情報なし";
                 }
             }
             String title = element.selectFirst("title").text();
