@@ -114,7 +114,7 @@ public class PlaylistsCmd extends MusicCommand {
             this.bePlaying = false;
 
             List<OptionData> options = new ArrayList<>();
-            options.add(new OptionData(OptionType.STRING, "name", "マイリスト名", true));
+            options.add(new OptionData(OptionType.STRING, "name", "Mylist name", true));
             this.options = options;
         }
 
