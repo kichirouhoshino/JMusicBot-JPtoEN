@@ -112,6 +112,10 @@ public class PlaylistsCmd extends MusicCommand {
             this.help = "Plays the specified playlist";
             this.beListening = true;
             this.bePlaying = false;
+
+            List<OptionData> options = new ArrayList<>();
+            options.add(new OptionData(OptionType.STRING, "name", "マイリスト名", true));
+            this.options = options;
         }
 
         @Override
