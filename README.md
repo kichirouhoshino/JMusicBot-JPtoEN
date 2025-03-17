@@ -1,13 +1,5 @@
 <img align="right" src="https://i.imgur.com/zrE80HY.png" height="200" width="200" alt="ロゴ">
 
-[![Downloads](https://img.shields.io/github/downloads/Cosgy-Dev/MusicBot-JP-java/total.svg)](https://github.com/Cosgy-Dev/MusicBot-JP-java/releases/latest)
-[![Stars](https://img.shields.io/github/stars/Cosgy-Dev/MusicBot-JP-java.svg)](https://github.com/Cosgy-Dev/MusicBot-JP-java/stargazers)
-[![Release](https://img.shields.io/github/release/Cosgy-Dev/MusicBot-JP-java.svg)](https://github.com/Cosgy-Dev/MusicBot-JP-java/releases/latest)
-[![License](https://img.shields.io/github/license/Cosgy-Dev/MusicBot-JP-java.svg)](https://github.com/Cosgy-Dev/MusicBot-JP-java/blob/master/LICENSE)
-[![Discord](https://discordapp.com/api/guilds/497317844191805450/widget.png)](https://discord.gg/RBpkHxf)
-![CircleCI](https://img.shields.io/circleci/build/github/Cosgy-Dev/JMusicBot-JP/develop?token=c2ceb77e45cfce45bc8e15161f91d355c54f48b1)
-[![CodeFactor](https://www.codefactor.io/repository/github/cosgy-dev/jmusicbot-jp/badge)](https://www.codefactor.io/repository/github/cosgy-dev/jmusicbot-jp)
-
 # JMusicBotJP
 
 MusicBot uses a simple and user-friendly UI. Both setup and launch are easy.
@@ -20,7 +12,6 @@ MusicBot uses a simple and user-friendly UI. Both setup and launch are easy.
 * Fix spotify command not working when "valence" value is empty.
 ### What I can't fix
 * The help command is broken due to Discord's 1000-character limit. This is yet to be fixed upstream.
-* Commands that uses the .isVoice() method from JDA will refuse to work. Also isn't fixed upstream. The Queue command is affected by this.
 
 [![Setup](http://i.imgur.com/VvXYp5j.png)](https://www.cosgy.dev/2019/09/06/jmusicbot-setup/)
 
