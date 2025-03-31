@@ -5,7 +5,7 @@
     <groupId>com.jagrosh</groupId>
     <artifactId>JMusicBot</artifactId>
     <!-- For reference on version qualifiers, see: https://kengotoda.gitbooks.io/what-is-maven/deploy/snapshot-and-stable.html -->
-    <version>0.10.1-1</version>
+    <version>0.10.1-2</version>
     <packaging>jar</packaging>
 
     <repositories>
