@@ -78,23 +78,38 @@ public class NicoAudioTrack extends DelegatedAudioTrack {
         if (Files.notExists(file)) {
             try {
                 log.info("Downloading NicoNico track from: {}", getIdentifier());
-                Runtime runtime = Runtime.getRuntime();
+                List<String> command = new java.util.ArrayList<>();
+                command.add("yt-dlp");
 
-                String login = "";
                 if (NicoAudioSourceManager.userName != null && NicoAudioSourceManager.password != null) {
-                    login += " --username " + NicoAudioSourceManager.userName + " --password " + NicoAudioSourceManager.password;
-                    log.info("Niconico login information was used.");
-                    if(NicoAudioSourceManager.twofactor != null) {
+                    command.add("--username");
+                    command.add(NicoAudioSourceManager.userName);
+                    command.add("--password");
+                    command.add(NicoAudioSourceManager.password);
+                    log.info("Used Niconico login information.");
+                    if (NicoAudioSourceManager.twofactor != null) {
+                        // Two-factor authentication code format check (optional: 6-digit number, etc.)
                         String code = TOTPGenerator.getCode(NicoAudioSourceManager.twofactor);
-
-                        login += " --twofactor " + code;
-                        log.info("Two-factor authentication was performed:{}", code);
+                        if (code != null && code.matches("\\d{6}")) {
+                            command.add("--twofactor");
+                            command.add(code);
+                            log.info("Performed two-factor authentication::{}", code);
+                        } else {
+                            log.warn("Invalid two-factor authentication code:{}", code);
+                        }
                     }
                 }
 
-                String command = "yt-dlp" + login + " --extract-audio --audio-format wav https://www.nicovideo.jp/watch/" + getIdentifier() + " --output cache/" + getIdentifier() + ".wav";
+                command.add("--extract-audio");
+                command.add("--audio-format");
+                command.add("wav");
+                command.add("https://www.nicovideo.jp/watch/" + getIdentifier());
+                command.add("--output");
+                command.add("cache/" + getIdentifier() + ".wav");
 
-                Process process = runtime.exec(command);
+                ProcessBuilder processBuilder = new ProcessBuilder(command);
+                processBuilder.directory(new File(path)); // Set current directory (as needed)
+                Process process = processBuilder.start();
 
                 // Create a thread to read the error stream
                 new Thread(() -> {
