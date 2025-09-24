@@ -283,6 +283,9 @@ public class PlayCmd extends MusicCommand {
             String addMsg = FormatUtil.filter(event.getClient().getSuccess() + " **" + (track.getInfo().uri.matches(".*stream.gensokyoradio.net/.*") ? "Gensokyo Radio" : track.getInfo().title)
                 + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "has been added." : "has been added to position " + pos + " in the queue."));
 
+            String addMsg = FormatUtil.filter(event.getClient().getSuccess() + " **" + (track.getInfo().uri.matches(".*stream.gensokyoradio.net/.*") ? "幻想郷ラジオ" : track.getInfo().title)
+                    + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "を追加しました。" : "を再生待ちの" + pos + "番目に追加しました。 "));
+
             // If there is no playlist or we cannot send buttons, simply edit the message
             if (playlist == null || !event.getGuild().getSelfMember().hasPermission(event.getTextChannel(), Permission.MESSAGE_SEND)) {
                 m.editOriginal(addMsg).queue();
@@ -309,13 +312,13 @@ public class PlayCmd extends MusicCommand {
                             if (e.getComponentId().equals(loadId)) {
                                 int count = loadPlaylist(playlist, track);
                                 m.editOriginal(addMsg + "\n" + event.getClient().getSuccess()
-                                                + "**" + count + "** tracks have been added to the queue!")
+                                                + "**" + count + "**Added to the queue!")
                                         .setComponents()
                                         .queue();
                             } else {
-                            m.editOriginal(addMsg)
-                                    .setComponents()
-                                    .queue();
+                                m.editOriginal(addMsg)
+                                        .setComponents()
+                                        .queue();
                             }
                         },
                         30, TimeUnit.SECONDS,
