@@ -117,7 +117,6 @@ public class PlaylistsCmd extends MusicCommand {
             options.add(new OptionData(OptionType.STRING, "name", "Mylist name", true));
             this.options = options;
         }
-
         @Override
         public void doCommand(CommandEvent event) {
             playPlaylist(event.getGuild().getId(), event.getArgs(), event, null);
