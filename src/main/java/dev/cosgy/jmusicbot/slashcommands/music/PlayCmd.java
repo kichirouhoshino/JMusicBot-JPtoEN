@@ -62,8 +62,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author John Grosh <john.a.grosh@gmail.com>
  */
 public class PlayCmd extends MusicCommand {
-    private final static String LOAD = "\uD83D\uDCE5 追加";    // 📥
-    private final static String CANCEL = "\uD83D\uDEAB キャンセル";  // 🚫
+    private final static String LOAD = "\uD83D\uDCE5 Add";    // 📥
+    private final static String CANCEL = "\uD83D\uDEAB Cancel";  // 🚫
 
     private final String loadingEmoji;
 

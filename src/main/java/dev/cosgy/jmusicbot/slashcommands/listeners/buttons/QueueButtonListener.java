@@ -41,7 +41,7 @@ public class QueueButtonListener extends ListenerAdapter {
 
         String[] parts = id.split(":");
         if (parts.length < 3 || !event.getUser().getId().equals(parts[2])) {
-            event.reply("このボタンはあなた専用です。").setEphemeral(true).queue();
+            event.reply("This button is for your exclusive use.").setEphemeral(true).queue();
             return;
         }
 
@@ -51,9 +51,9 @@ public class QueueButtonListener extends ListenerAdapter {
         String footer = embed.getFooter() != null ? embed.getFooter().getText() : "";
         int current = 1, max = 1;
         try {
-            String[] nums = footer.replace("ページ", "").trim().split("/");
+            String[] nums = footer.replace("Page", "").trim().split("/");
             current = Integer.parseInt(nums[0].trim());
-            max = Integer.parseInt(nums[1].trim().split(" ")[0]); // "5 🔁" のような場合対応
+            max = Integer.parseInt(nums[1].trim().split(" ")[0]); // Handling cases like “5 🔁”
         } catch (Exception ignored) {
         }
 

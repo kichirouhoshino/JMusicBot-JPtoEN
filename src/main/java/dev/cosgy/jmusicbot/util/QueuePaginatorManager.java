@@ -28,20 +28,20 @@ import java.awt.*;
 import java.util.List;
 
 /**
- * 楽曲キューのページをEmbedとして生成するユーティリティクラス。
+ * A utility class that generates a music cue page as an embed.
  */
 public class QueuePaginatorManager {
 
     /**
-     * 指定されたページに対応するEmbedを生成します。
+     * Generates an Embed corresponding to the specified page.
      *
-     * @param ah          AudioHandler（現在の再生情報を含む）
-     * @param queue       再生待ちのキューリスト
-     * @param successIcon 成功時に表示するアイコン（例：✅）
-     * @param repeatMode  リピートモード（ALL/SINGLE/OFF）
-     * @param page        現在のページ番号（1から開始）
-     * @param totalPages  全ページ数
-     * @return MessageEmbed（Discordに表示可能な埋め込みメッセージ）
+     * @param ah          AudioHandler (containing current playback information)
+     * @param queue       Queue list for playback
+     * @param successIcon Icon displayed upon success (e.g., ✅)
+     * @param repeatMode  Repeat Mode (ALL/SINGLE/OFF)
+     * @param page        Current page number (starting from 1)
+     * @param totalPages  Total number of pages
+     * @return MessageEmbed (Embeddable message for Discord)
      */
     public static MessageEmbed createQueuePageEmbed(AudioHandler ah,
                                                     List<QueuedTrack> queue,
@@ -72,8 +72,8 @@ public class QueuePaginatorManager {
 
         EmbedBuilder eb = getEmbedBuilder(ah, description);
 
-        eb.setFooter("ページ " + page + "/" + totalPages + repeatEmoji
-                + " | 総時間: " + FormatUtil.formatTime(totalDuration), null);
+        eb.setFooter("Page " + page + "/" + totalPages + repeatEmoji
+                + " | Total time: " + FormatUtil.formatTime(totalDuration), null);
 
         return eb.build();
     }
@@ -83,16 +83,16 @@ public class QueuePaginatorManager {
         eb.setColor(Color.CYAN);
         eb.setDescription(description.toString());
 
-        // 現在再生中の曲
+        // Currently playing track
         if (ah.getPlayer().getPlayingTrack() != null) {
             eb.setTitle(
-                    (ah.getPlayer().isPaused() ? "⏸" : "▶️") + " 再生中: " +
+                    (ah.getPlayer().isPaused() ? "⏸" : "▶️") + " Now playing: " +
                             (ah.getPlayer().getPlayingTrack().getInfo().uri.contains("gensokyoradio.net")
-                                    ? "幻想郷ラジオ"
+                                    ? "Gensokyo Radio"
                                     : ah.getPlayer().getPlayingTrack().getInfo().title)
             );
         } else {
-            eb.setTitle("再生中の曲はありません。");
+            eb.setTitle("No track is currently playing.");
         }
         return eb;
     }
