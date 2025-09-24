@@ -283,8 +283,6 @@ public class PlayCmd extends MusicCommand {
             String addMsg = FormatUtil.filter(event.getClient().getSuccess() + " **" + (track.getInfo().uri.matches(".*stream.gensokyoradio.net/.*") ? "Gensokyo Radio" : track.getInfo().title)
                 + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "has been added." : "has been added to position " + pos + " in the queue."));
 
-            String addMsg = FormatUtil.filter(event.getClient().getSuccess() + " **" + (track.getInfo().uri.matches(".*stream.gensokyoradio.net/.*") ? "幻想郷ラジオ" : track.getInfo().title)
-                    + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "を追加しました。" : "を再生待ちの" + pos + "番目に追加しました。 "));
 
             // If there is no playlist or we cannot send buttons, simply edit the message
             if (playlist == null || !event.getGuild().getSelfMember().hasPermission(event.getTextChannel(), Permission.MESSAGE_SEND)) {
@@ -708,12 +706,12 @@ public class PlayCmd extends MusicCommand {
             this.name = "mylist";
             this.aliases = new String[]{"ml"};
             this.arguments = "<name>";
-            this.help = "マイリストを再生します";
+            this.help = "Play My List";
             this.beListening = true;
             this.bePlaying = false;
 
             List<OptionData> options = new ArrayList<>();
-            options.add(new OptionData(OptionType.STRING, "name", "マイリスト名", true));
+            options.add(new OptionData(OptionType.STRING, "name", "My List Name", true));
             this.options = options;
         }
 
