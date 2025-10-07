@@ -41,9 +41,8 @@ public class NextCmd extends DJCommand {
         AudioTrack track = handler.getPlayer().getPlayingTrack();
         handler.addTrackIfRepeat(track);
 
-        event.reply(event.getClient().getSuccess() + " **" +
-                (handler.getPlayer().getPlayingTrack().getInfo().uri.contains("https://stream.gensokyoradio.net/") ? "Gensokyo Radio" : handler.getPlayer().getPlayingTrack().getInfo().title) +
-                "** has been skipped. (" + (u == null ? "Someone" : "**" + u.getName() + "**") + " requested it.)");
+        event.reply(event.getClient().getSuccess() + " **" + (handler.getPlayer().getPlayingTrack().getInfo().uri.contains("https://stream.gensokyoradio.net/") ? "Gensokyo Radio" : handler.getPlayer().getPlayingTrack().getInfo().title)
+                + "** has been skipped. (" + (u == null ? "Someone" : "**" + u.getName() + "**") + " requested it.)");
         handler.getPlayer().stopTrack();
     }
 
@@ -59,9 +58,9 @@ public class NextCmd extends DJCommand {
         AudioTrack track = handler.getPlayer().getPlayingTrack();
         handler.addTrackIfRepeat(track);
 
-        event.reply(event.getClient().getSuccess() + " **" +
-                (handler.getPlayer().getPlayingTrack().getInfo().uri.contains("https://stream.gensokyoradio.net/") ? "Gensokyo Radio" : handler.getPlayer().getPlayingTrack().getInfo().title) +
-                "** has been skipped. (" + (u == null ? "Someone" : "**" + u.getName() + "**") + " requested it.)").queue();
+        event.reply(event.getClient().getSuccess() + " **" + (handler.getPlayer().getPlayingTrack().getInfo().uri.contains("https://stream.gensokyoradio.net/") ? "Gensokyo Radio" : handler.getPlayer().getPlayingTrack().getInfo().title) +
+                handler.getPlayer().getPlayingTrack().getInfo().title
+                + "** was skipped. (Requested by " + (u == null ? "someone" : "**" + u.getName() + "**") + ").").queue();
         handler.getPlayer().stopTrack();
     }
 }

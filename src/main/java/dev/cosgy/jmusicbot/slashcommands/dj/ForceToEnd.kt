@@ -56,6 +56,7 @@ class ForceToEnd(bot: Bot) : DJCommand(bot) {
         event.replySuccess(msg)
     }
 
+
     override fun doCommand(event: SlashCommandEvent) {
         val nowSetting = bot.settingsManager?.getSettings(event.guild)?.isForceToEndQue
         var newSetting = false

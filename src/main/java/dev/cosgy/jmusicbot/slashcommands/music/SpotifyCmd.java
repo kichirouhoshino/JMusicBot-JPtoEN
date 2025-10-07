@@ -183,7 +183,7 @@ public class SpotifyCmd extends MusicCommand {
         String endpoint = "https://api.spotify.com/v1/tracks/" + trackId;
 
         HttpRequest request = HttpRequest.newBuilder()
-                .header("Authorization", "Bearer " + accessToken)
+                .header("Authorization", "Bearer "+ accessToken)
                 .header("Accept-Language", "en")
                 .GET()
                 .uri(URI.create(endpoint))
@@ -200,15 +200,14 @@ public class SpotifyCmd extends MusicCommand {
             // Use the Audio Features endpoint to retrieve track information
             endpoint = "https://api.spotify.com/v1/audio-features/" + trackId;
             request = HttpRequest.newBuilder()
-                    .header("Authorization", "Bearer " + accessToken)
+                    .header("Authorization", "Bearer "+ accessToken)
                     .GET()
                     .uri(URI.create(endpoint))
                     .build();
 
             response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             json = new JSONObject(response.body());
-            // Use a default value when valence key does not exist
-            double trackColor = json.has("valence") ? json.getDouble("valence") : 0.5;
+            double trackColor = json.getDouble("valence");
 
             int hue = (int) (trackColor * 360);
             Color color = Color.getHSBColor((float) hue / 360, 1.0f, 1.0f);
@@ -366,7 +365,8 @@ public class SpotifyCmd extends MusicCommand {
             builder.setColor(event.getSelfMember().getColor())
                     .setText(FormatUtil.filter(event.getClient().getSuccess() + "Search results:"))
                     .setChoices()
-                    .setSelection((msg, i) -> {
+                    .setSelection((msg, i) ->
+                    {
                         AudioTrack track = playlist.getTracks().get(i - 1);
                         if (bot.getConfig().isTooLong(track)) {
                             event.replyWarning("This track (**" + track.getInfo().title + "**) exceeds the allowed maximum length: `"
@@ -381,7 +381,8 @@ public class SpotifyCmd extends MusicCommand {
                     })
                     .setCancel((msg) -> {
                     })
-                    .setUsers(event.getAuthor());
+                    .setUsers(event.getAuthor())
+            ;
             for (int i = 0; i < 4 && i < playlist.getTracks().size(); i++) {
                 AudioTrack track = playlist.getTracks().get(i);
                 builder.addChoices("`[" + FormatUtil.formatTime(track.getDuration()) + "]` [**" + track.getInfo().title + "**](" + track.getInfo().uri + ")");

@@ -182,8 +182,8 @@ public class BotConfig {
                     mod = ("token = " + token + "\r\nowner = " + owner);
                 } else {
                     mod = original.substring(original.indexOf(START_TOKEN) + START_TOKEN.length(), original.indexOf(END_TOKEN))
-                    .replace("BOT_TOKEN_HERE", token).replace("Paste the bot token here", token)
-                    .replace("0 // OWNER ID", Long.toString(owner)).replace("Paste the owner ID here", Long.toString(owner))
+                            .replace("BOT_TOKEN_HERE", token).replace("Paste the bot token here", token)
+                            .replace("0 // OWNER ID", Long.toString(owner)).replace("Paste the owner ID here", Long.toString(owner))
                             .trim();
                 }
 

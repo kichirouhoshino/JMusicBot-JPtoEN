@@ -87,7 +87,6 @@ public class AboutCommand extends SlashCommand {
         String CosgyOwner = "Operated and developed by Cosgy Dev.";
         String author = event.getJDA().getUserById(event.getClient().getOwnerId()) == null ? "<@" + event.getClient().getOwnerId() + ">"
                 : Objects.requireNonNull(event.getJDA().getUserById(event.getClient().getOwnerId())).getName();
-
         StringBuilder descr = new StringBuilder().append("Hello! **").append(event.getJDA().getSelfUser().getName()).append("** here. ")
                 .append(description).append(" uses [" + JDAUtilitiesInfo.AUTHOR + "](https://github.com/JDA-Applications)'s [Commands Extension](" + JDAUtilitiesInfo.GITHUB + ") (")
                 .append(JDAUtilitiesInfo.VERSION).append(") and the [JDA library](https://github.com/DV8FromTheWorld/JDA) (")
@@ -133,7 +132,6 @@ public class AboutCommand extends SlashCommand {
         String CosgyOwner = "Operated and developed by Cosgy Dev.";
         String author = event.getJDA().getUserById(event.getClient().getOwnerId()) == null ? "<@" + event.getClient().getOwnerId() + ">"
                 : Objects.requireNonNull(event.getJDA().getUserById(event.getClient().getOwnerId())).getName();
-
         StringBuilder descr = new StringBuilder().append("Hello! **").append(event.getSelfUser().getName()).append("** here. ")
                 .append(description).append(" uses [" + JDAUtilitiesInfo.AUTHOR + "]'s [Commands Extension](" + JDAUtilitiesInfo.GITHUB + ") (")
                 .append(JDAUtilitiesInfo.VERSION).append(") and the [JDA library](https://github.com/DV8FromTheWorld/JDA) (")

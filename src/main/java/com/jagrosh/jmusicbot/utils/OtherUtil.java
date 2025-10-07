@@ -206,6 +206,7 @@ public class OtherUtil {
                     "Please disable 'PUBLIC BOT' in the Developer Portal.\n" +
                     "https://discord.com/developers/applications/" + info.getId() + "/bot\n" +
                     "To play music in VC, there may be potential copyright issues, so we ask for your understanding and cooperation.";
+
         return null;
     }
 }

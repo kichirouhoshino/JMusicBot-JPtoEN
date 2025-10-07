@@ -52,10 +52,8 @@ public class RepeatCmd extends DJCommand {
         String args = event.getArgs();
 
         if (args.isEmpty()) {
-            log.info("Current repeat mode before change: {}", settings.getRepeatMode());
-            value = (settings.getRepeatMode() == RepeatMode.OFF ? RepeatMode.ALL :
-                    (settings.getRepeatMode() == RepeatMode.ALL ? RepeatMode.SINGLE :
-                            (settings.getRepeatMode() == RepeatMode.SINGLE ? RepeatMode.OFF : settings.getRepeatMode())));
+            log.info("Current repeat mode before change:{}", settings.getRepeatMode());
+            value = (settings.getRepeatMode() == RepeatMode.OFF ? RepeatMode.ALL : (settings.getRepeatMode() == RepeatMode.ALL ? RepeatMode.SINGLE : (settings.getRepeatMode() == RepeatMode.SINGLE ? RepeatMode.OFF : settings.getRepeatMode())));
         } else if (args.equalsIgnoreCase("true") || args.equalsIgnoreCase("all") || args.equalsIgnoreCase("on")) {
             value = RepeatMode.ALL;
         } else if (args.equalsIgnoreCase("false") || args.equalsIgnoreCase("off")) {
@@ -63,21 +61,19 @@ public class RepeatCmd extends DJCommand {
         } else if (args.equalsIgnoreCase("one") || args.equalsIgnoreCase("single")) {
             value = RepeatMode.SINGLE;
         } else {
-            event.replyError("Valid options are:\n" +
+            event.replyError("Valid options are\n" +
                     "```\n" +
-                    "Repeat all songs: true, all, on\n" +
-                    "Repeat one song: one, single\n" +
-                    "Disable repeat: false, off" +
+                    "Repeat all tracks: true, all, on\n" +
+                    "Repeat one track: one, single\n" +
+                    "Repeat off: false, off" +
                     "```\n" +
-                    "(or you can switch without any option).");
+                    "(or, you can toggle without specifying an option)");
             return;
         }
 
         settings.setRepeatMode(value);
         log.info("{} executed the repeat command and set the mode to {}.", event.getGuild().getName(), value);
-        event.replySuccess("Repeat has been set to `" +
-                (value == RepeatMode.ALL ? "Enabled (Repeat All)" :
-                        (value == RepeatMode.SINGLE ? "Enabled (Repeat One)" : "Disabled")) + "`.");
+        event.replySuccess("Repeat has been set to `" + (value == RepeatMode.ALL ? "Enabled (Repeat All)" : (value == RepeatMode.SINGLE ? "Enabled (Repeat One)" : "Disabled")) + "`.");
     }
 
     @Override

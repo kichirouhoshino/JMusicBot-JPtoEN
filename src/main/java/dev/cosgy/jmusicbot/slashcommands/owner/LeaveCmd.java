@@ -33,7 +33,8 @@ public class LeaveCmd extends OwnerCommand {
         this.bot = bot;
         this.name = "leave";
         List<OptionData> options = new ArrayList<>();
-        options.add(new OptionData(OptionType.STRING, "serverid", "Server ID", true));        this.options = options;
+        options.add(new OptionData(OptionType.STRING, "serverid", "Server ID", true));
+        this.options = options;
     }
 
     @Override

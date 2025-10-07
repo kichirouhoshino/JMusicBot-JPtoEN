@@ -78,50 +78,61 @@ public class PublistCmd extends OwnerCommand {
         @Override
         protected void execute(SlashCommandEvent event) {
             String playlistName = event.getOption("name").getAsString();
+
             PubliclistLoader.Playlist playlist = bot.getPublistLoader().getPlaylist(playlistName);
             if (playlist == null) {
                 event.reply(event.getClient().getError() + " The playlist `" + playlistName + "` could not be found.").queue();
                 return;
             }
+
             if (playlist.getItems().isEmpty()) {
                 event.reply(event.getClient().getWarning() + " There are no tracks in the playlist `" + playlistName + "`").queue();
                 return;
             }
+
             StringBuilder builder = new StringBuilder(event.getClient().getSuccess() + " Tracks in the playlist `" + playlistName + "`:\n");
             for (int i = 0; i < playlist.getItems().size(); i++) {
                 builder.append(i + 1).append(". ").append(playlist.getItems().get(i)).append("\n");
             }
+
             if (builder.length() > 2000) {
                 builder.setLength(1997); // Adjust for Discord's message limit
                 builder.append("...");
             }
+
             event.reply(builder.toString()).queue();
         }
 
         @Override
         protected void execute(CommandEvent event) {
             String playlistName = event.getArgs().trim();
+
             if (playlistName.isEmpty()) {
                 event.reply(event.getClient().getError() + " Please specify the playlist name.");
                 return;
             }
+
             PubliclistLoader.Playlist playlist = bot.getPublistLoader().getPlaylist(playlistName);
             if (playlist == null) {
                 event.reply(event.getClient().getError() + " The playlist `" + playlistName + "` could not be found.");
                 return;
             }
+
             if (playlist.getItems().isEmpty()) {
                 event.reply(event.getClient().getWarning() + " There are no tracks in the playlist `" + playlistName + "`.");
                 return;
             }
+
             StringBuilder builder = new StringBuilder(event.getClient().getSuccess() + " Tracks in the playlist `" + playlistName + "`:\n");
             for (int i = 0; i < playlist.getItems().size(); i++) {
                 builder.append(i + 1).append(". ").append(playlist.getItems().get(i)).append("\n");
             }
+
             if (builder.length() > 2000) {
                 builder.setLength(1997); // Adjust for Discord's message limit
                 builder.append("...");
             }
+
             event.reply(builder.toString());
         }
     }

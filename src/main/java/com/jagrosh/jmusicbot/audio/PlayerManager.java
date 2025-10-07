@@ -27,7 +27,6 @@ import com.sedmelluq.discord.lavaplayer.track.*;
 import dev.cosgy.jmusicbot.util.YtDlpManager;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import dev.lavalink.youtube.clients.*;
-import dev.lavalink.youtube.clients.skeleton.Client;
 import net.dv8tion.jda.api.entities.Guild;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

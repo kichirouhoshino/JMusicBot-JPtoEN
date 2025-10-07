@@ -96,4 +96,5 @@ public class SettingsCmd extends SlashCommand {
                         null);
         event.getChannel().sendMessage(builder.addEmbeds(ebuilder.build()).build()).queue();
     }
+
 }

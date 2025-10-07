@@ -66,8 +66,8 @@ public class PlaynextCmd extends DJCommand {
         String args = event.getArgs().startsWith("<") && event.getArgs().endsWith(">")
                 ? event.getArgs().substring(1, event.getArgs().length() - 1)
                 : event.getArgs().isEmpty() ? event.getMessage().getAttachments().get(0).getUrl() : event.getArgs();
-        log.info("Loading [" + args + "] on " + event.getGuild().getName());
-        event.reply(loadingEmoji + "`[" + args + "]` is being loaded...", m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), args, new ResultHandler(m, event, false)));
+        log.info("Started loading [" + args + "] in " + event.getGuild().getName() + ".");
+        event.reply(loadingEmoji + "Loading `[" + args + "]`...", m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), args, new ResultHandler(m, event, false)));
     }
 
     @Override
@@ -104,8 +104,8 @@ public class PlaynextCmd extends DJCommand {
                     + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "was added to the queue." : "was added to position " + pos + " in the queue."));
             m.editOriginal(addMsg).queue();
 
-            // log.info(event.getGuild().getName() + track.getInfo().title
-            // + "(" + FormatUtil.formatTime(track.getDuration()) + ") " + (pos == 0 ? "added to the playback queue." : "added to the playback queue at position " + pos + "."));
+            //log.info(event.getGuild().getName() + track.getInfo().title
+            //        + "(" + FormatUtil.formatTime(track.getDuration()) + ") " + (pos == 0 ? "added to the playback queue." : "added to the playback queue at position " + pos + "."));
 
         }
 
@@ -168,8 +168,8 @@ public class PlaynextCmd extends DJCommand {
                     + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "was added to the queue." : "was added to position " + pos + " in the queue."));
             m.editMessage(addMsg).queue();
 
-            // log.info(event.getGuild().getName() + track.getInfo().title
-            // + "(" + FormatUtil.formatTime(track.getDuration()) + ") " + (pos == 0 ? "Added to the playback queue." : "Added to the playback queue at position " + pos + "."));
+            //log.info(event.getGuild().getName() + track.getInfo().title
+            //        + "(" + FormatUtil.formatTime(track.getDuration()) + ") " + (pos == 0 ? "Added to the playback queue." : "Added to the playback queue at position " + pos + "."));
 
         }
 

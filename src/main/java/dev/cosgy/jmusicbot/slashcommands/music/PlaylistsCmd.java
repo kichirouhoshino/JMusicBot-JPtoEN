@@ -215,10 +215,10 @@ public class PlaylistsCmd extends MusicCommand {
             event.reply(builder.toString());
         }
 
-            @Override
-            public void doCommand(SlashCommandEvent event) {
-                String guildId = event.getGuild().getId();
-                String playlistName = event.getOption("name").getAsString();
+        @Override
+        public void doCommand(SlashCommandEvent event) {
+            String guildId = event.getGuild().getId();
+            String playlistName = event.getOption("name").getAsString();
 
         PlaylistLoader.Playlist playlist = bot.getPlaylistLoader().getPlaylist(guildId, playlistName);
             if (playlist == null) {

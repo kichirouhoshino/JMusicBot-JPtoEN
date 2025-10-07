@@ -36,10 +36,12 @@ import java.util.List;
 /**
  * @author Whew., Inc.
  */
-public class SeekCmd extends MusicCommand {
+public class SeekCmd extends MusicCommand
+{
     private final static Logger LOG = LoggerFactory.getLogger("Seeking");
 
-    public SeekCmd(Bot bot) {
+    public SeekCmd(Bot bot)
+    {
         super(bot);
         this.name = "seek";
         this.help = "Changes the playback position of the currently playing track.";
@@ -54,22 +56,27 @@ public class SeekCmd extends MusicCommand {
     }
 
     @Override
-    public void doCommand(CommandEvent event) {
+    public void doCommand(CommandEvent event)
+    {
         AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
         AudioTrack playingTrack = handler.getPlayer().getPlayingTrack();
-        if (!playingTrack.isSeekable()) {
+        if (!playingTrack.isSeekable())
+        {
             event.replyError("This track cannot be seeked.");
             return;
         }
 
-        if (!DJCommand.checkDJPermission(event) && playingTrack.getUserData(RequestMetadata.class).getOwner() != event.getAuthor().getIdLong()) {
+
+        if (!DJCommand.checkDJPermission(event) && playingTrack.getUserData(RequestMetadata.class).getOwner() != event.getAuthor().getIdLong())
+        {
             event.replyError("You cannot seek because you did not add **" + playingTrack.getInfo().title + "**!");
             return;
         }
 
         String args = event.getArgs();
         TimeUtil.SeekTime seekTime = TimeUtil.parseTime(args);
-        if (seekTime == null) {
+        if (seekTime == null)
+        {
             event.replyError("Invalid seek time! Expected format: " + arguments + "\nExamples: `1:02:23` `+1:10` `-90`, `1h10m`, `+90s`");
             return;
         }
@@ -78,14 +85,18 @@ public class SeekCmd extends MusicCommand {
         long trackDuration = playingTrack.getDuration();
 
         long seekMilliseconds = seekTime.relative ? currentPosition + seekTime.milliseconds : seekTime.milliseconds;
-        if (seekMilliseconds > trackDuration) {
+        if (seekMilliseconds > trackDuration)
+        {
             event.replyError("The current track length is `" + TimeUtil.formatTime(trackDuration) + "` and cannot be seeked to `" + TimeUtil.formatTime(seekMilliseconds) + "`!");
             return;
         }
 
-        try {
+        try
+        {
             playingTrack.setPosition(seekMilliseconds);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             event.replyError("An error occurred while seeking: " + e.getMessage());
             LOG.warn("Failed to seek track " + playingTrack.getIdentifier(), e);
             return;
@@ -97,19 +108,22 @@ public class SeekCmd extends MusicCommand {
     public void doCommand(SlashCommandEvent event) {
         AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
         AudioTrack playingTrack = handler.getPlayer().getPlayingTrack();
-        if (!playingTrack.isSeekable()) {
+        if (!playingTrack.isSeekable())
+        {
             event.reply("This track cannot be seeked.").queue();
             return;
         }
 
-        if (!DJCommand.checkDJPermission(event.getClient(), event) && playingTrack.getUserData(RequestMetadata.class).getOwner() != event.getUser().getIdLong()) {
+        if (!DJCommand.checkDJPermission(event.getClient(), event) && playingTrack.getUserData(RequestMetadata.class).getOwner() != event.getUser().getIdLong())
+        {
             event.reply("You cannot seek because you did not add **" + playingTrack.getInfo().title + "**!").queue();
             return;
         }
 
         String args = event.getOption("time").getAsString();
         TimeUtil.SeekTime seekTime = TimeUtil.parseTime(args);
-        if (seekTime == null) {
+        if (seekTime == null)
+        {
             event.reply("Invalid seek time! Expected format: " + arguments + "\nExamples: `1:02:23` `+1:10` `-90`, `1h10m`, `+90s`").queue();
             return;
         }
@@ -118,14 +132,18 @@ public class SeekCmd extends MusicCommand {
         long trackDuration = playingTrack.getDuration();
 
         long seekMilliseconds = seekTime.relative ? currentPosition + seekTime.milliseconds : seekTime.milliseconds;
-        if (seekMilliseconds > trackDuration) {
+        if (seekMilliseconds > trackDuration)
+        {
             event.reply("The current track length is `" + TimeUtil.formatTime(trackDuration) + "` and cannot be seeked to `" + TimeUtil.formatTime(seekMilliseconds) + "`!").queue();
             return;
         }
 
-        try {
+        try
+        {
             playingTrack.setPosition(seekMilliseconds);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             event.reply("An error occurred while seeking: " + e.getMessage()).queue();
             LOG.warn("Failed to seek track {}", playingTrack.getIdentifier(), e);
             return;

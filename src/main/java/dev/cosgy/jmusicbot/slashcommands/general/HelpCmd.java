@@ -56,6 +56,13 @@ public class HelpCmd extends SlashCommand {
             builder.append("\n\nIf you need further help, you can join the official server: ").append(event.getClient().getServerInvite());
 
         event.reply(builder.toString()).queue();
+
+        /*event.reply(builder.toString(), unused ->
+        {
+            if (event.isFromType(ChannelType.TEXT))
+                event.reactSuccess();
+        }, t -> event.replyWarning("I cannot send you help because I have blocked your direct messages."));
+         */
     }
 
     public void execute(CommandEvent event) {

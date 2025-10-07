@@ -56,3 +56,4 @@ Additionally, please consider starring the essential dependent libraries for thi
 # Example of Commands
 
 ![Example](https://i.imgur.com/tevrtKt.png)
+

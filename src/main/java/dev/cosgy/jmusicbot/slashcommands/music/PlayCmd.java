@@ -37,7 +37,6 @@ import dev.cosgy.jmusicbot.playlist.MylistLoader;
 import dev.cosgy.jmusicbot.playlist.PubliclistLoader;
 import dev.cosgy.jmusicbot.slashcommands.DJCommand;
 import dev.cosgy.jmusicbot.slashcommands.MusicCommand;
-import dev.cosgy.jmusicbot.slashcommands.music.PlayCmd.SlashResultHandler;
 import dev.cosgy.jmusicbot.util.Cache;
 import dev.cosgy.jmusicbot.util.StackTraceUtil;
 import net.dv8tion.jda.api.JDA;
@@ -139,7 +138,8 @@ public class PlayCmd extends MusicCommand {
                     event.replyError("The playlist file `" + event.getArgs() + ".txt` could not be found in the playlist folder.");
                     return;
                 }
-                event.getChannel().sendMessage(loadingEmoji + " Loading playlist **" + settings.getDefaultPlaylist() + "** ... ( " + playlist.getItems().size() + " songs)").queue(m -> {
+                event.getChannel().sendMessage(loadingEmoji + " Loading playlist **" + settings.getDefaultPlaylist() + "** ... ( " + playlist.getItems().size() + " songs)").queue(m ->
+                {
 
                     playlist.loadTracks(bot.getPlayerManager(), (at) -> handler.addTrack(new QueuedTrack(at, event.getAuthor())), () -> {
                         StringBuilder builder = new StringBuilder(playlist.getTracks().isEmpty()
@@ -155,6 +155,7 @@ public class PlayCmd extends MusicCommand {
                     });
                 });
                 return;
+
             }
 
             StringBuilder builder = new StringBuilder(event.getClient().getWarning() + " Play command:\n");
@@ -228,7 +229,8 @@ public class PlayCmd extends MusicCommand {
                     event.reply("`" + event.getOption("input").getAsString() + ".txt` was not found in the playlist folder.").queue();
                     return;
                 }
-                event.reply(loadingEmoji + " Loading playlist **" + settings.getDefaultPlaylist() + " ** ... (" + playlist.getItems().size() + " songs)").queue(m -> {
+                event.reply(loadingEmoji + " Loading playlist **" + settings.getDefaultPlaylist() + " ** ... (" + playlist.getItems().size() + " songs)").queue(m ->
+                {
 
                     playlist.loadTracks(bot.getPlayerManager(), (at) -> handler.addTrack(new QueuedTrack(at, event.getUser())), () -> {
                         StringBuilder builder = new StringBuilder(playlist.getTracks().isEmpty()
@@ -256,6 +258,7 @@ public class PlayCmd extends MusicCommand {
             return;
         }
         event.reply(loadingEmoji + "Loading `[" + event.getOption("input").getAsString() + "]`...").queue(m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), event.getOption("input").getAsString(), new SlashResultHandler(m, event, false)));
+
     }
 
     public class SlashResultHandler implements AudioLoadResultHandler {
@@ -280,9 +283,9 @@ public class PlayCmd extends MusicCommand {
             }
             AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
             int pos = handler.addTrack(new QueuedTrack(track, event.getUser())) + 1;
-            String addMsg = FormatUtil.filter(event.getClient().getSuccess() + " **" + (track.getInfo().uri.matches(".*stream.gensokyoradio.net/.*") ? "Gensokyo Radio" : track.getInfo().title)
-                + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "has been added." : "has been added to position " + pos + " in the queue."));
 
+            String addMsg = FormatUtil.filter(event.getClient().getSuccess() + " **" + (track.getInfo().uri.matches(".*stream.gensokyoradio.net/.*") ? "Gensokyo Radio" : track.getInfo().title)
+                    + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "has been added." : "has been added to position " + pos + " in the queue."));
 
             // If there is no playlist or we cannot send buttons, simply edit the message
             if (playlist == null || !event.getGuild().getSelfMember().hasPermission(event.getTextChannel(), Permission.MESSAGE_SEND)) {
@@ -377,6 +380,7 @@ public class PlayCmd extends MusicCommand {
             if (throwable.severity == Severity.COMMON) {
                 m.editOriginal(event.getClient().getError() + " An error occurred while loading: " + throwable.getMessage()).queue();
             } else {
+
                 m.editOriginal(event.getClient().getError() + " An error occurred while loading the track.").queue();
             }
         }
@@ -525,7 +529,8 @@ public class PlayCmd extends MusicCommand {
             this.bePlaying = false;
 
             List<OptionData> options = new ArrayList<>();
-            options.add(new OptionData(OptionType.STRING, "input", "URL or song title", false));            this.options = options;
+            options.add(new OptionData(OptionType.STRING, "input", "URL or song title", false));
+            this.options = options;
 
         }
 

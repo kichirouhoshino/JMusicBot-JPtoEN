@@ -95,6 +95,7 @@ public class SettcCmd extends AdminCommand {
             }
             Settings s = event.getClient().getSettingsFor(event.getGuild());
 
+
             if (event.getOption("channel").getChannelType() != ChannelType.TEXT) {
                 event.reply(event.getClient().getError() + "Please set a text channel.").queue();
                 return;
@@ -104,6 +105,7 @@ public class SettcCmd extends AdminCommand {
 
             s.setTextChannel(tc);
             event.reply(client.getSuccess() + "Music commands are now available only in <#" + tc.getId() + ">").queue();
+
         }
     }
 
