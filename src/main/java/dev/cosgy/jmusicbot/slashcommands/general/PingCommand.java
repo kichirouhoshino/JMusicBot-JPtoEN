@@ -35,8 +35,8 @@ public class PingCommand extends SlashCommand {
 
     public PingCommand() {
         this.name = "ping";
-        this.help = "Checks the bot's latency";
-        this.guildOnly = false;
+        this.help = "Check the bot's latency";
+        //this.guildOnly = false;
         this.aliases = new String[]{"pong"};
     }
 

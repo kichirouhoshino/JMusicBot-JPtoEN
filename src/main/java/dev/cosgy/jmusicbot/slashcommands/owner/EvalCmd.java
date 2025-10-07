@@ -38,7 +38,7 @@ public class EvalCmd extends OwnerCommand {
         this.name = "eval";
         this.help = "Executes Nashorn code";
         this.aliases = bot.getConfig().getAliases(this.name);
-        this.guildOnly = false;
+        //this.guildOnly = false;
         List<OptionData> options = new ArrayList<>();
         options.add(new OptionData(OptionType.STRING, "code", "Code to execute", true));
         this.options = options;

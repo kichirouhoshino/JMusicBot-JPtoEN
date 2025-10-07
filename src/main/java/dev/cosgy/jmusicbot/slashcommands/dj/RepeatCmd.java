@@ -37,7 +37,7 @@ public class RepeatCmd extends DJCommand {
         this.help = "Adds the song to the queue again after the currently playing song finishes.";
         this.arguments = "[all|on|single|one|off]";
         this.aliases = bot.getConfig().getAliases(this.name);
-        this.guildOnly = true;
+        //this.guildOnly = true;
 
         this.children = new SlashCommand[]{new SingleCmd(bot), new AllCmd(bot), new OffCmd(bot)};
 
@@ -91,8 +91,8 @@ public class RepeatCmd extends DJCommand {
         public SingleCmd(Bot bot) {
             super(bot);
             this.name = "single";
-            this.help = "Switches to repeat one song mode.";
-            this.guildOnly = true;
+            this.help = "Switch to single-song repeat mode.";
+            //this.guildOnly = true;
         }
 
         @Override
@@ -115,8 +115,8 @@ public class RepeatCmd extends DJCommand {
         public AllCmd(Bot bot) {
             super(bot);
             this.name = "all";
-            this.help = "Switches to repeat all songs mode.";
-            this.guildOnly = true;
+            this.help = "Switch to repeat all songs mode.";
+            //this.guildOnly = true;
         }
 
         @Override
@@ -139,8 +139,8 @@ public class RepeatCmd extends DJCommand {
         public OffCmd(Bot bot) {
             super(bot);
             this.name = "off";
-            this.help = "Disables the repeat mode.";
-            this.guildOnly = true;
+            this.help = "Disable repeat.";
+            //this.guildOnly = true;
         }
 
         @Override

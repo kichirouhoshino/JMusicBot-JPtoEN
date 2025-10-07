@@ -101,29 +101,6 @@ public class JMusicBot {
         if (!System.getProperty("java.vm.name").contains("64"))
             prompt.alert(Prompt.Level.WARNING, "Java Version", "You are using an unsupported Java version. Please use the 64-bit version of Java.");
 
-        try {
-            Process checkPython3 = Runtime.getRuntime().exec("python3 --version");
-            int python3ExitCode = checkPython3.waitFor();
-
-            if (python3ExitCode != 0) {
-                log.info("Python3 is not installed. Checking for python.");
-                Process checkPython = Runtime.getRuntime().exec("python --version");
-                BufferedReader reader = new BufferedReader(new InputStreamReader(checkPython.getInputStream()));
-                String pythonVersion = reader.readLine();
-                int pythonExitCode = checkPython.waitFor();
-
-                if (pythonExitCode == 0 && pythonVersion != null && pythonVersion.startsWith("Python 3")) {
-                    log.info("Python is version 3.x.");
-                } else {
-                    prompt.alert(Prompt.Level.WARNING, "Python", "Python (version 3.x) is not installed. Please install Python 3.");
-                }
-            } else {
-                log.info("Python3 is installed.");
-            }
-        } catch (Exception e) {
-            prompt.alert(Prompt.Level.WARNING, "Python", "An error occurred while checking the Python version. Please ensure Python 3 is installed.");
-        }
-
 
 
         // load config

@@ -25,8 +25,8 @@ public class CashCmd extends SlashCommand {
     public CashCmd(Bot bot) {
         this.bot = bot;
         this.name = "cache";
-        this.help = "Displays the songs saved in the cache.";
-        this.guildOnly = true;
+        this.help = "Display songs saved in the cache.";
+        //this.guildOnly = true;
         this.category = new Category("General");
         this.aliases = bot.getConfig().getAliases(this.name);
         this.children = new SlashCommand[]{new DeleteCmd(bot), new ShowCmd(bot)};
@@ -95,7 +95,7 @@ public class CashCmd extends SlashCommand {
             this.name = "delete";
             this.aliases = new String[]{"dl", "clear"};
             this.help = "Deletes the saved cache.";
-            this.guildOnly = true;
+            //this.guildOnly = true;
         }
 
         @Override
@@ -139,7 +139,7 @@ public class CashCmd extends SlashCommand {
         public ShowCmd(Bot bot) {
             this.name = "show";
             this.help = "Displays the list of cached songs.";
-            this.guildOnly = true;
+            //this.guildOnly = true;
             this.botPermissions = new Permission[]{Permission.MESSAGE_ADD_REACTION, Permission.MESSAGE_EMBED_LINKS};
             builder = new Paginator.Builder()
                     .setColumns(1)

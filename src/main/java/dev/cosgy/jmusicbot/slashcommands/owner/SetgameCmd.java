@@ -35,7 +35,7 @@ public class SetgameCmd extends OwnerCommand {
         this.help = "Sets the game the bot is playing";
         this.arguments = "[action] [game]";
         this.aliases = bot.getConfig().getAliases(this.name);
-        this.guildOnly = false;
+        //this.guildOnly = false;
         this.children = new OwnerCommand[]{
                 new PlayingCmd(),
                 new SetlistenCmd(),
@@ -67,7 +67,7 @@ public class SetgameCmd extends OwnerCommand {
             this.name = "none";
             this.aliases = new String[]{"none"};
             this.help = "Resets the status.";
-            this.guildOnly = false;
+            //this.guildOnly = false;
         }
 
         @Override
@@ -89,7 +89,7 @@ public class SetgameCmd extends OwnerCommand {
             this.aliases = new String[]{"twitch", "streaming"};
             this.help = "Sets the game the bot is playing.";
             this.arguments = "<title>";
-            this.guildOnly = false;
+            //this.guildOnly = false;
             List<OptionData> options = new ArrayList<>();
             options.add(new OptionData(OptionType.STRING, "title", "Title of the game", true));
             this.options = options;
@@ -118,7 +118,7 @@ public class SetgameCmd extends OwnerCommand {
             this.aliases = new String[]{"twitch", "streaming"};
             this.help = "Sets the game the bot is streaming.";
             this.arguments = "<username> <game>";
-            this.guildOnly = false;
+            //this.guildOnly = false;
             List<OptionData> options = new ArrayList<>();
             options.add(new OptionData(OptionType.STRING, "user", "Username", true));
             options.add(new OptionData(OptionType.STRING, "game", "Game title", true));
@@ -159,7 +159,7 @@ public class SetgameCmd extends OwnerCommand {
             this.aliases = new String[]{"listening"};
             this.help = "Sets the game the bot is listening to.";
             this.arguments = "<title>";
-            this.guildOnly = false;
+            //this.guildOnly = false;
             List<OptionData> options = new ArrayList<>();
             options.add(new OptionData(OptionType.STRING, "title", "Title", true));
             this.options = options;
@@ -198,7 +198,7 @@ public class SetgameCmd extends OwnerCommand {
             this.aliases = new String[]{"watching"};
             this.help = "Sets the game the bot is watching.";
             this.arguments = "<title>";
-            this.guildOnly = false;
+            //this.guildOnly = false;
             List<OptionData> options = new ArrayList<>();
             options.add(new OptionData(OptionType.STRING, "title", "Title", true));
             this.options = options;
@@ -236,7 +236,7 @@ public class SetgameCmd extends OwnerCommand {
             this.name = "competing";
             this.help = "Sets the game the bot is competing in.";
             this.arguments = "<title>";
-            this.guildOnly = false;
+            //this.guildOnly = false;
             List<OptionData> options = new ArrayList<>();
             options.add(new OptionData(OptionType.STRING, "title", "Game title", true));
             this.options = options;

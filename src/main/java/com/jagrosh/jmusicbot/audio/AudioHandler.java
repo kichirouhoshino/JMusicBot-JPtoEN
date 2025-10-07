@@ -27,6 +27,7 @@ import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import com.sedmelluq.discord.lavaplayer.track.playback.AudioFrame;
 import dev.cosgy.jmusicbot.settings.RepeatMode;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -42,9 +43,10 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * @author John Grosh <john.a.grosh@gmail.com>
+ * @author John Grosh
  */
 public class AudioHandler extends AudioEventAdapter implements AudioSendHandler {
     private final FairQueue<QueuedTrack> queue = new FairQueue<>();
@@ -56,11 +58,19 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     private final String stringGuildId;
     private AudioFrame lastFrame;
 
+    // "One-time exit suppression" flag during replacement
+    private final AtomicBoolean suppressAutoLeaveOnce = new AtomicBoolean(false);
+
     protected AudioHandler(PlayerManager manager, Guild guild, AudioPlayer player) {
         this.manager = manager;
         this.audioPlayer = player;
         this.guildId = guild.getIdLong();
         this.stringGuildId = guild.getId();
+    }
+
+    // Call just before replacement
+    public void suppressAutoLeaveOnce() {
+        this.suppressAutoLeaveOnce.set(true);
     }
 
     public int addTrackToFront(QueuedTrack qtrack) {
@@ -84,12 +94,26 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     }
 
     public void addTrackIfRepeat(AudioTrack track) {
-        // If in repeat mode, add the track to the end of the queue
         RepeatMode mode = manager.getBot().getSettingsManager().getSettings(guildId).getRepeatMode();
         boolean toEnt = manager.getBot().getSettingsManager().getSettings(guildId).isForceToEndQue();
         if (mode != RepeatMode.OFF) {
-            queue.add(new QueuedTrack(track.makeClone(), track.getUserData(RequestMetadata.class)), toEnt);
+            AudioTrack cloned = track.makeClone();
+            cloned.setUserData(track.getUserData());
+            queue.add(new QueuedTrack(cloned, extractRequestMetadata(track)), toEnt);
         }
+    }
+
+    private static RequestMetadata extractRequestMetadata(AudioTrack track) {
+        if (track == null) return RequestMetadata.EMPTY;
+        Object ud = track.getUserData();
+        if (ud instanceof RequestMetadata) return (RequestMetadata) ud;
+        if (ud instanceof PlayerManager.TrackContext) {
+            PlayerManager.TrackContext tc = (PlayerManager.TrackContext) ud;
+            if (tc.userData instanceof RequestMetadata) {
+                return (RequestMetadata) tc.userData;
+            }
+        }
+        return RequestMetadata.EMPTY; // Dummy (EMPTY) for NPE prevention
     }
 
     public FairQueue<QueuedTrack> getQueue() {
@@ -100,7 +124,6 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
         queue.clear();
         defaultQueue.clear();
         audioPlayer.stopTrack();
-        //current = null;
 
         Guild guild = guild(manager.getBot().getJDA());
         Bot.updatePlayStatus(guild, guild.getSelfMember(), PlayStatus.STOPPED);
@@ -121,8 +144,15 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     public RequestMetadata getRequestMetadata() {
         if (audioPlayer.getPlayingTrack() == null)
             return RequestMetadata.EMPTY;
-        RequestMetadata rm = audioPlayer.getPlayingTrack().getUserData(RequestMetadata.class);
-        return rm == null ? RequestMetadata.EMPTY : rm;
+        Object ud = audioPlayer.getPlayingTrack().getUserData();
+        if (ud instanceof RequestMetadata) return (RequestMetadata) ud;
+        if (ud instanceof PlayerManager.TrackContext) {
+            PlayerManager.TrackContext tc = (PlayerManager.TrackContext) ud;
+            if (tc.userData instanceof RequestMetadata) {
+                return (RequestMetadata) tc.userData;
+            }
+        }
+        return RequestMetadata.EMPTY;
     }
 
     public boolean playFromDefault() {
@@ -152,17 +182,24 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     // Audio Events
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
+        // ★ Skip exit logic during replacement (REPLACED) or temporary suppression
+        if (endReason == AudioTrackEndReason.REPLACED || suppressAutoLeaveOnce.getAndSet(false)) {
+            return;
+        }
+
         RepeatMode repeatMode = manager.getBot().getSettingsManager().getSettings(guildId).getRepeatMode();
 
-        // If the song finishes playing normally and repeat mode is enabled (!OFF), it will be re-added to the queue.
+        // Repeat processing upon completion
         if (endReason == AudioTrackEndReason.FINISHED && repeatMode != RepeatMode.OFF) {
-            // in RepeatMode.ALL
-            if (repeatMode == RepeatMode.ALL) {
-                queue.add(new QueuedTrack(track.makeClone(), track.getUserData(RequestMetadata.class)));
+            // Inherit the original track's userData directly to the clone
+            AudioTrack cloned = track.makeClone();
+            cloned.setUserData(track.getUserData());
+            RequestMetadata rm = extractRequestMetadata(track);
 
-                // in RepeatMode.SINGLE
+            if (repeatMode == RepeatMode.ALL) {
+                queue.add(new QueuedTrack(cloned, rm), true);
             } else if (repeatMode == RepeatMode.SINGLE) {
-                queue.addAt(0, new QueuedTrack(track.makeClone(), track.getUserData(RequestMetadata.class)));
+                queue.addAt(0, new QueuedTrack(cloned, rm));
             }
         }
 
@@ -191,7 +228,6 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
         Bot.updatePlayStatus(guild, guild.getSelfMember(), PlayStatus.PLAYING);
     }
 
-
     // Formatting
     public MessageCreateData getNowPlaying(JDA jda) throws Exception {
         if (isMusicPlaying(jda)) {
@@ -202,6 +238,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
             EmbedBuilder eb = new EmbedBuilder();
             eb.setColor(guild.getSelfMember().getColor());
             RequestMetadata rm = getRequestMetadata();
+
             if (!track.getInfo().uri.matches(".*stream.gensokyoradio.net/.*")) {
                 if (rm.getOwner() != 0L) {
                     User u = guild.getJDA().getUserById(rm.user.id);
@@ -210,18 +247,39 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
                     else
                         eb.setAuthor(u.getName(), null, u.getEffectiveAvatarUrl());
                 }
-                try {
-                    eb.setTitle(track.getInfo().title, track.getInfo().uri);
-                } catch (Exception e) {
-                    eb.setTitle(track.getInfo().title);
+
+                // ★ Prioritize original meta (title/URI/author) during replacement
+                AudioTrackInfo info = track.getInfo();
+                String title = info.title;
+                String uri   = info.uri;
+                String author = info.author;
+
+                Object udAll = track.getUserData();
+                if (udAll instanceof PlayerManager.TrackContext) {
+                    PlayerManager.TrackContext tc = (PlayerManager.TrackContext) udAll;
+                    if (tc.originalInfo != null) {
+                        if (tc.originalInfo.title != null) title = tc.originalInfo.title;
+                        if (tc.originalInfo.uri != null) uri = tc.originalInfo.uri;
+                        if (tc.originalInfo.author != null) author = tc.originalInfo.author;
+                    }
                 }
 
-                if (track instanceof YoutubeAudioTrack && manager.getBot().getConfig().useNPImages()) {
-                    eb.setThumbnail("https://img.youtube.com/vi/" + track.getIdentifier() + "/maxresdefault.jpg");
+                try { eb.setTitle(title, uri); } catch (Exception e) { eb.setTitle(title); }
+
+                // サムネ
+                if (manager.getBot().getConfig().useNPImages()) {
+                    if (track instanceof YoutubeAudioTrack) {
+                        eb.setThumbnail("https://img.youtube.com/vi/" + track.getIdentifier() + "/maxresdefault.jpg");
+                    } else {
+                        String ytId = extractYoutubeId(uri);
+                        if (ytId != null) {
+                            eb.setThumbnail("https://img.youtube.com/vi/" + ytId + "/maxresdefault.jpg");
+                        }
+                    }
                 }
 
-                if (track.getInfo().author != null && !track.getInfo().author.isEmpty())
-                    eb.setFooter("Source: " + track.getInfo().author, null);
+                if (author != null && !author.isEmpty())
+                    eb.setFooter("Source: " + author, null);
 
                 double progress = (double) audioPlayer.getPlayingTrack().getPosition() / track.getDuration();
                 eb.setDescription((audioPlayer.isPaused() ? JMusicBot.PAUSE_EMOJI : JMusicBot.PLAY_EMOJI)
@@ -255,41 +313,6 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
                         + " " + FormatUtil.progressBar(progress)
                         + " `[" + FormatUtil.formatTime(track.getPosition()) + "/" + FormatUtil.formatTime(track.getDuration()) + "]` "
                         + FormatUtil.volumeIcon(audioPlayer.getVolume()));
-                /*String titleUrl = GensokyoInfoAgent.getInfo().getMisc().getCirclelink().equals("") ?
-                        "https://gensokyoradio.net/" :
-                        GensokyoInfoAgent.getInfo().getMisc().getCirclelink();
-
-                String albumArt = "";
-                if(manager.getBot().getConfig().useNPImages()){
-                    albumArt = GensokyoInfoAgent.getInfo().getMisc().getAlbumart().equals("") ?
-                        "https://cdn.discordapp.com/attachments/240116420946427905/373019550725177344/gr-logo-placeholder.png" :
-                        "https://gensokyoradio.net/images/albums/original/" + GensokyoInfoAgent.getInfo().getMisc().getAlbumart();
-                }
-                eb.setTitle(GensokyoInfoAgent.getInfo().getSonginfo().getTitle(), titleUrl)
-                    .addField("Album", GensokyoInfoAgent.getInfo().getSonginfo().getAlbum(), true)
-                    .addField("Artist", GensokyoInfoAgent.getInfo().getSonginfo().getArtist(), true)
-                    .addField("Circle", GensokyoInfoAgent.getInfo().getSonginfo().getCircle(), true);
-
-
-                if (Integer.parseInt(GensokyoInfoAgent.getInfo().getSonginfo().getYear()) != 0) {
-                    eb.addField("Release", GensokyoInfoAgent.getInfo().getSonginfo().getYear(), true);
-                }
-
-                double progress = (double) GensokyoInfoAgent.getInfo().getSongtimes().getPlayed() / GensokyoInfoAgent.getInfo().getSongtimes().getDuration();
-                eb.setDescription((audioPlayer.isPaused() ? JMusicBot.PAUSE_EMOJI : JMusicBot.PLAY_EMOJI)
-                        + " " + FormatUtil.progressBar(progress)
-                        + " `[" + FormatUtil.formatTime(GensokyoInfoAgent.getInfo().getSongtimes().getPlayed()) + "/" + FormatUtil.formatTime(GensokyoInfoAgent.getInfo().getSongtimes().getDuration()) + "]` "
-                        + FormatUtil.volumeIcon(audioPlayer.getVolume()));
-
-                eb.addField("Listener", Integer.toString(GensokyoInfoAgent.getInfo().getServerinfo().getListeners()), true)
-                        .setColor(new Color(66, 16, 80))
-                        .setFooter("Content is provided by gensokyoradio.net.\n" +
-                            "The GR logo is a trademark of Gensokyo Radio." +
-                              "\nGensokyo Radio is © LunarSpotlight.", null);
-                        if(manager.getBot().getConfig().useNPImages()){
-                            eb.setImage(albumArt);
-                        }
-                 */
             }
 
             return mb.addEmbeds(eb.build()).build();
@@ -313,7 +336,6 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
             long userid = getRequestMetadata().getOwner();
             AudioTrack track = audioPlayer.getPlayingTrack();
 
-            // Check if Gensokyo Radio is playing.
             if (track.getInfo().uri.matches(".*stream.gensokyoradio.net/.*")) {
                 return "**Gensokyo Radio** [" + (userid == 0 ? "Auto-play" : "<@" + userid + ">") + "]"
                         + "\n" + (audioPlayer.isPaused() ? JMusicBot.PAUSE_EMOJI : JMusicBot.PLAY_EMOJI) + " "
@@ -321,9 +343,21 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
                         + FormatUtil.volumeIcon(audioPlayer.getVolume());
             }
 
-            String title = track.getInfo().title;
-            if (title == null || title.equals("不明なタイトル"))
-                title = track.getInfo().uri;
+            // Prioritize displaying the original title even during replacement
+            AudioTrackInfo info = track.getInfo();
+            String title = info.title;
+            String uri   = info.uri;
+            Object udAll = track.getUserData();
+            if (udAll instanceof PlayerManager.TrackContext) {
+                PlayerManager.TrackContext tc = (PlayerManager.TrackContext) udAll;
+                if (tc.originalInfo != null) {
+                    if (tc.originalInfo.title != null) title = tc.originalInfo.title;
+                    if (tc.originalInfo.uri != null) uri = tc.originalInfo.uri;
+                }
+            }
+            if (title == null || title.equals("不明なタイトル")) // TL NOTE: This is likely have to be in Japanese to work
+                title = uri;
+
             return "**" + title + "** [" + (userid == 0 ? "Auto-play" : "<@" + userid + ">") + "]"
                     + "\n" + (audioPlayer.isPaused() ? JMusicBot.PAUSE_EMOJI : JMusicBot.PLAY_EMOJI) + " "
                     + "[" + FormatUtil.formatTime(track.getDuration()) + "] "
@@ -348,9 +382,34 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
         return true;
     }
 
-
     // Private methods
     private Guild guild(JDA jda) {
         return jda.getGuildById(guildId);
+    }
+
+    // Extract YouTube ID from the original URL (for replacement display)
+    private static String extractYoutubeId(String url) {
+        if (url == null) return null;
+        try {
+            int vIndex = url.indexOf("v=");
+            if (vIndex >= 0) {
+                String v = url.substring(vIndex + 2);
+                int amp = v.indexOf('&');
+                return amp > 0 ? v.substring(0, amp) : v;
+            }
+            int idx = url.indexOf("youtu.be/");
+            if (idx >= 0) {
+                String v = url.substring(idx + "youtu.be/".length());
+                int q = v.indexOf('?');
+                return q > 0 ? v.substring(0, q) : v;
+            }
+            idx = url.indexOf("/shorts/");
+            if (idx >= 0) {
+                String v = url.substring(idx + "/shorts/".length());
+                int q = v.indexOf('?');
+                return q > 0 ? v.substring(0, q) : v;
+            }
+        } catch (Exception ignored) {}
+        return null;
     }
 }

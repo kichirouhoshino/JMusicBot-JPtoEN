@@ -23,7 +23,7 @@ public class UserInfo extends SlashCommand {
         this.name = "userinfo";
         this.help = "Displays information about the specified user";
         this.arguments = "<user>";
-        this.guildOnly = true;
+        //this.guildOnly = true;
         this.category = new Category("General");
 
         List<OptionData> options = new ArrayList<>();

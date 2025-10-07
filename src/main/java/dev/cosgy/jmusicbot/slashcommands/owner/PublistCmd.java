@@ -25,7 +25,7 @@ public class PublistCmd extends OwnerCommand {
 
     public PublistCmd(Bot bot) {
         this.bot = bot;
-        this.guildOnly = false;
+        //this.guildOnly = false;
         this.name = "publist";
         this.arguments = "<append|delete|make|all|show>";
         this.help = "Playlist Management";
@@ -59,7 +59,7 @@ public class PublistCmd extends OwnerCommand {
             this.name = "setdefault";
             this.aliases = new String[]{"default"};
             this.arguments = "<playlistname|NONE>";
-            this.guildOnly = true;
+            //this.guildOnly = true;
         }
     }
 
@@ -68,7 +68,8 @@ public class PublistCmd extends OwnerCommand {
             this.name = "show";
             this.help = "Displays the tracks in the specified playlist";
             this.arguments = "<name>";
-            this.guildOnly = false;
+            //this.guildOnly = false;
+
             List<OptionData> options = new ArrayList<>();
             options.add(new OptionData(OptionType.STRING, "name", "Playlist name", true));
             this.options = options;
@@ -131,7 +132,7 @@ public class PublistCmd extends OwnerCommand {
             this.aliases = new String[]{"create"};
             this.help = "Creates a new playlist";
             this.arguments = "<name>";
-            this.guildOnly = false;
+            //this.guildOnly = false;
 
             List<OptionData> options = new ArrayList<>();
             options.add(new OptionData(OptionType.STRING, "name", "Playlist name", true));
@@ -173,7 +174,7 @@ public class PublistCmd extends OwnerCommand {
             this.aliases = new String[]{"remove"};
             this.help = "Deletes an existing playlist";
             this.arguments = "<name>";
-            this.guildOnly = false;
+            //this.guildOnly = false;
 
             List<OptionData> options = new ArrayList<>();
             options.add(new OptionData(OptionType.STRING, "name", "Playlist name", true));
@@ -217,7 +218,7 @@ public class PublistCmd extends OwnerCommand {
             this.aliases = new String[]{"add"};
             this.help = "Adds tracks to an existing playlist";
             this.arguments = "<name> <URL> | <URL> | ...";
-            this.guildOnly = false;
+            //this.guildOnly = false;
             List<OptionData> options = new ArrayList<>();
             options.add(new OptionData(OptionType.STRING, "name", "Playlist name", true));
             options.add(new OptionData(OptionType.STRING, "url", "URL", true));
@@ -285,7 +286,7 @@ public class PublistCmd extends OwnerCommand {
             this.name = "all";
             this.aliases = new String[]{"available", "list"};
             this.help = "Displays all available playlists.";
-            this.guildOnly = true;
+            //this.guildOnly = true;
         }
 
         @Override

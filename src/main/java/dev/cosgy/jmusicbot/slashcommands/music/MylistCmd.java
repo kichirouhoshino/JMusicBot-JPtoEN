@@ -25,7 +25,7 @@ public class MylistCmd extends MusicCommand {
 
     public MylistCmd(Bot bot) {
         super(bot);
-        this.guildOnly = false;
+        //this.guildOnly = false;
         this.name = "mylist";
         this.arguments = "<append|delete|make|all|show>";
         this.help = "Manage your personal playlist";
@@ -60,7 +60,7 @@ public class MylistCmd extends MusicCommand {
             this.name = "show";
             this.help = "Displays the tracks in the specified playlist";
             this.arguments = "<name>";
-            this.guildOnly = false;
+            //this.guildOnly = false;
             this.ownerCommand = false;
             List<OptionData> options = new ArrayList<>();
             options.add(new OptionData(OptionType.STRING, "name", "Playlist name", true));
@@ -205,7 +205,7 @@ public class MylistCmd extends MusicCommand {
             this.aliases = new String[]{"create"};
             this.help = "Create a new playlist";
             this.arguments = "<name>";
-            this.guildOnly = true;
+            //this.guildOnly = true;
             this.ownerCommand = false;
 
             List<OptionData> options = new ArrayList<>();
@@ -280,7 +280,7 @@ public class MylistCmd extends MusicCommand {
             this.aliases = new String[]{"remove"};
             this.help = "Delete an existing mylist";
             this.arguments = "<name>";
-            this.guildOnly = true;
+            //this.guildOnly = true;
             this.ownerCommand = false;
 
             List<OptionData> options = new ArrayList<>();
@@ -334,7 +334,7 @@ public class MylistCmd extends MusicCommand {
             this.aliases = new String[]{"add"};
             this.help = "Add songs to an existing mylist";
             this.arguments = "<name> <URL> | <URL> | ...";
-            this.guildOnly = true;
+            //this.guildOnly = true;
             this.ownerCommand = false;
             List<OptionData> options = new ArrayList<>();
             options.add(new OptionData(OptionType.STRING, "name", "Playlist name", true));
@@ -406,8 +406,8 @@ public class MylistCmd extends MusicCommand {
             super(bot);
             this.name = "all";
             this.aliases = new String[]{"available", "list"};
-            this.help = "Display all available mylists";
-            this.guildOnly = true;
+            this.help = "Show all available My Lists";
+            //this.guildOnly = true;
             this.ownerCommand = false;
         }
 

@@ -34,7 +34,7 @@ public class SetnameCmd extends OwnerCommand {
         this.help = "Sets the bot's name.";
         this.arguments = "<name>";
         this.aliases = bot.getConfig().getAliases(this.name);
-        this.guildOnly = false;
+        //this.guildOnly = false;
 
         List<OptionData> options = new ArrayList<>();
         options.add(new OptionData(OptionType.STRING, "name", "New bot name", true));
