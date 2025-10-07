@@ -274,9 +274,16 @@ public final class YtDlpManager {
             log.warn("The SHA256 checksum could not be found, so verification is skipped.");
         }
 
+        // JPtoEN Change: Fixes move operation failing on Linux systems
         // 3) Placement
         log.debug("Move yt-dlp to final location: {} -> {}", tmp, exePath);
-        Files.move(tmp, exePath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+        try {
+            Files.move(tmp, exePath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+        } catch (AtomicMoveNotSupportedException e) {
+            log.warn("Atomic move failed due to cross-device link, falling back to copy: {}", e.getMessage());
+            Files.copy(tmp, exePath, StandardCopyOption.REPLACE_EXISTING);
+            Files.deleteIfExists(tmp); // Clean up the temporary file
+        }
         grantExecuteIfNeeded(exePath);
         log.info("The deployment of yt-dlp is complete.");
     }

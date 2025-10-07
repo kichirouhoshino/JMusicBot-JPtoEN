@@ -87,13 +87,15 @@ public class AboutCommand extends SlashCommand {
         String CosgyOwner = "Operated and developed by Cosgy Dev.";
         String author = event.getJDA().getUserById(event.getClient().getOwnerId()) == null ? "<@" + event.getClient().getOwnerId() + ">"
                 : Objects.requireNonNull(event.getJDA().getUserById(event.getClient().getOwnerId())).getName();
-        StringBuilder descr = new StringBuilder().append("Hello! **").append(event.getJDA().getSelfUser().getName()).append("** here. ")
-                .append(description).append(" uses [" + JDAUtilitiesInfo.AUTHOR + "](https://github.com/JDA-Applications)'s [Commands Extension](" + JDAUtilitiesInfo.GITHUB + ") (")
-                .append(JDAUtilitiesInfo.VERSION).append(") and the [JDA library](https://github.com/DV8FromTheWorld/JDA) (")
-                .append(JDAInfo.VERSION).append("), and is owned by ").append((IS_AUTHOR ? CosgyOwner : author + ". "))
-                .append("Related questions about ").append(event.getJDA().getSelfUser().getName()).append(" can be directed to the [Cosgy Dev Official Channel](https://discord.gg/RBpkHxf).")
-                .append("\nTo check the bot's usage, type `").append("/help")
-                .append("`.").append("\n\nFeatures: ```css");
+        StringBuilder descr = new StringBuilder()
+                .append("Hello! I'm **").append(event.getJDA().getSelfUser().getName()).append("**, ")
+                .append(description).append(". ")
+                .append("This bot is built using [").append(JDAUtilitiesInfo.AUTHOR).append("]'s [Commands Extension](").append(JDAUtilitiesInfo.GITHUB).append(") (v")
+                .append(JDAUtilitiesInfo.VERSION).append(") and the [JDA library](https://github.com/DV8FromTheWorld/JDA) (v")
+                .append(JDAInfo.VERSION).append("), and is maintained by ").append(IS_AUTHOR ? "CosgyOwner" : author).append(". ")
+                .append("If you have any questions about ").append(event.getJDA().getSelfUser().getName()).append(", please visit the [Cosgy Dev official channel](https://discord.gg/RBpkHxf).")
+                .append("\n\nTo learn how to use this bot, type `/help`.")
+                .append("\n\nKey Features:\n```css");
         for (String feature : features)
             descr.append("\n").append(event.getClient().getSuccess().startsWith("<") ? REPLACEMENT_ICON : event.getClient().getSuccess()).append(" ").append(feature);
         descr.append(" ```");
@@ -132,13 +134,16 @@ public class AboutCommand extends SlashCommand {
         String CosgyOwner = "Operated and developed by Cosgy Dev.";
         String author = event.getJDA().getUserById(event.getClient().getOwnerId()) == null ? "<@" + event.getClient().getOwnerId() + ">"
                 : Objects.requireNonNull(event.getJDA().getUserById(event.getClient().getOwnerId())).getName();
-        StringBuilder descr = new StringBuilder().append("Hello! **").append(event.getSelfUser().getName()).append("** here. ")
-                .append(description).append(" uses [" + JDAUtilitiesInfo.AUTHOR + "]'s [Commands Extension](" + JDAUtilitiesInfo.GITHUB + ") (")
-                .append(JDAUtilitiesInfo.VERSION).append(") and the [JDA library](https://github.com/DV8FromTheWorld/JDA) (")
-                .append(JDAInfo.VERSION).append("), and is ").append((IS_AUTHOR ? CosgyOwner : author + " owns it."))
-                .append(event.getSelfUser().getName()).append(" related questions can be directed to the [Cosgy Dev Official Channel](https://discord.gg/RBpkHxf).")
-                .append("\nTo check the bot's usage, type `").append(event.getClient().getTextualPrefix()).append(event.getClient().getHelpWord())
-                .append("`.").append("\n\nFeatures: ```css");
+        StringBuilder descr = new StringBuilder()
+                .append("Hello! I'm **").append(event.getSelfUser().getName()).append("**, ")
+                .append(description).append(". ")
+                .append("This bot is built using ").append(JDAUtilitiesInfo.AUTHOR).append("'s [Command Extension](").append(JDAUtilitiesInfo.GITHUB).append(") (v")
+                .append(JDAUtilitiesInfo.VERSION).append(") and the [JDA Library](https://github.com/DV8FromTheWorld/JDA) (v")
+                .append(JDAInfo.VERSION).append("), and is maintained by ").append(IS_AUTHOR ? "CosgyOwner" : author).append(". ")
+                .append("If you have any questions about ").append(event.getSelfUser().getName()).append(", please join the [Cosgy Dev official channel](https://discord.gg/RBpkHxf).")
+                .append("\n\nTo learn how to use this bot, type `").append(event.getClient().getTextualPrefix()).append(event.getClient().getHelpWord())
+                .append("`.")
+                .append("\n\nKey Features:\n```css");
         for (String feature : features)
             descr.append("\n").append(event.getClient().getSuccess().startsWith("<") ? REPLACEMENT_ICON : event.getClient().getSuccess()).append(" ").append(feature);
         descr.append(" ```");
