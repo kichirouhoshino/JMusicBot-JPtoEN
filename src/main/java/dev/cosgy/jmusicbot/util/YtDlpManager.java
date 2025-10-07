@@ -26,17 +26,17 @@ public final class YtDlpManager {
     private static final String SHA256_FILE = "SHA2-256SUMS";
     private static final int PROC_TIMEOUT_SEC = 120;
 
-    // 自動更新の既定設定（24h・起動分散のため初回 5–30 分ランダム遅延）
+    // Default auto-update settings (24h; initial 5–30 min random delay for startup load balancing)
     private static final Duration DEFAULT_UPDATE_INTERVAL = Duration.ofDays(1);
     private static final boolean AUTO_UPDATE_ENABLED =
             !"false".equalsIgnoreCase(System.getProperty("jmusicbot.ytdlp.autoUpdate", "true"));
     private static final String UPDATE_TO = System.getProperty("jmusicbot.ytdlp.updateTo", "").trim(); // "", "stable", "nightly", "2025.XX"
 
-    // 準備済みフラグとパス（複数回実行を防ぐ）
+    // Ready flag and path (to prevent multiple executions)
     private static final AtomicBoolean prepared = new AtomicBoolean(false);
     private static volatile Path preparedPath = null;
 
-    // 自動更新スケジューラ（JVM内で1本のみ）
+    // Automatic Update Scheduler (Only one instance within the JVM)
     private static final ScheduledExecutorService SCHEDULER =
             Executors.newSingleThreadScheduledExecutor(r -> {
                 Thread t = new Thread(r, "yt-dlp-auto-update");
@@ -51,18 +51,18 @@ public final class YtDlpManager {
     private final String assetName;
 
     public YtDlpManager(Path botDir) {
-        log.debug("YtDlpManagerを初期化中: botDir={}", botDir);
+        log.debug("Initializing YtDlpManager: botDir={}", botDir);
         this.binDir = botDir.resolve("bin");
         this.assetName = pickAssetForCurrentPlatform();
         this.exePath = binDir.resolve(assetNameForLocal(assetName));
-        log.debug("実行ファイルパス: {}", exePath);
+        log.debug("Executable file path: {}", exePath);
     }
 
-    /** yt-dlpの準備を行い、実行可能なパスを返す（ダウンロード/検証/権限設定/自己更新1回） */
+    /** Prepare yt-dlp and return an executable path (download/verify/permission settings/self-update once) */
     public Path prepare() throws Exception {
         if (prepared.get() && preparedPath != null) {
-            log.debug("yt-dlpは既に準備済みです: {}", preparedPath);
-            // 自動更新が未起動なら起動
+            log.debug("yt-dlp is already prepared: {}", preparedPath);
+            // If automatic updates are not running, start them.
             if (AUTO_UPDATE_ENABLED) startAutoUpdateIfNeeded(DEFAULT_UPDATE_INTERVAL);
             return preparedPath;
         }
@@ -73,121 +73,121 @@ public final class YtDlpManager {
                 return preparedPath;
             }
 
-            log.info("yt-dlpの準備を開始します");
+            log.info("Begin preparing yt-dlp.");
             Files.createDirectories(binDir);
-            log.debug("binディレクトリを作成/確認: {}", binDir);
+            log.debug("Create/check bin directory: {}", binDir);
 
             boolean needDownload = !Files.isRegularFile(exePath);
             if (!needDownload) {
-                log.debug("既存のyt-dlp実行ファイルを検証中...");
+                log.debug("Verifying the existing yt-dlp executable file...");
                 if (!isExecutableOk(exePath)) {
-                    log.warn("既存のyt-dlpが破損/実行不可。再ダウンロードします。");
+                    log.warn("The existing yt-dlp is corrupted/unable to run. Attempting re-download.");
                     needDownload = true;
                 }
             }
 
             if (needDownload) {
-                log.info("yt-dlpをダウンロードしています...");
+                log.info("Downloading yt-dlp...");
                 downloadAndVerify();
                 grantExecuteIfNeeded(exePath);
-                log.info("yt-dlpのダウンロードと検証が完了しました");
+                log.info("Download and verification of yt-dlp have been completed.");
             } else {
-                log.info("既存のyt-dlpを使用します");
+                log.info("Use the existing yt-dlp.");
             }
 
-            // 起動確認
-            log.debug("yt-dlpのバージョンを確認中...");
+            // Startup Verification
+            log.debug("Checking the version of yt-dlp...");
             String version = runAndCapture(exePath.toString(), "--version").trim();
             if (version.isEmpty()) throw new IllegalStateException("yt-dlp launch failed");
-            log.info("yt-dlpのバージョン: {}", version);
+            log.info("yt-dlp version: {}", version);
 
-            // 一度だけ手動自己更新（失敗しても続行）
+            // Manual self-update once only (continue even if it fails)
             try {
-                log.info("yt-dlpの自己更新を実行中...");
+                log.info("Executing yt-dlp self-update...");
                 runUpdateCommandWithTimeout(300, exePath);
-                log.info("yt-dlpの自己更新が完了しました");
+                log.info("The self-update for yt-dlp has completed.");
             } catch (Exception e) {
-                log.warn("yt-dlpの自己更新に失敗しましたが、続行します: {}", e.getMessage());
+                log.warn("Failed to update yt-dlp, but continuing: {}", e.getMessage());
             }
 
             preparedPath = exePath;
             prepared.set(true);
 
-            // 自動更新を開始
+            // Start automatic update
             if (AUTO_UPDATE_ENABLED) startAutoUpdateIfNeeded(DEFAULT_UPDATE_INTERVAL);
-            else log.info("yt-dlp自動更新は無効化されています（-Djmusicbot.ytdlp.autoUpdate=false）");
+            else log.info("yt-dlp auto-update is disabled (-Djmusicbot.ytdlp.autoUpdate=false)");
 
-            log.info("yt-dlpの準備が完了しました: {}", exePath);
+            log.info("yt-dlp setup is complete: {}", exePath);
             return exePath;
         }
     }
 
-    // ————— 自動更新制御 —————
+    // ————— Automatic Update Control —————
 
-    /** 既定間隔（24h）で自動更新を開始。既に開始済みなら何もしない */
+    /** Automatically start updating at the default interval (24 hours). If already started, do nothing. */
     public synchronized void startAutoUpdate() {
         startAutoUpdateIfNeeded(DEFAULT_UPDATE_INTERVAL);
     }
 
-    /** 任意の間隔で自動更新を開始（例：Duration.ofHours(6)）。既に開始済みなら何もしない */
+    /** Start automatic updates at specified intervals (e.g., Duration.ofHours(6)). If already running, do nothing. */
     public synchronized void startAutoUpdate(Duration interval) {
         startAutoUpdateIfNeeded(interval != null ? interval : DEFAULT_UPDATE_INTERVAL);
     }
 
-    /** 自動更新を停止 */
+    /** Stop automatic updates */
     public synchronized void stopAutoUpdate() {
         if (updateFuture != null) {
             updateFuture.cancel(false);
             updateFuture = null;
-            log.info("yt-dlp自動更新を停止しました");
+            log.info("yt-dlp auto-update has been stopped.");
         }
     }
 
     private void startAutoUpdateIfNeeded(Duration interval) {
         if (updateFuture != null && !updateFuture.isCancelled()) return;
 
-        long periodSec = Math.max(60, interval.getSeconds()); // 最短60秒
-        long initialDelaySec = ThreadLocalRandom.current().nextLong(300, 1800); // 5〜30分分散
+        long periodSec = Math.max(60, interval.getSeconds()); // Minimum 60 seconds
+        long initialDelaySec = ThreadLocalRandom.current().nextLong(300, 1800); // 5 to 30 minutes dispersed
 
-        // シャットダウン時の後片付け
+        // Post-shutdown cleanup
         try {
             Runtime.getRuntime().addShutdownHook(new Thread(this::stopAutoUpdate, "yt-dlp-auto-update-shutdown"));
-        } catch (IllegalStateException ignored) { /* 既に終了中 */ }
+        } catch (IllegalStateException ignored) { /* Already ended */ }
 
         updateFuture = SCHEDULER.scheduleAtFixedRate(() -> {
             try {
                 if (!prepared.get()) {
-                    // まだ準備完了していない場合は準備（他スレッドと競合しない）
+                    // If not yet ready, prepare (without conflicting with other threads)
                     try { prepare(); } catch (Exception e) {
-                        log.warn("自動更新前の準備に失敗: {}", e.toString());
+                        log.warn("Failed to prepare for automatic renewal: {}", e.toString());
                         return;
                     }
                 }
-                performSelfUpdate(); // 実処理
+                performSelfUpdate(); // Actual processing
             } catch (Throwable t) {
-                log.warn("yt-dlp自動更新ループでエラー: {}", t.toString());
+                log.warn("Error in yt-dlp auto-update loop: {}", t.toString());
             }
         }, initialDelaySec, periodSec, TimeUnit.SECONDS);
 
-        log.info("yt-dlp自動更新を開始しました: 初回遅延={}秒, 周期={}秒", initialDelaySec, periodSec);
+        log.info("yt-dlp auto-update started: Initial delay = {} seconds, Cycle = {} seconds", initialDelaySec, periodSec);
     }
 
-    /** 実際の自己更新（同時実行防止付き） */
+    /** Actual self-update (with concurrency control) */
     private void performSelfUpdate() {
         if (!updatingNow.compareAndSet(false, true)) {
-            log.debug("別の更新処理が実行中のためスキップ");
+            log.debug("Skip because another update process is running.");
             return;
         }
         try {
             Path target = (preparedPath != null) ? preparedPath : exePath;
             if (!Files.isRegularFile(target)) {
-                log.warn("更新対象のyt-dlpが見つかりません: {}", target);
+                log.warn("The target yt-dlp for update could not be found: {}", target);
                 return;
             }
-            log.info("[yt-dlp] 自動更新チェックを実行します...");
-            runUpdateCommandWithTimeout(600, target); // 自動更新は余裕を持って最大600秒
+            log.info("[yt-dlp] Performing automatic update check...");
+            runUpdateCommandWithTimeout(600, target); // Auto-renewal is set with a buffer of up to 600 seconds.
         } catch (Exception e) {
-            log.warn("yt-dlp自動更新に失敗: {}", e.toString());
+            log.warn("yt-dlp auto-update failed: {}", e.toString());
         } finally {
             updatingNow.set(false);
         }
@@ -203,43 +203,43 @@ public final class YtDlpManager {
 
     // ————— helpers —————
 
-    /** 現在のプラットフォームに適したアセット名を選択 */
+    /** Select an asset name suitable for the current platform */
     private static String pickAssetForCurrentPlatform() {
         String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
         String arch = System.getProperty("os.arch").toLowerCase(Locale.ROOT);
 
-        log.debug("プラットフォームを検出: OS={}, Arch={}", os, arch);
+        log.debug("Detecting platform: OS={}, Arch={}", os, arch);
         if (os.contains("win")) {
             if (arch.contains("aarch64") || arch.contains("arm64")) {
-                log.debug("Windows ARM64版を選択");
+                log.debug("Select Windows ARM64 Edition");
                 return "yt-dlp_arm64.exe";
             }
-            log.debug("Windows版を選択");
+            log.debug("Select Windows version");
             return "yt-dlp.exe";
         } else if (os.contains("mac") || os.contains("darwin")) {
-            log.debug("macOS版を選択");
+            log.debug("Select macOS version");
             return "yt-dlp_macos";
         } else {
-            log.debug("Linux版を選択");
+            log.debug("Select Linux version");
             return "yt-dlp_linux";
         }
     }
 
-    /** ローカル配置名（固定） */
+    /** Local Deployment Name (Fixed) */
     private static String assetNameForLocal(String asset) {
         return asset.endsWith(".exe") ? "yt-dlp.exe" : "yt-dlp";
     }
 
-    /** ダウンロード＆SHA256検証＆配置 */
+    /** Download & SHA256 Verification & Deployment */
     private void downloadAndVerify() throws Exception {
-        log.info("yt-dlpのダウンロードを開始: {}", assetName);
+        log.info("Start downloading yt-dlp: {}", assetName);
         HttpClient client = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.ALWAYS).build();
 
-        // 1) 本体DL
+        // 1) Download the main program
         URI binUri = URI.create(GITHUB_LATEST_BASE + assetName);
-        log.debug("ダウンロードURL: {}", binUri);
+        log.debug("Download URL: {}", binUri);
         Path tmp = Files.createTempFile("yt-dlp-", ".dl");
-        log.debug("一時ファイル: {}", tmp);
+        log.debug("Temporary file: {}", tmp);
 
         HttpResponse<InputStream> response = client.send(
                 HttpRequest.newBuilder(binUri).GET().build(),
@@ -250,38 +250,38 @@ public final class YtDlpManager {
         try (InputStream in = response.body();
              OutputStream out = Files.newOutputStream(tmp, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
             downloadWithProgress(in, out, totalBytes);
-            log.info("ダウンロード完了");
+            log.info("Download complete");
         }
 
-        // 2) SHA256検証
-        log.info("SHA256チェックサムを検証中...");
+        // 2) SHA256 verification
+        log.info("Verifying SHA256 checksum...");
         URI sumsUri = URI.create(GITHUB_LATEST_BASE + SHA256_FILE);
         String sums = client.send(HttpRequest.newBuilder(sumsUri).GET().build(),
                 HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)).body();
         String expected = parseSha256ForAsset(sums, assetName);
 
         if (expected != null) {
-            log.debug("期待されるSHA256: {}", expected);
+            log.debug("Expected SHA256: {}", expected);
             String actual = sha256Hex(tmp);
-            log.debug("実際のSHA256: {}", actual);
+            log.debug("Actual SHA256: {}", actual);
             if (!expected.equalsIgnoreCase(actual)) {
                 Files.deleteIfExists(tmp);
-                log.error("SHA256不一致。期待: {}, 実際: {}", expected, actual);
+                log.error("SHA256 mismatch. Expected: {}, Actual: {}", expected, actual);
                 throw new SecurityException("SHA-256 mismatch for " + assetName);
             }
-            log.info("✓ SHA256検証成功");
+            log.info("✓ SHA256 verification successful");
         } else {
-            log.warn("SHA256チェックサムが見つからず、検証をスキップします。");
+            log.warn("The SHA256 checksum could not be found, so verification is skipped.");
         }
 
-        // 3) 配置
-        log.debug("yt-dlpを最終位置に移動: {} -> {}", tmp, exePath);
+        // 3) Placement
+        log.debug("Move yt-dlp to final location: {} -> {}", tmp, exePath);
         Files.move(tmp, exePath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
         grantExecuteIfNeeded(exePath);
-        log.info("yt-dlpの配置が完了しました");
+        log.info("The deployment of yt-dlp is complete.");
     }
 
-    /** 進捗表示付きでダウンロード */
+    /** Download with progress indicator */
     private void downloadWithProgress(InputStream in, OutputStream out, long totalBytes) throws IOException {
         byte[] buffer = new byte[8192];
         long downloadedBytes = 0;
@@ -289,7 +289,7 @@ public final class YtDlpManager {
         long lastProgressTime = System.currentTimeMillis();
         int lastProgress = -1;
 
-        log.info("ダウンロード開始: {} (サイズ: {})", "yt-dlp", formatBytes(totalBytes));
+        log.info("Download started: {} (Size: {})", "yt-dlp", formatBytes(totalBytes));
 
         while ((bytesRead = in.read(buffer)) != -1) {
             out.write(buffer, 0, bytesRead);
@@ -301,21 +301,21 @@ public final class YtDlpManager {
                     int progress = (int) ((downloadedBytes * 100) / totalBytes);
                     if (progress != lastProgress) {
                         String progressBar = createProgressBar(downloadedBytes, totalBytes);
-                        log.info("ダウンロード進捗: {} {}% ({}/{})",
+                        log.info("Download progress: {} {}% ({}/{})",
                                 progressBar, progress, formatBytes(downloadedBytes), formatBytes(totalBytes));
                         lastProgress = progress;
                     }
                 } else {
-                    log.info("ダウンロード進捗: {} (サイズ不明)", formatBytes(downloadedBytes));
+                    log.info("Download progress: {} (Size unknown)", formatBytes(downloadedBytes));
                 }
                 lastProgressTime = currentTime;
             }
         }
 
         if (totalBytes > 0) {
-            log.info("ダウンロード完了: 100% ({}/{})", formatBytes(downloadedBytes), formatBytes(totalBytes));
+            log.info("Download complete: 100% ({}/{})", formatBytes(downloadedBytes), formatBytes(totalBytes));
         } else {
-            log.info("ダウンロード完了: {}", formatBytes(downloadedBytes));
+            log.info("Download complete: {}", formatBytes(downloadedBytes));
         }
     }
 
@@ -334,7 +334,7 @@ public final class YtDlpManager {
     }
 
     private String formatBytes(long bytes) {
-        if (bytes < 0) return "不明";
+        if (bytes < 0) return "Unknown";
         if (bytes < 1024) return bytes + " B";
         if (bytes < 1024 * 1024) return String.format("%.1f KB", bytes / 1024.0);
         if (bytes < 1024 * 1024 * 1024) return String.format("%.1f MB", bytes / (1024.0 * 1024.0));
@@ -342,7 +342,7 @@ public final class YtDlpManager {
     }
 
     private static String parseSha256ForAsset(String sumsText, String asset) {
-        log.debug("SHA256SUMSから{}のハッシュを検索中", asset);
+        log.debug("Searching for the hash of {} from SHA256SUMS", asset);
         for (String line : sumsText.split("\n")) {
             String t = line.trim();
             if (t.isEmpty()) continue;
@@ -351,17 +351,17 @@ public final class YtDlpManager {
                 String hash = t.substring(0, sp).trim();
                 String file = t.substring(t.lastIndexOf(' ') + 1).trim();
                 if (file.equals(asset)) {
-                    log.debug("一致するハッシュを発見: {}", hash);
+                    log.debug("Matching hash found: {}", hash);
                     return hash;
                 }
             }
         }
-        log.debug("{}のハッシュが見つかりませんでした", asset);
+        log.debug("The hash for {} was not found.", asset);
         return null;
     }
 
     private static String sha256Hex(Path p) throws Exception {
-        log.debug("SHA256を計算中: {}", p);
+        log.debug("Calculating SHA256: {}", p);
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         try (InputStream in = Files.newInputStream(p)) {
             byte[] buf = new byte[8192];
@@ -376,37 +376,37 @@ public final class YtDlpManager {
 
     private static void grantExecuteIfNeeded(Path p) throws IOException {
         try {
-            log.debug("実行権限を付与中: {}", p);
+            log.debug("Granting execution permissions: {}", p);
             Set<PosixFilePermission> perms = Files.getPosixFilePermissions(p);
             if (!perms.contains(PosixFilePermission.OWNER_EXECUTE)) {
                 perms.add(PosixFilePermission.OWNER_EXECUTE);
                 perms.add(PosixFilePermission.GROUP_EXECUTE);
                 perms.add(PosixFilePermission.OTHERS_EXECUTE);
                 Files.setPosixFilePermissions(p, perms);
-                log.debug("✓ 実行権限を付与しました");
+                log.debug("✓ Granted execution permissions");
             } else {
-                log.debug("既に実行権限があります");
+                log.debug("You already have execution privileges.");
             }
         } catch (UnsupportedOperationException ignored) {
-            log.debug("POSIX権限非対応（Windowsなど）");
+            log.debug("Non-POSIX permissions support (Windows, etc.)");
         }
     }
 
     private static boolean isExecutableOk(Path exe) {
-        log.debug("実行ファイルの動作確認: {}", exe);
+        log.debug("Verifying executable file operation: {}", exe);
         try {
             String out = runAndCapture(exe.toString(), "--version");
             boolean ok = !out.isBlank();
-            log.debug("動作確認結果: {}", ok ? "OK" : "NG");
+            log.debug("Operation Verification Result: {}", ok ? "OK" : "NG");
             return ok;
         } catch (Exception e) {
-            log.debug("動作確認で例外発生: {}", e.getMessage());
+            log.debug("Exception occurred during operation verification: {}", e.getMessage());
             return false;
         }
     }
 
     private static String runAndCapture(String... cmd) throws Exception {
-        log.debug("コマンド実行: {}", Arrays.toString(cmd));
+        log.debug("Command execution: {}", Arrays.toString(cmd));
         Process proc = new ProcessBuilder(cmd).redirectErrorStream(true).start();
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try (InputStream in = proc.getInputStream()) {
@@ -414,22 +414,22 @@ public final class YtDlpManager {
         }
         if (!proc.waitFor(PROC_TIMEOUT_SEC, TimeUnit.SECONDS)) {
             proc.destroyForcibly();
-            log.error("プロセスがタイムアウトしました: {}", Arrays.toString(cmd));
+            log.error("The process timed out: {}", Arrays.toString(cmd));
             throw new RuntimeException("Process timeout: " + Arrays.toString(cmd));
         }
         String output = bos.toString(StandardCharsets.UTF_8);
-        log.debug("コマンド実行完了。出力サイズ: {} バイト", output.length());
+        log.debug("Command execution complete. Output size: {} bytes", output.length());
         return output;
     }
 
-    /** 旧API（既定=120秒） */
+    /** Legacy API (default=120 seconds) */
     private static String runAndCaptureWithProgress(String... cmd) throws Exception {
         return runAndCaptureWithProgressTimeout(PROC_TIMEOUT_SEC, cmd);
     }
 
-    /** タイムアウト指定付き */
+    /** Timeout-specified */
     private static String runAndCaptureWithProgressTimeout(int timeoutSec, String... cmd) throws Exception {
-        log.debug("コマンド実行: {}", Arrays.toString(cmd));
+        log.debug("Command execution: {}", Arrays.toString(cmd));
         Process proc = new ProcessBuilder(cmd).redirectErrorStream(true).start();
 
         StringBuilder output = new StringBuilder();
@@ -444,16 +444,16 @@ public final class YtDlpManager {
 
         if (!proc.waitFor(timeoutSec, TimeUnit.SECONDS)) {
             proc.destroyForcibly();
-            log.error("プロセスがタイムアウトしました: {}", Arrays.toString(cmd));
+            log.error("The process timed out: {}", Arrays.toString(cmd));
             throw new RuntimeException("Process timeout: " + Arrays.toString(cmd));
         }
 
         int exitCode = proc.exitValue();
         if (exitCode != 0) {
-            log.warn("コマンドが終了コード {} で終了しました", exitCode);
+            log.warn("The command ended with the exit code {}.", exitCode);
         }
 
-        log.debug("コマンド実行完了。出力サイズ: {} バイト", output.length());
+        log.debug("Command execution complete. Output size: {} bytes", output.length());
         return output.toString();
     }
 }

@@ -79,7 +79,7 @@ public class NicoAudioSourceManager implements AudioSourceManager, HttpConfigura
             y.startAutoUpdate(Duration.ofHours(6));
 
         } catch (Exception e) {
-            log.error("yt-dlp の準備に失敗しました", e);
+            log.error("Failed to prepare yt-dlp", e);
         }
 
         File cacheDir = new File("cache");
