@@ -144,11 +144,15 @@
             <groupId>org.bytedeco</groupId>
             <artifactId>javacv-platform</artifactId>
             <version>1.5.12</version>
+            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.bytedeco</groupId>
             <artifactId>ffmpeg-platform-gpl</artifactId>
             <version>7.1.1-1.5.12</version>
+            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 
@@ -171,6 +175,10 @@
                                 <includes>
                                     <include>*:*</include>
                                 </includes>
+                                <excludes>
+                                    <exclude>org.bytedeco:javacv-platform</exclude>
+                                    <exclude>org.bytedeco:ffmpeg-platform-gpl</exclude>
+                                </excludes>
                             </artifactSet>
                             <transformers>
                                 <transformer
