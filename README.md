@@ -9,7 +9,6 @@ MusicBot uses a simple and user-friendly UI. Both setup and launch are easy.
 ### Changes
 * Translated all strings (and some comments), reference.conf and this README from Japanese to English
 * Modified the code for reading config.txt to accept settings from both JP and this fork
-* Fix yt-dlp auto-installation on Linux systems
 ### What I can't fix
 * The help command is broken due to Discord's 1000-character limit. This is yet to be fixed upstream.
 
