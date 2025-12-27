@@ -238,7 +238,9 @@ public final class YtDlpManager {
         // 1) Download the main program
         URI binUri = URI.create(GITHUB_LATEST_BASE + assetName);
         log.debug("Download URL: {}", binUri);
-        Path tmp = Files.createTempFile("yt-dlp-", ".dl");
+        // Create a temporary file on the same drive/directory to avoid failures caused by 
+        // moving files between different drives (e.g., AppData -> D:\, etc.)
+        Path tmp = Files.createTempFile(binDir, "yt-dlp-", ".dl");
         log.debug("Temporary file: {}", tmp);
 
         HttpResponse<InputStream> response = client.send(
@@ -274,18 +276,18 @@ public final class YtDlpManager {
             log.warn("The SHA256 checksum could not be found, so verification is skipped.");
         }
 
-        // JPtoEN Change: Fixes move operation failing on Linux systems
-        // 3) Placement
-        log.debug("Move yt-dlp to final location: {} -> {}", tmp, exePath);
+        // 3) Deployment
+        log.debug("Moving yt-dlp to final location: {} -> {}", tmp, exePath);
         try {
+            // Replace atomically if possible (assuming same file system).
             Files.move(tmp, exePath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
         } catch (AtomicMoveNotSupportedException e) {
-            log.warn("Atomic move failed due to cross-device link, falling back to copy: {}", e.getMessage());
-            Files.copy(tmp, exePath, StandardCopyOption.REPLACE_EXISTING);
-            Files.deleteIfExists(tmp); // Clean up the temporary file
+            // If ATOMIC_MOVE is impossible (e.g., across different drives/file systems), retry with a standard MOVE.
+            log.debug("ATOMIC_MOVE not supported; retrying with standard MOVE: {}", e.getMessage());
+            Files.move(tmp, exePath, StandardCopyOption.REPLACE_EXISTING);
         }
         grantExecuteIfNeeded(exePath);
-        log.info("The deployment of yt-dlp is complete.");
+        log.info("yt-dlp deployment completed");
     }
 
     /** Download with progress indicator */
