@@ -37,7 +37,7 @@ import java.util.Objects;
  */
 @CommandInfo(
         name = "About",
-        description = "Displays information about the bot."
+        description = "Display information about the bot"
 )
 @Author("Cosgy Dev")
 public class AboutCommand extends SlashCommand {
@@ -54,7 +54,7 @@ public class AboutCommand extends SlashCommand {
         this.description = description;
         this.features = features;
         this.name = "about";
-        this.help = "Displays information about the bot.";
+        this.help = "Display information about the bot";
         this.aliases = new String[]{"botinfo", "info"};
         //this.guildOnly = false;
         this.perms = perms;
@@ -77,41 +77,39 @@ public class AboutCommand extends SlashCommand {
                 oauthLink = info.isBotPublic() ? info.getInviteUrl(0L, perms) : "";
             } catch (Exception e) {
                 Logger log = LoggerFactory.getLogger("OAuth2");
-                log.error("Failed to generate invite link ", e);
+                log.error("Failed to generate invitation link", e);
                 oauthLink = "";
             }
         }
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(event.getGuild() == null ? color : event.getGuild().getSelfMember().getColor());
-        builder.setAuthor("" + event.getJDA().getSelfUser().getName() + " Information", null, event.getJDA().getSelfUser().getAvatarUrl());
-        String CosgyOwner = "Operated and developed by Cosgy Dev.";
+        builder.setAuthor("About " + event.getJDA().getSelfUser().getName(), null, event.getJDA().getSelfUser().getAvatarUrl());
+        String CosgyOwner = "Maintained and developed by Cosgy Dev.";
         String author = event.getJDA().getUserById(event.getClient().getOwnerId()) == null ? "<@" + event.getClient().getOwnerId() + ">"
                 : Objects.requireNonNull(event.getJDA().getUserById(event.getClient().getOwnerId())).getName();
-        StringBuilder descr = new StringBuilder()
-                .append("Hello! I'm **").append(event.getJDA().getSelfUser().getName()).append("**, ")
-                .append(description).append(". ")
-                .append("This bot is built using [").append(JDAUtilitiesInfo.AUTHOR).append("]'s [Commands Extension](").append(JDAUtilitiesInfo.GITHUB).append(") (v")
-                .append(JDAUtilitiesInfo.VERSION).append(") and the [JDA library](https://github.com/DV8FromTheWorld/JDA) (v")
-                .append(JDAInfo.VERSION).append("), and is maintained by ").append(IS_AUTHOR ? "CosgyOwner" : author).append(". ")
-                .append("If you have any questions about ").append(event.getJDA().getSelfUser().getName()).append(", please visit the [Cosgy Dev official channel](https://discord.gg/RBpkHxf).")
-                .append("\n\nTo learn how to use this bot, type `/help`.")
-                .append("\n\nKey Features:\n```css");
+        StringBuilder descr = new StringBuilder().append("Hello! I'm **").append(event.getJDA().getSelfUser().getName()).append("**. ")
+                .append(description).append(" uses [" + JDAUtilitiesInfo.AUTHOR + "](https://github.com/JDA-Applications)'s [Commands Extension](" + JDAUtilitiesInfo.GITHUB + ") (")
+                .append(JDAUtilitiesInfo.VERSION).append(") and [JDA library](https://github.com/DV8FromTheWorld/JDA) (")
+                .append(JDAInfo.VERSION).append("), and is owned by ").append((IS_AUTHOR ? CosgyOwner : author + "."))
+                .append("For questions about ").append(event.getJDA().getSelfUser().getName()).append(", please visit [Cosgy Dev's official channel](https://discord.gg/RBpkHxf). ")
+                .append("\nYou can check how to use this bot with `").append("/help")
+                .append("`. \n\nFeatures: ```css");
         for (String feature : features)
             descr.append("\n").append(event.getClient().getSuccess().startsWith("<") ? REPLACEMENT_ICON : event.getClient().getSuccess()).append(" ").append(feature);
         descr.append(" ```");
         builder.setDescription(descr);
 
         if (event.getJDA().getShardInfo().getShardTotal() == 1) {
-            builder.addField("Status", event.getJDA().getGuilds().size() + " servers\n1 shard", true);
-            builder.addField("Users", event.getJDA().getUsers().size() + " unique\n" + event.getJDA().getGuilds().stream().mapToInt(g -> g.getMembers().size()).sum() + " total", true);
-            builder.addField("Channels", event.getJDA().getTextChannels().size() + " text\n" + event.getJDA().getVoiceChannels().size() + " voice", true);
+            builder.addField("Status", event.getJDA().getGuilds().size() + " Servers\n1 Shard", true);
+            builder.addField("Users", event.getJDA().getUsers().size() + " Unique\n" + event.getJDA().getGuilds().stream().mapToInt(g -> g.getMembers().size()).sum() + " Total", true);
+            builder.addField("Channels", event.getJDA().getTextChannels().size() + " Text\n" + event.getJDA().getVoiceChannels().size() + " Voice", true);
         } else {
-            builder.addField("Status", (event.getClient()).getTotalGuilds() + " servers\nShard " + (event.getJDA().getShardInfo().getShardId() + 1)
+            builder.addField("Status", (event.getClient()).getTotalGuilds() + " Servers\nShard " + (event.getJDA().getShardInfo().getShardId() + 1)
                     + "/" + event.getJDA().getShardInfo().getShardTotal(), true);
-            builder.addField("", event.getJDA().getUsers().size() + " users in shard\n" + event.getJDA().getGuilds().size() + " servers", true);
-            builder.addField("", event.getJDA().getTextChannels().size() + " text channels\n" + event.getJDA().getVoiceChannels().size() + " voice channels", true);
+            builder.addField("", event.getJDA().getUsers().size() + " Shard Users\n" + event.getJDA().getGuilds().size() + " Servers", true);
+            builder.addField("", event.getJDA().getTextChannels().size() + " Text Channels\n" + event.getJDA().getVoiceChannels().size() + " Voice Channels", true);
         }
-        builder.setFooter("Time when the bot was last restarted", "https://www.cosgy.dev/wp-content/uploads/2020/03/restart.jpg");
+        builder.setFooter("Last restart time", "https://www.cosgy.dev/wp-content/uploads/2020/03/restart.jpg");
         builder.setTimestamp(event.getClient().getStartTime());
         event.replyEmbeds(builder.build()).queue();
     }
@@ -124,42 +122,39 @@ public class AboutCommand extends SlashCommand {
                 oauthLink = info.isBotPublic() ? info.getInviteUrl(0L, perms) : "";
             } catch (Exception e) {
                 Logger log = LoggerFactory.getLogger("OAuth2");
-                log.error("Failed to generate invite link ", e);
+                log.error("Failed to generate invitation link", e);
                 oauthLink = "";
             }
         }
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(event.isFromType(ChannelType.TEXT) ? event.getGuild().getSelfMember().getColor() : color);
-        builder.setAuthor("" + event.getSelfUser().getName() + " Information", null, event.getSelfUser().getAvatarUrl());
-        String CosgyOwner = "Operated and developed by Cosgy Dev.";
+        builder.setAuthor("About " + event.getSelfUser().getName(), null, event.getSelfUser().getAvatarUrl());
+        String CosgyOwner = "Maintained and developed by Cosgy Dev.";
         String author = event.getJDA().getUserById(event.getClient().getOwnerId()) == null ? "<@" + event.getClient().getOwnerId() + ">"
                 : Objects.requireNonNull(event.getJDA().getUserById(event.getClient().getOwnerId())).getName();
-        StringBuilder descr = new StringBuilder()
-                .append("Hello! I'm **").append(event.getSelfUser().getName()).append("**, ")
-                .append(description).append(". ")
-                .append("This bot is built using ").append(JDAUtilitiesInfo.AUTHOR).append("'s [Command Extension](").append(JDAUtilitiesInfo.GITHUB).append(") (v")
-                .append(JDAUtilitiesInfo.VERSION).append(") and the [JDA Library](https://github.com/DV8FromTheWorld/JDA) (v")
-                .append(JDAInfo.VERSION).append("), and is maintained by ").append(IS_AUTHOR ? "CosgyOwner" : author).append(". ")
-                .append("If you have any questions about ").append(event.getSelfUser().getName()).append(", please join the [Cosgy Dev official channel](https://discord.gg/RBpkHxf).")
-                .append("\n\nTo learn how to use this bot, type `").append(event.getClient().getTextualPrefix()).append(event.getClient().getHelpWord())
-                .append("`.")
-                .append("\n\nKey Features:\n```css");
+        StringBuilder descr = new StringBuilder().append("Hello! I'm **").append(event.getSelfUser().getName()).append("**. ")
+                .append(description).append(" uses [" + JDAUtilitiesInfo.AUTHOR + "](https://github.com/JDA-Applications)'s [Commands Extension](" + JDAUtilitiesInfo.GITHUB + ") (")
+                .append(JDAUtilitiesInfo.VERSION).append(") and [JDA library](https://github.com/DV8FromTheWorld/JDA) (")
+                .append(JDAInfo.VERSION).append("), and is owned by ").append((IS_AUTHOR ? CosgyOwner : author + "."))
+                .append("For questions about ").append(event.getSelfUser().getName()).append(", please visit [Cosgy Dev's official channel](https://discord.gg/RBpkHxf). ")
+                .append("\nYou can check how to use this bot with `").append(event.getClient().getTextualPrefix()).append(event.getClient().getHelpWord())
+                .append("`\n\nFeatures: ```css");
         for (String feature : features)
             descr.append("\n").append(event.getClient().getSuccess().startsWith("<") ? REPLACEMENT_ICON : event.getClient().getSuccess()).append(" ").append(feature);
         descr.append(" ```");
         builder.setDescription(descr);
 
         if (event.getJDA().getShardInfo().getShardTotal() == 1) {
-            builder.addField("Status", event.getJDA().getGuilds().size() + " servers\n1 shard", true);
-            builder.addField("Users", event.getJDA().getUsers().size() + " unique\n" + event.getJDA().getGuilds().stream().mapToInt(g -> g.getMembers().size()).sum() + " total", true);
-            builder.addField("Channels", event.getJDA().getTextChannels().size() + " text\n" + event.getJDA().getVoiceChannels().size() + " voice", true);
+            builder.addField("Status", event.getJDA().getGuilds().size() + " Servers\n1 Shard", true);
+            builder.addField("Users", event.getJDA().getUsers().size() + " Unique\n" + event.getJDA().getGuilds().stream().mapToInt(g -> g.getMembers().size()).sum() + " Total", true);
+            builder.addField("Channels", event.getJDA().getTextChannels().size() + " Text\n" + event.getJDA().getVoiceChannels().size() + " Voice", true);
         } else {
-            builder.addField("Status", (event.getClient()).getTotalGuilds() + " servers\nShard " + (event.getJDA().getShardInfo().getShardId() + 1)
+            builder.addField("Status", (event.getClient()).getTotalGuilds() + " Servers\nShard " + (event.getJDA().getShardInfo().getShardId() + 1)
                     + "/" + event.getJDA().getShardInfo().getShardTotal(), true);
-            builder.addField("", event.getJDA().getUsers().size() + " users in shard\n" + event.getJDA().getGuilds().size() + " servers", true);
-            builder.addField("", event.getJDA().getTextChannels().size() + " text channels\n" + event.getJDA().getVoiceChannels().size() + " voice channels", true);
+            builder.addField("", event.getJDA().getUsers().size() + " Shard Users\n" + event.getJDA().getGuilds().size() + " Servers", true);
+            builder.addField("", event.getJDA().getTextChannels().size() + " Text Channels\n" + event.getJDA().getVoiceChannels().size() + " Voice Channels", true);
         }
-        builder.setFooter("Time when the bot was last restarted", "https://www.cosgy.dev/wp-content/uploads/2020/03/restart.jpg");
+        builder.setFooter("Last restart time", "https://www.cosgy.dev/wp-content/uploads/2020/03/restart.jpg");
         builder.setTimestamp(event.getClient().getStartTime());
         event.reply(builder.build());
     }

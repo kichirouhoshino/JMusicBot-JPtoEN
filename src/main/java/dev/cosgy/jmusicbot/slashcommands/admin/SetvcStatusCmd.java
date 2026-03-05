@@ -67,10 +67,10 @@ public class SetvcStatusCmd extends AdminCommand {
         if (event.getArgs().toLowerCase().matches("(false|disabled)")) {
             s.setVCStatus(false);
             event.reply(event.getClient().getSuccess() + "The VC status will no longer display 'Playing'.");
-        } else if (event.getArgs().toLowerCase().matches("(true|enabled)")) {
+        }else if(event.getArgs().toLowerCase().matches("(true|enabled)")) {
             s.setVCStatus(true);
             event.reply(event.getClient().getSuccess() + "The VC status will now display 'Playing'.");
-        } else {
+        }else {
             event.reply(event.getClient().getError() + "Please include true or false.");
         }
     }

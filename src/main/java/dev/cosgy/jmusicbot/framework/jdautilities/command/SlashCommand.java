@@ -39,39 +39,39 @@ import java.util.Map;
  */
 public abstract class SlashCommand extends Command
 {
-    
+
     protected Map<DiscordLocale, String> nameLocalization = new HashMap<>();
 
-    
+
     protected Map<DiscordLocale, String> descriptionLocalization = new HashMap<>();
 
-    
+
     @Deprecated
     protected String requiredRole = null;
 
-    
+
     protected SlashCommand[] children = new SlashCommand[0];
 
-    
+
     protected SubcommandGroupData subcommandGroup = null;
 
-    
+
     protected List<OptionData> options = new ArrayList<>();
 
-    
+
     protected CommandClient client;
 
-    
+
     protected abstract void execute(SlashCommandEvent event);
 
-    
+
     public void onAutoComplete(CommandAutoCompleteInteractionEvent event) {}
 
-    
+
     @Override
     protected void execute(CommandEvent event) {}
 
-    
+
     public final void run(SlashCommandEvent event)
     {
         // Set client reference
@@ -79,7 +79,7 @@ public abstract class SlashCommand extends Command
 
         // Check owner permissions
         if(ownerCommand && !(isOwner(event, client)))
-        {
+            {
             terminate(event, "This command can only be executed by the bot owner.", client);
             return;
         }
@@ -87,7 +87,7 @@ public abstract class SlashCommand extends Command
         // Check channel availability
         try {
             if(!isAllowed(event.getTextChannel()))
-            {
+                {
                 terminate(event, "This command cannot be used in this channel.", client);
                 return;
             }
@@ -98,8 +98,8 @@ public abstract class SlashCommand extends Command
         // Check required role
         if(requiredRole!=null)
             if(!(event.getChannelType() == ChannelType.TEXT) || event.getMember().getRoles().stream().noneMatch(r -> r.getName().equalsIgnoreCase(requiredRole)))
-            {
-                terminate(event, client.getError()+" You need the `"+requiredRole+"` role to use this command.", client);
+                {
+                terminate(event, client.getError()+" You need the '"+requiredRole+"' role to use this command.", client);
                 return;
             }
 
@@ -108,23 +108,23 @@ public abstract class SlashCommand extends Command
         {
             // Check user permissions
             for(Permission p: userPermissions)
-            {
+                {
                 // This is usually not null when executed on the server
                 if(event.getMember() == null)
                     continue;
 
                 if(p.isChannel())
-                {
-                    if(!event.getMember().hasPermission(event.getGuildChannel(), p))
                     {
-                        terminate(event, String.format(userMissingPermMessage, client.getError(), p.getName(), "channel"), client);
+                    if(!event.getMember().hasPermission(event.getGuildChannel(), p))
+                        {
+                        terminate(event,String.format(userMissingPermMessage, client.getError(), p.getName(), "channel"), client);
                         return;
                     }
                 }
                 else
-                {
-                    if(!event.getMember().hasPermission(p))
                     {
+                    if(!event.getMember().hasPermission(p))
+                        {
                         terminate(event, String.format(userMissingPermMessage, client.getError(), p.getName(), "server"), client);
                         return;
                     }
@@ -159,7 +159,7 @@ public abstract class SlashCommand extends Command
                 } else {
                     // Check guild-wide permissions
                     if (!selfMember.hasPermission(p)) {
-                        terminate(event, String.format(botMissingPermMessage, client.getError(), p.getName(), "サーバー"), client);
+                        terminate(event, String.format(botMissingPermMessage, client.getError(), p.getName(), "server"), client);
                         return;
                     }
                 }
@@ -167,24 +167,24 @@ public abstract class SlashCommand extends Command
 
             // Check NSFW
             if (nsfwOnly && event.getChannelType() == ChannelType.TEXT && !event.getTextChannel().isNSFW())
-            {
+                {
                 terminate(event, "This command can only be used in NSFW text channels.", client);
                 return;
             }
         }
         else if(guildOnly)
-        {
-            terminate(event, client.getError()+" This command cannot be used in direct messages.", client);
+            {
+            terminate(event, client.getError() + " This command cannot be used in direct messages.", client);
             return;
         }
 
         // Check cooldown (owner excluded)
         if(cooldown>0 && !(isOwner(event, client)))
-        {
+            {
             String key = getCooldownKey(event);
             int remaining = client.getRemainingCooldown(key);
             if(remaining>0)
-            {
+                {
                 terminate(event, getCooldownError(event, remaining, client), client);
                 return;
             }
@@ -196,7 +196,7 @@ public abstract class SlashCommand extends Command
             execute(event);
         } catch(Throwable t) {
             if(client.getListener() != null)
-            {
+                {
                 client.getListener().onSlashCommandException(event, this, t);
                 return;
             }
@@ -208,7 +208,7 @@ public abstract class SlashCommand extends Command
             client.getListener().onCompletedSlashCommand(event, this);
     }
 
-    
+
     public boolean isOwner(SlashCommandEvent event, CommandClient client)
     {
         if(event.getUser().getId().equals(client.getOwnerId()))
@@ -221,7 +221,7 @@ public abstract class SlashCommand extends Command
         return false;
     }
 
-    
+
     @Deprecated
     @ForRemoval(deadline = "2.0.0")
     public CommandClient getClient()
@@ -229,72 +229,72 @@ public abstract class SlashCommand extends Command
         return client;
     }
 
-    
+
     public SubcommandGroupData getSubcommandGroup()
     {
         return subcommandGroup;
     }
 
-    
+
     public List<OptionData> getOptions()
     {
         return options;
     }
 
-    
+
     public CommandData buildCommandData()
     {
         // Build command definition
         SlashCommandData data = Commands.slash(getName(), getHelp());
         if (!getOptions().isEmpty())
-        {
+            {
             data.addOptions(getOptions());
         }
 
         // Apply name localization
         if (!getNameLocalization().isEmpty())
-        {
+            {
             // Set localization
             data.setNameLocalizations(getNameLocalization());
         }
         // Apply description localization
         if (!getDescriptionLocalization().isEmpty())
-        {
+            {
             // Set localization
             data.setDescriptionLocalizations(getDescriptionLocalization());
         }
 
         // Apply subcommands
         if (children.length != 0)
-        {
+            {
             // Map to aggregate subcommand groups
             Map<String, SubcommandGroupData> groupData = new HashMap<>();
             for (SlashCommand child : children)
-            {
+                {
                 // Create subcommand definition
                 SubcommandData subcommandData = new SubcommandData(child.getName(), child.getHelp());
                 // Apply options
                 if (!child.getOptions().isEmpty())
-                {
+                    {
                     subcommandData.addOptions(child.getOptions());
                 }
 
                 // Apply child command name localization
                 if (!child.getNameLocalization().isEmpty())
-                {
+                    {
                     // Set localization
                     subcommandData.setNameLocalizations(child.getNameLocalization());
                 }
                 // Apply child command description localization
                 if (!child.getDescriptionLocalization().isEmpty())
-                {
+                    {
                     // Set localization
                     subcommandData.setDescriptionLocalizations(child.getDescriptionLocalization());
                 }
 
                 // If subcommand group exists
                 if (child.getSubcommandGroup() != null)
-                {
+                    {
                     SubcommandGroupData group = child.getSubcommandGroup();
 
                     SubcommandGroupData newData = groupData.getOrDefault(group.getName(), group)
@@ -304,7 +304,7 @@ public abstract class SlashCommand extends Command
                 }
                 // If group not specified, add directly
                 else
-                {
+                    {
                     data.addSubcommands(subcommandData);
                 }
             }
@@ -319,10 +319,10 @@ public abstract class SlashCommand extends Command
 
         //data.setGuildOnly(this.guildOnly);
 
-        return data;
+        return data;    
     }
 
-    
+
     public SlashCommand[] getChildren()
     {
         return children;
@@ -336,17 +336,17 @@ public abstract class SlashCommand extends Command
             client.getListener().onTerminatedSlashCommand(event, this);
     }
 
-    
+
     public String getCooldownKey(SlashCommandEvent event)
     {
         switch (cooldownScope)
         {
             case USER:         return cooldownScope.genKey(name,event.getUser().getIdLong());
             case USER_GUILD:   return event.getGuild()!=null ? cooldownScope.genKey(name,event.getUser().getIdLong(),event.getGuild().getIdLong()) :
-                    CooldownScope.USER_CHANNEL.genKey(name,event.getUser().getIdLong(), event.getChannel().getIdLong());
+                CooldownScope.USER_CHANNEL.genKey(name,event.getUser().getIdLong(), event.getChannel().getIdLong());
             case USER_CHANNEL: return cooldownScope.genKey(name,event.getUser().getIdLong(),event.getChannel().getIdLong());
             case GUILD:        return event.getGuild()!=null ? cooldownScope.genKey(name,event.getGuild().getIdLong()) :
-                    CooldownScope.CHANNEL.genKey(name,event.getChannel().getIdLong());
+                CooldownScope.CHANNEL.genKey(name,event.getChannel().getIdLong());
             case CHANNEL:      return cooldownScope.genKey(name,event.getChannel().getIdLong());
             case SHARD:
                 event.getJDA().getShardInfo();
@@ -359,7 +359,7 @@ public abstract class SlashCommand extends Command
         }
     }
 
-    
+
     public String getCooldownError(SlashCommandEvent event, int remaining, CommandClient client)
     {
         if(remaining<=0)
@@ -375,12 +375,12 @@ public abstract class SlashCommand extends Command
             return front+" "+cooldownScope.errorSpecification+"!";
     }
 
-    
+
     public Map<DiscordLocale, String> getNameLocalization() {
         return nameLocalization;
     }
 
-    
+
     public Map<DiscordLocale, String> getDescriptionLocalization() {
         return descriptionLocalization;
     }
