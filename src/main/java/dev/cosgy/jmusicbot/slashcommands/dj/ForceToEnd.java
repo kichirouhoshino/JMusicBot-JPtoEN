@@ -23,7 +23,7 @@ public class ForceToEnd extends DJCommand {
     public ForceToEnd(Bot bot) {
         super(bot);
         this.name = "forcetoend";
-        this.help = "Toggle between fair queue mode and normal queue mode for song additions. Setting to `TRUE` enables normal queue mode.";
+        this.help = "Toggle between fair queue and normal queue mode. TRUE enables normal queue.";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.options = List.of(new OptionData(OptionType.BOOLEAN, "value", "Use normal queue mode", true));
     }

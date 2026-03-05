@@ -6,11 +6,13 @@ MusicBot uses a simple and user-friendly UI. Both setup and launch are easy.
 <br><br>This is an English translation of JMusicBotJP.
 <br>This fork only aims to translate strings while keeping most of the code intact.
 <br>If some fixes are needed, they are very small fixes and are mentioned below.
+
 ### Changes
+
 * Translated all strings (and some comments), reference.conf and this README from Japanese to English
 * Modified the code for reading config.txt to accept settings from both JP and this fork
-### What I can't fix
-* The help command is broken due to Discord's 1000-character limit. This is yet to be fixed upstream.
+* Modified the help commmand to split message into chunks, due to English strings being longer
+* The default build behavior combines all platform natives into one jar. Modified to build platform-specific jars instead.
 
 [![Setup](http://i.imgur.com/VvXYp5j.png)](https://www.cosgy.dev/2019/09/06/jmusicbot-setup/)
 

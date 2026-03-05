@@ -45,24 +45,27 @@ public class HelpCmd extends SlashCommand {
             if (!command.isHidden() && (!command.isOwnerCommand() || event.getMember().isOwner())) {
                 if (!Objects.equals(category, command.getCategory())) {
                     category = command.getCategory();
-                    builder.append("\n\n  __").append(category == null ? "No Category" : category.getName()).append("__:\n");
+                    builder.append("\n\n  __").append(category == null ? "No Category" : category.getName())
+                            .append("__:\n");
                 }
-                builder.append("\n`").append(event.getClient().getTextualPrefix()).append(event.getClient().getPrefix() == null ? " " : "").append(command.getName())
+                builder.append("\n`").append(event.getClient().getTextualPrefix())
+                        .append(event.getClient().getPrefix() == null ? " " : "").append(command.getName())
                         .append(command.getArguments() == null ? "`" : " " + command.getArguments() + "`")
                         .append(" - ").append(command.getHelp());
             }
         }
         if (event.getClient().getServerInvite() != null)
-            builder.append("\n\nIf you need further help, you can join the official server: ").append(event.getClient().getServerInvite());
+            builder.append("\n\nIf you need further help, you can join the official server: ")
+                    .append(event.getClient().getServerInvite());
 
-        event.reply(builder.toString()).queue();
-
-        /*event.reply(builder.toString(), unused ->
-        {
-            if (event.isFromType(ChannelType.TEXT))
-                event.reactSuccess();
-        }, t -> event.replyWarning("I cannot send you help because I have blocked your direct messages."));
-         */
+        List<String> messages = splitMessage(builder.toString());
+        for (int i = 0; i < messages.size(); i++) {
+            if (i == 0) {
+                event.reply(messages.get(i)).queue();
+            } else {
+                event.getHook().sendMessage(messages.get(i)).queue();
+            }
+        }
     }
 
     public void execute(CommandEvent event) {
@@ -73,24 +76,57 @@ public class HelpCmd extends SlashCommand {
             if (!command.isHidden() && (!command.isOwnerCommand() || event.isOwner())) {
                 if (!Objects.equals(category, command.getCategory())) {
                     category = command.getCategory();
-                    builder.append("\n\n  __").append(category == null ? "No Category" : category.getName()).append("__:\n");
+                    builder.append("\n\n  __").append(category == null ? "No Category" : category.getName())
+                            .append("__:\n");
                 }
-                builder.append("\n`").append(event.getClient().getTextualPrefix()).append(event.getClient().getPrefix() == null ? " " : "").append(command.getName())
+                builder.append("\n`").append(event.getClient().getTextualPrefix())
+                        .append(event.getClient().getPrefix() == null ? " " : "").append(command.getName())
                         .append(command.getArguments() == null ? "`" : " " + command.getArguments() + "`")
                         .append(" - ").append(command.getHelp());
             }
         }
         if (event.getClient().getServerInvite() != null)
-            builder.append("\n\nIf you need further help, you can join the official server: ").append(event.getClient().getServerInvite());
+            builder.append("\n\nIf you need further help, you can join the official server: ")
+                    .append(event.getClient().getServerInvite());
 
+        List<String> messages = splitMessage(builder.toString());
         if (bot.getConfig().getHelpToDm()) {
-            event.replyInDm(builder.toString(), unused ->
-            {
-                if (event.isFromType(ChannelType.TEXT))
-                    event.reactSuccess();
-            }, t -> event.replyWarning("Unable to send help due to blocked direct messages."));
+            for (int i = 0; i < messages.size(); i++) {
+                String msg = messages.get(i);
+                if (i == messages.size() - 1) {
+                    event.replyInDm(msg, unused -> {
+                        if (event.isFromType(ChannelType.TEXT))
+                            event.reactSuccess();
+                    }, t -> event.replyWarning("Unable to send help due to blocked direct messages."));
+                } else {
+                    event.replyInDm(msg);
+                }
+            }
         } else {
-            event.reply(builder.toString());
+            for (String msg : messages) {
+                event.reply(msg);
+            }
         }
+    }
+
+    private List<String> splitMessage(String msg) {
+        List<String> messages = new java.util.ArrayList<>();
+        if (msg.length() <= 2000) {
+            messages.add(msg);
+            return messages;
+        }
+        String[] parts = msg.split("(?<=\\n)");
+        StringBuilder currentMsg = new StringBuilder();
+        for (String part : parts) {
+            if (currentMsg.length() + part.length() > 2000) {
+                messages.add(currentMsg.toString());
+                currentMsg = new StringBuilder();
+            }
+            currentMsg.append(part);
+        }
+        if (currentMsg.length() > 0) {
+            messages.add(currentMsg.toString());
+        }
+        return messages;
     }
 }

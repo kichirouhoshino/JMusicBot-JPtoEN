@@ -51,26 +51,6 @@
             <version>0.1.7</version>
         </dependency>
         <dependency>
-            <groupId>club.minnced</groupId>
-            <artifactId>jdave-native-linux-x86-64</artifactId>
-            <version>0.1.7</version>
-        </dependency>
-        <dependency>
-            <groupId>club.minnced</groupId>
-            <artifactId>jdave-native-linux-aarch64</artifactId>
-            <version>0.1.7</version>
-        </dependency>
-        <dependency>
-            <groupId>club.minnced</groupId>
-            <artifactId>jdave-native-win-x86-64</artifactId>
-            <version>0.1.7</version>
-        </dependency>
-        <dependency>
-            <groupId>club.minnced</groupId>
-            <artifactId>jdave-native-darwin</artifactId>
-            <version>0.1.7</version>
-        </dependency>
-        <dependency>
             <groupId>dev.arbjerg</groupId>
             <artifactId>lavaplayer</artifactId>
             <version>2.2.6</version>
@@ -142,15 +122,11 @@
             <artifactId>unirest-java</artifactId>
             <version>3.14.5</version>
         </dependency>
+        <!-- Base javacv Java library (no platform natives); natives are provided by platform profiles -->
         <dependency>
             <groupId>org.bytedeco</groupId>
-            <artifactId>javacv-platform</artifactId>
+            <artifactId>javacv</artifactId>
             <version>1.5.12</version>
-        </dependency>
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>ffmpeg-platform-gpl</artifactId>
-            <version>7.1.1-1.5.12</version>
         </dependency>
     </dependencies>
 
@@ -168,7 +144,7 @@
                         </goals>
                         <configuration>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <shadedClassifierName>All</shadedClassifierName>
+                            <shadedClassifierName>${shade.classifier}</shadedClassifierName>
                             <artifactSet>
                                 <includes>
                                     <include>*:*</include>
@@ -233,9 +209,154 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Default classifier for the shaded jar; overridden by platform profiles -->
+        <shade.classifier>All</shade.classifier>
         <maven.compiler.release>25</maven.compiler.release>
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.target>25</maven.compiler.target>
         <revision>SNAPSHOT</revision>
     </properties>
+    <profiles>
+        <!-- ── Linux x86_64 ─────────────────────────────────────────────────── -->
+        <profile>
+            <id>linux-x86_64</id>
+            <properties>
+                <shade.classifier>linux-x86_64</shade.classifier>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>club.minnced</groupId>
+                    <artifactId>jdave-native-linux-x86-64</artifactId>
+                    <version>0.1.7</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>ffmpeg</artifactId>
+                    <version>7.1.1-1.5.12</version>
+                    <classifier>linux-x86_64-gpl</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <!-- ── Linux aarch64 ─────────────────────────────────────────────────── -->
+        <profile>
+            <id>linux-aarch64</id>
+            <properties>
+                <shade.classifier>linux-aarch64</shade.classifier>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>club.minnced</groupId>
+                    <artifactId>jdave-native-linux-aarch64</artifactId>
+                    <version>0.1.7</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>ffmpeg</artifactId>
+                    <version>7.1.1-1.5.12</version>
+                    <classifier>linux-arm64-gpl</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <!-- ── Windows x86_64 ────────────────────────────────────────────────── -->
+        <profile>
+            <id>windows-x86_64</id>
+            <properties>
+                <shade.classifier>windows-x86_64</shade.classifier>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>club.minnced</groupId>
+                    <artifactId>jdave-native-win-x86-64</artifactId>
+                    <version>0.1.7</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>ffmpeg</artifactId>
+                    <version>7.1.1-1.5.12</version>
+                    <classifier>windows-x86_64-gpl</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <!-- ── macOS x86_64 ──────────────────────────────────────────────────── -->
+        <profile>
+            <id>macos-x86_64</id>
+            <properties>
+                <shade.classifier>macos-x86_64</shade.classifier>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>club.minnced</groupId>
+                    <artifactId>jdave-native-darwin</artifactId>
+                    <version>0.1.7</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>ffmpeg</artifactId>
+                    <version>7.1.1-1.5.12</version>
+                    <classifier>macosx-x86_64-gpl</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <!-- ── macOS aarch64 ─────────────────────────────────────────────────── -->
+        <profile>
+            <id>macos-aarch64</id>
+            <properties>
+                <shade.classifier>macos-aarch64</shade.classifier>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>club.minnced</groupId>
+                    <artifactId>jdave-native-darwin</artifactId>
+                    <version>0.1.7</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>ffmpeg</artifactId>
+                    <version>7.1.1-1.5.12</version>
+                    <classifier>macosx-arm64-gpl</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <!-- ── All platforms (original fat-jar, useful for local testing) ────── -->
+        <profile>
+            <id>all-platforms</id>
+            <dependencies>
+                <dependency>
+                    <groupId>club.minnced</groupId>
+                    <artifactId>jdave-native-linux-x86-64</artifactId>
+                    <version>0.1.7</version>
+                </dependency>
+                <dependency>
+                    <groupId>club.minnced</groupId>
+                    <artifactId>jdave-native-linux-aarch64</artifactId>
+                    <version>0.1.7</version>
+                </dependency>
+                <dependency>
+                    <groupId>club.minnced</groupId>
+                    <artifactId>jdave-native-win-x86-64</artifactId>
+                    <version>0.1.7</version>
+                </dependency>
+                <dependency>
+                    <groupId>club.minnced</groupId>
+                    <artifactId>jdave-native-darwin</artifactId>
+                    <version>0.1.7</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>javacv-platform</artifactId>
+                    <version>1.5.12</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>ffmpeg-platform-gpl</artifactId>
+                    <version>7.1.1-1.5.12</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>
