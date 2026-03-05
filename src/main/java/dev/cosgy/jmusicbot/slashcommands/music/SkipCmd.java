@@ -117,7 +117,7 @@ public class SkipCmd extends MusicCommand {
 
             // Add a message if required votes do not match the number of people in voice chat
             if (required != listeners) {
-                // メッセージを付加する
+                // Add a message
                 msg += "Skip requests are " + skippers + ". To skip, " + required + "/" + listeners + " are needed.]`";
             } else {
                 msg = "";

@@ -122,7 +122,7 @@ public class TOTPGenerator {
                 String gauge = "=".repeat((int) current) + "-".repeat(TIME_STEP - (int) current);
                 System.out.printf("\rTOTP Code: %s [%s] %s sec", code, gauge, TIME_STEP - (int) current);
             }
-        }, 0, 500); // 0ミリ秒で開始し、500ミリ秒ごとに更新
+        }, 0, 500); // Start at 0 milliseconds and update every 500 milliseconds
     }
 }
 
