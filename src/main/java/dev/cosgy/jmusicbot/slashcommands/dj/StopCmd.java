@@ -15,8 +15,8 @@
  */
 package dev.cosgy.jmusicbot.slashcommands.dj;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
-import com.jagrosh.jdautilities.command.SlashCommandEvent;
+import dev.cosgy.jmusicbot.framework.jdautilities.command.CommandEvent;
+import dev.cosgy.jmusicbot.framework.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
@@ -68,7 +68,7 @@ public class StopCmd extends DJCommand {
             event.reply(event.getClient().getSuccess() + " Cleared the queue and stopped the playback.");
         }
         handler.stopAndClear();
-        event.getGuild().getAudioManager().closeAudioConnection();
+        bot.closeAudioConnection(event.getGuild().getIdLong());
     }
 
     @Override
@@ -87,7 +87,7 @@ public class StopCmd extends DJCommand {
             event.reply(event.getClient().getSuccess() + " Cleared the queue and stopped the playback.").queue();
             log.info("Cleared the queue and disconnected from the voice channel in " + event.getGuild().getName());
             handler.stopAndClear();
-            event.getGuild().getAudioManager().closeAudioConnection();
+            bot.closeAudioConnection(event.getGuild().getIdLong());
             return;
         }
 
@@ -100,7 +100,7 @@ public class StopCmd extends DJCommand {
             log.info("Cleared the queue and disconnected from the voice channel in " + event.getGuild().getName());
         }
         handler.stopAndClear();
-        event.getGuild().getAudioManager().closeAudioConnection();
+        bot.closeAudioConnection(event.getGuild().getIdLong());
     }
 
     @Override

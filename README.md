@@ -31,9 +31,10 @@ MusicBot uses a simple and user-friendly UI. Both setup and launch are easy.
 
 # Setting up
 
-This bot requires Java version 11 or higher.
-If Java is not installed, download it from [here](https://www.oracle.com/jp/java/technologies/downloads/).
-To start this bot yourself, refer to the [Cosgy Dev Official Page](https://www.cosgy.dev/2019/09/06/jmusicbot-setup/).
+This bot requires Java version 25 or higher.
+If Java is not installed, please download it from [here](https://www.oracle.com/java/technologies/downloads/).
+To run this bot yourself, please refer to the [Cosgy Dev Official Setup Guide](https://www.cosgy.dev/2019/09/06/jmusicbot-setup/).
+Also, to use DAVE, it is recommended to add `--enable-native-access=ALL-UNNAMED` when starting the bot.
 
 # Setup Using Docker
 
@@ -56,4 +57,3 @@ Additionally, please consider starring the essential dependent libraries for thi
 # Example of Commands
 
 ![Example](https://i.imgur.com/tevrtKt.png)
-

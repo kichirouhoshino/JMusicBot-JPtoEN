@@ -16,10 +16,11 @@
 package com.jagrosh.jmusicbot;
 
 import com.github.lalyos.jfiglet.FigletFont;
-import com.jagrosh.jdautilities.command.Command;
-import com.jagrosh.jdautilities.command.CommandClientBuilder;
-import com.jagrosh.jdautilities.command.SlashCommand;
-import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
+import club.minnced.discord.jdave.interop.JDaveSessionFactory;
+import dev.cosgy.jmusicbot.framework.jdautilities.command.Command;
+import dev.cosgy.jmusicbot.framework.jdautilities.command.CommandClientBuilder;
+import dev.cosgy.jmusicbot.framework.jdautilities.command.SlashCommand;
+import dev.cosgy.jmusicbot.framework.jdautilities.commons.waiter.EventWaiter;
 import com.jagrosh.jmusicbot.entities.Prompt;
 import com.jagrosh.jmusicbot.gui.GUI;
 import com.jagrosh.jmusicbot.settings.SettingsManager;
@@ -36,6 +37,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.audio.AudioModuleConfig;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -67,6 +69,24 @@ public class JMusicBot {
     public static boolean COMMAND_AUDIT_ENABLED = false;
 
     /**
+     * Builds DAVE audio encryption configuration.
+     * Returns null if initialization fails and falls back to the existing encryption method.
+     */
+    private static AudioModuleConfig createDaveAudioModuleConfig(Logger log, Prompt prompt) {
+        try {
+            AudioModuleConfig config = new AudioModuleConfig()
+                    .withDaveSessionFactory(new JDaveSessionFactory());
+            log.info("DAVE audio encryption has been enabled.");
+            return config;
+        } catch (Throwable t) {
+            log.warn("Failed to initialize DAVE audio encryption. Continuing with legacy method: {}", t.toString());
+            prompt.alert(Prompt.Level.WARNING, "DAVE",
+                    "Failed to initialize DAVE, continuing with legacy audio encryption. Details: " + t.getClass().getSimpleName());
+            return null;
+        }
+    }
+
+    /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
@@ -86,8 +106,9 @@ public class JMusicBot {
         // check deprecated nogui mode (new way of setting it is -Dnogui=true)
         for (String arg : args)
             if ("-nogui".equalsIgnoreCase(arg)) {
-                prompt.alert(Prompt.Level.WARNING, "GUI", "-nogui flag is deprecated. "
-                        + "Please use the -Dnogui=true flag before the jar name. Example: java -jar -Dnogui=true JMusicBot.jar");
+                prompt.alert(Prompt.Level.WARNING, "GUI", "The -nogui flag is deprecated. "
+                        + "Please use the -Dnogui=true flag before the jar name. "
+                        + "Example: java --enable-native-access=ALL-UNNAMED -Dnogui=true -jar JMusicBot.jar");
             } else if ("-nocheckupdates".equalsIgnoreCase(arg)) {
                 CHECK_UPDATE = false;
                 log.info("Disabled update check");
@@ -211,7 +232,6 @@ public class JMusicBot {
         }};
 
         cb.addCommands(slashCommandList.toArray(new Command[0]));
-        cb.addSlashCommands(slashCommandList.toArray(new SlashCommand[0]));
 
         if (config.useEval())
             cb.addCommand(new EvalCmd(bot));
@@ -242,12 +262,19 @@ public class JMusicBot {
 
         // attempt to log in and start
         try {
-            JDA jda = JDABuilder.create(config.getToken(), Arrays.asList(INTENTS))
+            JDABuilder jdaBuilder = JDABuilder.create(config.getToken(), Arrays.asList(INTENTS))
                     .enableCache(CacheFlag.MEMBER_OVERRIDES, CacheFlag.VOICE_STATE)
                     .disableCache(CacheFlag.ACTIVITY, CacheFlag.CLIENT_STATUS, CacheFlag.EMOJI, CacheFlag.ONLINE_STATUS)
                     .setActivity(nogame ? null : Activity.playing("Loading..."))
                     .setStatus(config.getStatus() == OnlineStatus.INVISIBLE || config.getStatus() == OnlineStatus.OFFLINE
-                            ? OnlineStatus.INVISIBLE : OnlineStatus.DO_NOT_DISTURB)
+                            ? OnlineStatus.INVISIBLE : OnlineStatus.DO_NOT_DISTURB);
+
+            AudioModuleConfig daveConfig = createDaveAudioModuleConfig(log, prompt);
+            if (daveConfig != null) {
+                jdaBuilder.setAudioModuleConfig(daveConfig);
+            }
+
+            JDA jda = jdaBuilder
                     .addEventListeners(cb.build(), waiter, new Listener(bot),new QueueButtonListener(bot))
                     .setBulkDeleteSplittingEnabled(true)
                     .build();

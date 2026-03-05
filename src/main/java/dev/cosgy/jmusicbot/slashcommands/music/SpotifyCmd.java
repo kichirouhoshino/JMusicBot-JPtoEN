@@ -16,9 +16,9 @@
 
 package dev.cosgy.jmusicbot.slashcommands.music;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
-import com.jagrosh.jdautilities.command.SlashCommandEvent;
-import com.jagrosh.jdautilities.menu.OrderedMenu;
+import dev.cosgy.jmusicbot.framework.jdautilities.command.CommandEvent;
+import dev.cosgy.jmusicbot.framework.jdautilities.command.SlashCommandEvent;
+import dev.cosgy.jmusicbot.framework.jdautilities.menu.OrderedMenu;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
@@ -113,7 +113,7 @@ public class SpotifyCmd extends MusicCommand {
         }
 
         if (!isSpotifyTrackUrl(trackUrl)) {
-            event.reply("Error: The specified URL is not a Spotify track URL").queue();
+            event.reply("Error: The specified URL is not a valid Spotify track URL.").queue();
             return;
         }
 
@@ -175,7 +175,7 @@ public class SpotifyCmd extends MusicCommand {
         }
 
         if (!isSpotifyTrackUrl(trackUrl)) {
-            event.reply("Error: The specified URL is not a Spotify track URL");
+            event.reply("Error: The specified URL is not a valid Spotify track URL.");
             return;
         }
 
@@ -324,7 +324,7 @@ public class SpotifyCmd extends MusicCommand {
 
         @Override
         public void noMatches() {
-            event.getHook().sendMessage(FormatUtil.filter(event.getClient().getWarning() + " 曲を検索しましたが見つかりませんでした。 `")).queue();
+            event.getHook().sendMessage(FormatUtil.filter(event.getClient().getWarning() + " No tracks found matching the search.")).queue();
         }
 
         @Override
@@ -405,4 +405,3 @@ public class SpotifyCmd extends MusicCommand {
         }
     }
 }
-

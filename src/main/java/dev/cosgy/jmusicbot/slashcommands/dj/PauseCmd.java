@@ -15,8 +15,8 @@
  */
 package dev.cosgy.jmusicbot.slashcommands.dj;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
-import com.jagrosh.jdautilities.command.SlashCommandEvent;
+import dev.cosgy.jmusicbot.framework.jdautilities.command.CommandEvent;
+import dev.cosgy.jmusicbot.framework.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.PlayStatus;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
@@ -48,6 +48,7 @@ public class PauseCmd extends DJCommand {
         handler.getPlayer().setPaused(true);
         log.info("Paused **" + handler.getPlayer().getPlayingTrack().getInfo().title + "** in " + event.getGuild().getName());
         event.replySuccess("Paused **" + handler.getPlayer().getPlayingTrack().getInfo().title + "**. Use `" + event.getClient().getPrefix() + " play` to resume it.");
+        bot.getNowplayingHandler().onTrackUpdate(event.getGuild().getIdLong(), handler.getPlayer().getPlayingTrack(), handler);
 
         Bot.updatePlayStatus(event.getGuild(), event.getGuild().getSelfMember(), PlayStatus.PAUSED);
     }
@@ -66,6 +67,7 @@ public class PauseCmd extends DJCommand {
         handler.getPlayer().setPaused(true);
         log.info("Paused **" + handler.getPlayer().getPlayingTrack().getInfo().title + "** in " + event.getGuild().getName());
         event.reply(event.getClient().getSuccess() + "Paused **" + handler.getPlayer().getPlayingTrack().getInfo().title + "**. Use `" + event.getClient().getPrefix() + " play` to resume it.").queue();
+        bot.getNowplayingHandler().onTrackUpdate(event.getGuild().getIdLong(), handler.getPlayer().getPlayingTrack(), handler);
 
         Bot.updatePlayStatus(event.getGuild(), event.getGuild().getSelfMember(), PlayStatus.PAUSED);
     }

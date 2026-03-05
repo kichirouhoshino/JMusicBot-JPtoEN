@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jagrosh.jdautilities.command;
+package dev.cosgy.jmusicbot.framework.jdautilities.command;
 
 import net.dv8tion.jda.annotations.ForRemoval;
 import net.dv8tion.jda.api.Permission;
@@ -32,199 +32,84 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 /**
- * <h2><b>Slash Commands In JDA-Chewtils</b></h2>
- *
- * <p>This intends to mimic the {@link Command command} with minimal breaking changes,
- * to make migration easy and smooth.</p>
- * <p>Breaking changes are documented
- * <a href="https://github.com/Chew/JDA-Chewtils/wiki/Command-to-SlashCommand-Migration">here</a>.</p>
- * {@link SlashCommand#execute(SlashCommandEvent) #execute(CommandEvent)} body:
- *
- * <pre><code> public class ExampleCmd extends SlashCommand {
- *
- *      public ExampleCmd() {
- *          this.name = "example";
- *          this.help = "gives an example of commands do";
- *      }
- *
- *      {@literal @Override}
- *      protected void execute(SlashCommandEvent event) {
- *          event.reply("Hey look! This would be the bot's reply if this was a command!").queue();
- *      }
- *
- * }</code></pre>
- *
- * Execution is with the provision of the SlashCommandEvent is performed in two steps:
- * <ul>
- *     <li>{@link SlashCommand#run(SlashCommandEvent) run} - The command runs
- *     through a series of conditionals, automatically terminating the command instance if one is not met,
- *     and possibly providing an error response.</li>
- *
- *     <li>{@link SlashCommand#execute(SlashCommandEvent) execute} - The command,
- *     now being cleared to run, executes and performs whatever lies in the abstract body method.</li>
- * </ul>
- *
- * @author Olivia (Chew)
+ * Base class for slash command execution.
+ * Handles permission checks, cooldowns, and command data generation.
  */
 public abstract class SlashCommand extends Command
 {
-    /**
-     * Localization of slash command name. Allows discord to change the language of the name of slash commands in the client.<br>
-     * Example:<br>
-     *<pre><code>
-     *     public Command() {
-     *          this.name = "help"
-     *          this.nameLocalization = Map.of(DiscordLocale.GERMAN, "hilfe", DiscordLocale.RUSSIAN, "помощь");
-     *     }
-     *</code></pre>
-     */
+    
     protected Map<DiscordLocale, String> nameLocalization = new HashMap<>();
 
-    /**
-     * Localization of slash command description. Allows discord to change the language of the description of slash commands in the client.<br>
-     * Example:<br>
-     *<pre><code>
-     *     public Command() {
-     *          this.description = "all commands"
-     *          this.descriptionLocalization = Map.of(DiscordLocale.GERMAN, "alle Befehle", DiscordLocale.RUSSIAN, "все команды");
-     *     }
-     *</code></pre>
-     */
+    
     protected Map<DiscordLocale, String> descriptionLocalization = new HashMap<>();
 
-    /**
-     * This option is deprecated in favor of using Discord's permissions<br>
-     * This deprecation can be ignored if you intend to support normal and slash commands.
-     */
+    
     @Deprecated
     protected String requiredRole = null;
 
-    /**
-     * The child commands of the command. These are used in the format {@code /<parent name>
-     * <child name>}.
-     * This is synonymous with sub commands. Additionally, sub-commands cannot have children.<br>
-     */
+    
     protected SlashCommand[] children = new SlashCommand[0];
 
-    /**
-     * The subcommand/child group this is associated with.
-     * Will be in format {@code /<parent name> <subcommandGroup name> <subcommand name>}.
-     *
-     * <b>This only works in a child/subcommand.</b>
-     *
-     * To instantiate: <code>{@literal new SubcommandGroupData(name, description)}</code><br>
-     * It's important the instantiations are the same across children if you intend to keep them in the same group.
-     *
-     * Can be null, and it will not be assigned to a group.
-     */
+    
     protected SubcommandGroupData subcommandGroup = null;
 
-    /**
-     * An array list of OptionData.
-     *
-     * <b>This is incompatible with children. You cannot have a child AND options.</b>
-     *
-     * This is to specify different options for arguments and the stuff.
-     *
-     * For example, to add an argument for "input", you can do this:<br>
-     * <pre><code>
-     *     OptionData data = new OptionData(OptionType.STRING, "input", "The input for the command").setRequired(true);
-     *    {@literal List<OptionData> dataList = new ArrayList<>();}
-     *     dataList.add(data);
-     *     this.options = dataList;</code></pre>
-     */
+    
     protected List<OptionData> options = new ArrayList<>();
 
-    /**
-     * The command client to be retrieved if needed.
-     * @deprecated This is now retrieved from {@link SlashCommandEvent#getClient()}.
-     */
+    
     protected CommandClient client;
 
-    /**
-     * The main body method of a {@link SlashCommand SlashCommand}.
-     * <br>This is the "response" for a successful
-     * {@link SlashCommand#run(SlashCommandEvent) #run(CommandEvent)}.
-     *
-     * @param  event
-     *         The {@link SlashCommandEvent SlashCommandEvent} that
-     *         triggered this Command
-     */
+    
     protected abstract void execute(SlashCommandEvent event);
 
-    /**
-     * This body is executed when an auto-complete event is received.
-     * This only ever gets executed if an auto-complete {@link #options option} is set.
-     *
-     * @param event The event to handle.
-     * @see OptionData#setAutoComplete(boolean)
-     */
+    
     public void onAutoComplete(CommandAutoCompleteInteractionEvent event) {}
 
-    /**
-     * The main body method of a {@link com.jagrosh.jdautilities.command.Command Command}.
-     * <br>This is the "response" for a successful
-     * {@link com.jagrosh.jdautilities.command.Command#run(CommandEvent) #run(CommandEvent)}.
-     * <b>
-     *     Because this is a SlashCommand, this is called, but does nothing.
-     *     You can still override this if you want to have a separate response for normal [prefix][name].
-     *     Keep in mind you must add it as a Command via {@link CommandClientBuilder#addCommand(Command)} for it to work properly.
-     * </b>
-     *
-     * @param  event
-     *         The {@link com.jagrosh.jdautilities.command.CommandEvent CommandEvent} that
-     *         triggered this Command
-     */
+    
     @Override
     protected void execute(CommandEvent event) {}
 
-    /**
-     * Runs checks for the {@link SlashCommand SlashCommand} with the
-     * given {@link SlashCommandEvent SlashCommandEvent} that called it.
-     * <br>Will terminate, and possibly respond with a failure message, if any checks fail.
-     *
-     * @param  event
-     *         The SlashCommandEvent that triggered this Command
-     */
+    
     public final void run(SlashCommandEvent event)
     {
-        // set the client
+        // Set client reference
         this.client = event.getClient();
 
-        // owner check
+        // Check owner permissions
         if(ownerCommand && !(isOwner(event, client)))
         {
-            terminate(event, "Only an owner may run this command. Sorry.", client);
+            terminate(event, "This command can only be executed by the bot owner.", client);
             return;
         }
 
-        // is allowed check
+        // Check channel availability
         try {
             if(!isAllowed(event.getTextChannel()))
             {
-                terminate(event, "That command cannot be used in this channel!", client);
+                terminate(event, "This command cannot be used in this channel.", client);
                 return;
             }
         } catch (Exception e) {
-            // ignore for now
+            // Non-text channels are not checked
         }
 
-        // required role check
+        // Check required role
         if(requiredRole!=null)
             if(!(event.getChannelType() == ChannelType.TEXT) || event.getMember().getRoles().stream().noneMatch(r -> r.getName().equalsIgnoreCase(requiredRole)))
             {
-                terminate(event, client.getError()+" You must have a role called `"+requiredRole+"` to use that!", client);
+                terminate(event, client.getError()+" You need the `"+requiredRole+"` role to use this command.", client);
                 return;
             }
 
-        // availability check
+        // Check execution conditions
         if(event.getChannelType() != ChannelType.PRIVATE)
         {
-            //user perms
+            // Check user permissions
             for(Permission p: userPermissions)
             {
-                // Member will never be null because this is only ran in a server (text channel)
+                // This is usually not null when executed on the server
                 if(event.getMember() == null)
                     continue;
 
@@ -248,25 +133,25 @@ public abstract class SlashCommand extends Command
 
             // Check bot permissions
             for (Permission p : botPermissions) {
-                // Skip permissions that do not prevent the bot from functioning
+                // Permissions not required for operation are excluded from checks
                 if (p == Permission.VIEW_CHANNEL || p == Permission.MESSAGE_EMBED_LINKS) {
                     continue;
                 }
 
-                // Get the guild and self member
+                // Get guild and bot member info
                 Member selfMember = event.getGuild() != null ? event.getGuild().getSelfMember() : null;
 
                 if (p.isChannel()) {
-                    // Handle channel-specific permissions
+                    // Check channel-level permissions
                     GuildVoiceState voiceState = event.getMember().getVoiceState();
                     AudioChannelUnion channel = voiceState != null ? voiceState.getChannel() : null;
 
                     if (channel == null || !channel.getType().isAudio()) {
-                        terminate(event, client.getError() + " You must be in a voice channel to use that!", client);
+                        terminate(event, client.getError() + " You must join a voice channel to use this command.", client);
                         return;
                     }
 
-                    // Check bot's permissions in the voice channel
+                    // Check bot permissions in voice channel
                     if (!selfMember.hasPermission(channel, p)) {
                         terminate(event, String.format(botMissingPermMessage, client.getError(), p.getName(), "voice channel"), client);
                         return;
@@ -274,26 +159,26 @@ public abstract class SlashCommand extends Command
                 } else {
                     // Check guild-wide permissions
                     if (!selfMember.hasPermission(p)) {
-                        terminate(event, String.format(botMissingPermMessage, client.getError(), p.getName(), "server"), client);
+                        terminate(event, String.format(botMissingPermMessage, client.getError(), p.getName(), "サーバー"), client);
                         return;
                     }
                 }
             }
 
-            // nsfw check
+            // Check NSFW
             if (nsfwOnly && event.getChannelType() == ChannelType.TEXT && !event.getTextChannel().isNSFW())
             {
-                terminate(event, "This command may only be used in NSFW text channels!", client);
+                terminate(event, "This command can only be used in NSFW text channels.", client);
                 return;
             }
         }
         else if(guildOnly)
         {
-            terminate(event, client.getError()+" This command cannot be used in direct messages", client);
+            terminate(event, client.getError()+" This command cannot be used in direct messages.", client);
             return;
         }
 
-        // cooldown check, ignoring owner
+        // Check cooldown (owner excluded)
         if(cooldown>0 && !(isOwner(event, client)))
         {
             String key = getCooldownKey(event);
@@ -306,7 +191,7 @@ public abstract class SlashCommand extends Command
             else client.applyCooldown(key, cooldown);
         }
 
-        // run
+        // Execute main process
         try {
             execute(event);
         } catch(Throwable t) {
@@ -315,7 +200,7 @@ public abstract class SlashCommand extends Command
                 client.getListener().onSlashCommandException(event, this, t);
                 return;
             }
-            // otherwise we rethrow
+            // Re-throw exception if listener not set
             throw t;
         }
 
@@ -323,14 +208,7 @@ public abstract class SlashCommand extends Command
             client.getListener().onCompletedSlashCommand(event, this);
     }
 
-    /**
-     * Tests whether or not the {@link net.dv8tion.jda.api.entities.User User} who triggered this
-     * event is an owner of the bot.
-     *
-     * @param event the event that triggered the command
-     * @param client the command client for checking stuff
-     * @return {@code true} if the User is the Owner, else {@code false}
-     */
+    
     public boolean isOwner(SlashCommandEvent event, CommandClient client)
     {
         if(event.getUser().getId().equals(client.getOwnerId()))
@@ -343,12 +221,7 @@ public abstract class SlashCommand extends Command
         return false;
     }
 
-    /**
-     * Gets the CommandClient.
-     *
-     * @return the CommandClient.
-     * @deprecated This is now retrieved from {@link SlashCommandEvent#getClient()}.
-     */
+    
     @Deprecated
     @ForRemoval(deadline = "2.0.0")
     public CommandClient getClient()
@@ -356,85 +229,70 @@ public abstract class SlashCommand extends Command
         return client;
     }
 
-    /**
-     * Gets the subcommand data associated with this subcommand.
-     *
-     * @return subcommand data
-     */
+    
     public SubcommandGroupData getSubcommandGroup()
     {
         return subcommandGroup;
     }
 
-    /**
-     * Gets the options associated with this command.
-     *
-     * @return the OptionData array for options
-     */
+    
     public List<OptionData> getOptions()
     {
         return options;
     }
 
-    /**
-     * Builds CommandData for the SlashCommand upsert.
-     * This code is executed when we need to upsert the command.
-     *
-     * Useful for manual upserting.
-     *
-     * @return the built command data
-     */
+    
     public CommandData buildCommandData()
     {
-        // Make the command data
+        // Build command definition
         SlashCommandData data = Commands.slash(getName(), getHelp());
         if (!getOptions().isEmpty())
         {
             data.addOptions(getOptions());
         }
 
-        //Check name localizations
+        // Apply name localization
         if (!getNameLocalization().isEmpty())
         {
-            //Add localizations
+            // Set localization
             data.setNameLocalizations(getNameLocalization());
         }
-        //Check description localizations
+        // Apply description localization
         if (!getDescriptionLocalization().isEmpty())
         {
-            //Add localizations
+            // Set localization
             data.setDescriptionLocalizations(getDescriptionLocalization());
         }
 
-        // Check for children
+        // Apply subcommands
         if (children.length != 0)
         {
-            // Temporary map for easy group storage
+            // Map to aggregate subcommand groups
             Map<String, SubcommandGroupData> groupData = new HashMap<>();
             for (SlashCommand child : children)
             {
-                // Create subcommand data
+                // Create subcommand definition
                 SubcommandData subcommandData = new SubcommandData(child.getName(), child.getHelp());
-                // Add options
+                // Apply options
                 if (!child.getOptions().isEmpty())
                 {
                     subcommandData.addOptions(child.getOptions());
                 }
 
-                //Check child name localizations
+                // Apply child command name localization
                 if (!child.getNameLocalization().isEmpty())
                 {
-                    //Add localizations
+                    // Set localization
                     subcommandData.setNameLocalizations(child.getNameLocalization());
                 }
-                //Check child description localizations
+                // Apply child command description localization
                 if (!child.getDescriptionLocalization().isEmpty())
                 {
-                    //Add localizations
+                    // Set localization
                     subcommandData.setDescriptionLocalizations(child.getDescriptionLocalization());
                 }
 
-                // If there's a subcommand group
+                // If subcommand group exists
                 if (child.getSubcommandGroup() != null)
                 {
                     SubcommandGroupData group = child.getSubcommandGroup();
@@ -444,7 +302,7 @@ public abstract class SlashCommand extends Command
 
                     groupData.put(group.getName(), newData);
                 }
-                // Just add to the command
+                // If group not specified, add directly
                 else
                 {
                     data.addSubcommands(subcommandData);
@@ -464,11 +322,7 @@ public abstract class SlashCommand extends Command
         return data;
     }
 
-    /**
-     * Gets the {@link SlashCommand#children Command.children} for the Command.
-     *
-     * @return The children for the Command
-     */
+    
     public SlashCommand[] getChildren()
     {
         return children;
@@ -482,15 +336,7 @@ public abstract class SlashCommand extends Command
             client.getListener().onTerminatedSlashCommand(event, this);
     }
 
-    /**
-     * Gets the proper cooldown key for this Command under the provided
-     * {@link SlashCommandEvent SlashCommandEvent}.
-     *
-     * @param  event
-     *         The CommandEvent to generate the cooldown for.
-     *
-     * @return A String key to use when applying a cooldown.
-     */
+    
     public String getCooldownKey(SlashCommandEvent event)
     {
         switch (cooldownScope)
@@ -513,25 +359,12 @@ public abstract class SlashCommand extends Command
         }
     }
 
-    /**
-     * Gets an error message for this Command under the provided
-     * {@link SlashCommandEvent SlashCommandEvent}.
-     *
-     * @param  event
-     *         The CommandEvent to generate the error message for.
-     * @param  remaining
-     *         The remaining number of seconds a command is on cooldown for.
-     * @param client
-     *         The CommandClient for checking stuff
-     *
-     * @return A String error message for this command if {@code remaining > 0},
-     *         else {@code null}.
-     */
+    
     public String getCooldownError(SlashCommandEvent event, int remaining, CommandClient client)
     {
         if(remaining<=0)
             return null;
-        String front = client.getWarning()+" That command is on cooldown for "+remaining+" more seconds";
+        String front = client.getWarning()+" This command is on cooldown for "+remaining+" more seconds";
         if(cooldownScope.equals(CooldownScope.USER))
             return front+"!";
         else if(cooldownScope.equals(CooldownScope.USER_GUILD) && event.getGuild()==null)
@@ -542,18 +375,12 @@ public abstract class SlashCommand extends Command
             return front+" "+cooldownScope.errorSpecification+"!";
     }
 
-    /**
-     * Gets the specified localizations of slash command names.
-     * @return Slash command name localizations.
-     */
+    
     public Map<DiscordLocale, String> getNameLocalization() {
         return nameLocalization;
     }
 
-    /**
-     * Gets the specified localizations of slash command descriptions.
-     * @return Slash command description localizations.
-     */
+    
     public Map<DiscordLocale, String> getDescriptionLocalization() {
         return descriptionLocalization;
     }

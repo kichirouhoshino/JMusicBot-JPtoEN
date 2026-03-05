@@ -67,7 +67,10 @@ public class QueueButtonListener extends ListenerAdapter {
         }
 
         if (action.equals("close")) {
-            event.getMessage().delete().queue();
+            event.deferEdit().queue(
+                    ignored -> event.getMessage().delete().queue(),
+                    ignored -> {}
+            );
             return;
         }
         if (newPage == -1) {
@@ -75,12 +78,25 @@ public class QueueButtonListener extends ListenerAdapter {
             return;
         }
 
+        if (event.getGuild() == null) {
+            event.reply("This operation can only be used within a server.").setEphemeral(true).queue();
+            return;
+        }
+
         AudioHandler ah = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
+        if (ah == null) {
+            event.reply("There is currently no playback queue.").setEphemeral(true).queue();
+            return;
+        }
+
         List<QueuedTrack> queue = ah.getQueue().getList();
         RepeatMode repeatMode = bot.getSettingsManager().getSettings(event.getGuild()).getRepeatMode();
         MessageEmbed newEmbed = QueuePaginatorManager.createQueuePageEmbed(ah, queue,
                 bot.getConfig().getSuccess(), repeatMode, newPage, max);
 
-        event.editMessageEmbeds(newEmbed).queue();
+        event.deferEdit().queue(
+                ignored -> event.getMessage().editMessageEmbeds(newEmbed).queue(),
+                ignored -> {}
+        );
     }
 }

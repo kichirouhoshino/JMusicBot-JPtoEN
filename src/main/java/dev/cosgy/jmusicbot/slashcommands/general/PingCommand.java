@@ -15,11 +15,11 @@
  */
 package dev.cosgy.jmusicbot.slashcommands.general;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
-import com.jagrosh.jdautilities.command.SlashCommand;
-import com.jagrosh.jdautilities.command.SlashCommandEvent;
-import com.jagrosh.jdautilities.doc.standard.CommandInfo;
-import com.jagrosh.jdautilities.examples.doc.Author;
+import dev.cosgy.jmusicbot.framework.jdautilities.command.CommandEvent;
+import dev.cosgy.jmusicbot.framework.jdautilities.command.SlashCommand;
+import dev.cosgy.jmusicbot.framework.jdautilities.command.SlashCommandEvent;
+import dev.cosgy.jmusicbot.framework.jdautilities.doc.standard.CommandInfo;
+import dev.cosgy.jmusicbot.framework.jdautilities.examples.doc.Author;
 
 import java.time.temporal.ChronoUnit;
 
@@ -42,16 +42,16 @@ public class PingCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        event.reply("Ping: ...").queue(m -> {
-            m.editOriginal("Websocket: " + event.getJDA().getGatewayPing() + "ms").queue();
+        event.reply("Measuring response time...").queue(m -> {
+            m.editOriginal("WebSocket: " + event.getJDA().getGatewayPing() + "ms").queue();
         });
     }
 
     @Override
     protected void execute(CommandEvent event) {
-        event.reply("Ping: ...", m -> {
+        event.reply("Measuring response time...", m -> {
             long ping = event.getMessage().getTimeCreated().until(m.getTimeCreated(), ChronoUnit.MILLIS);
-            m.editMessage("Ping: " + ping + "ms | Websocket: " + event.getJDA().getGatewayPing() + "ms").queue();
+            m.editMessage("Response time: " + ping + "ms | WebSocket: " + event.getJDA().getGatewayPing() + "ms").queue();
         });
     }
 

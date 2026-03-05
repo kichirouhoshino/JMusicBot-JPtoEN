@@ -15,8 +15,8 @@
  */
 package dev.cosgy.jmusicbot.slashcommands.music;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
-import com.jagrosh.jdautilities.command.SlashCommandEvent;
+import dev.cosgy.jmusicbot.framework.jdautilities.command.CommandEvent;
+import dev.cosgy.jmusicbot.framework.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.settings.Settings;
@@ -66,8 +66,9 @@ public class VolumeCmd extends MusicCommand {
             else {
                 handler.getPlayer().setVolume(nvolume);
                 settings.setVolume(nvolume);
+                bot.getNowplayingHandler().onTrackUpdate(event.getGuild().getIdLong(), handler.getPlayer().getPlayingTrack(), handler);
                 event.reply(FormatUtil.volumeIcon(nvolume) + " Changed volume from `" + volume + "` to `" + nvolume + "`.");
-                log.info("The volume in " + event.getGuild().getName() + " has been changed from " + volume + " to " + nvolume + ".");
+                log.info(event.getGuild().getName() + " volume changed from " + volume + " to " + nvolume + ".");
             }
         }
     }
@@ -89,8 +90,9 @@ public class VolumeCmd extends MusicCommand {
         else {
             handler.getPlayer().setVolume(nvolume);
             settings.setVolume(nvolume);
+            bot.getNowplayingHandler().onTrackUpdate(event.getGuild().getIdLong(), handler.getPlayer().getPlayingTrack(), handler);
             event.reply(FormatUtil.volumeIcon(nvolume) + " Changed volume from `" + volume + "` to `" + nvolume + "`.").queue();
-            log.info("The volume in " + event.getGuild().getName() + " has been changed from " + volume + " to " + nvolume + ".");
+            log.info(event.getGuild().getName() + " volume changed from " + volume + " to " + nvolume + ".");
         }
     }
 }

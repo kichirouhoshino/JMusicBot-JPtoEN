@@ -15,11 +15,11 @@
  */
 package dev.cosgy.jmusicbot.slashcommands.music;
 
-import com.jagrosh.jdautilities.command.Command;
-import com.jagrosh.jdautilities.command.CommandEvent;
-import com.jagrosh.jdautilities.command.SlashCommand;
-import com.jagrosh.jdautilities.command.SlashCommandEvent;
-import com.jagrosh.jdautilities.menu.ButtonMenu;
+import dev.cosgy.jmusicbot.framework.jdautilities.command.Command;
+import dev.cosgy.jmusicbot.framework.jdautilities.command.CommandEvent;
+import dev.cosgy.jmusicbot.framework.jdautilities.command.SlashCommand;
+import dev.cosgy.jmusicbot.framework.jdautilities.command.SlashCommandEvent;
+import dev.cosgy.jmusicbot.framework.jdautilities.menu.ButtonMenu;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.PlayStatus;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
@@ -48,7 +48,8 @@ import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -91,7 +92,8 @@ public class PlayCmd extends MusicCommand {
             if (handler.getPlayer().getPlayingTrack() != null && handler.getPlayer().isPaused()) {
                 if (DJCommand.checkDJPermission(event)) {
                     handler.getPlayer().setPaused(false);
-                    event.replySuccess("Resumed playing **" + handler.getPlayer().getPlayingTrack().getInfo().title + "**.");
+                    event.replySuccess("Resumed playback of **" + handler.getPlayer().getPlayingTrack().getInfo().title + "**.");
+                    bot.getNowplayingHandler().onTrackUpdate(event.getGuild().getIdLong(), handler.getPlayer().getPlayingTrack(), handler);
 
                     Bot.updatePlayStatus(event.getGuild(), event.getGuild().getSelfMember(), PlayStatus.PLAYING);
                 } else
@@ -181,7 +183,8 @@ public class PlayCmd extends MusicCommand {
                 if (DJCommand.checkDJPermission(event.getClient(), event)) {
 
                     handler.getPlayer().setPaused(false);
-                    event.reply(event.getClient().getSuccess() + "Resumed playing **" + handler.getPlayer().getPlayingTrack().getInfo().title + "**.").queue();
+                    event.reply(event.getClient().getSuccess() + "Resumed playback of **" + handler.getPlayer().getPlayingTrack().getInfo().title + "**.").queue();
+                    bot.getNowplayingHandler().onTrackUpdate(event.getGuild().getIdLong(), handler.getPlayer().getPlayingTrack(), handler);
 
                     Bot.updatePlayStatus(event.getGuild(), event.getGuild().getSelfMember(), PlayStatus.PLAYING);
                 } else
@@ -300,8 +303,8 @@ public class PlayCmd extends MusicCommand {
                 Button cancelButton = Button.danger(cancelId, CANCEL);
 
                 m.editOriginal(addMsg + "\n" + event.getClient().getWarning()
-                                + " This song's playlist includes **" + playlist.getTracks().size() + "** other tracks. To load the tracks, select " + LOAD + ".")
-                        .setActionRow(loadButton, cancelButton)
+                                + " This song's playlist contains **" + playlist.getTracks().size() + "** additional songs. Select " + LOAD + " to load the tracks.")
+                        .setComponents(ActionRow.of(loadButton, cancelButton))
                         .queue();
 
                 // wait for button click or timeout
@@ -420,9 +423,9 @@ public class PlayCmd extends MusicCommand {
                 Button loadButton = Button.primary(loadId, LOAD);
                 Button cancelButton = Button.danger(cancelId, CANCEL);
 
-                m.editMessage(addMsg + "\n" + event.getClient().getWarning() + " This song's playlist includes **" + playlist.getTracks().size()
-                                + "** other tracks. To load the tracks, select " + LOAD + ".")
-                        .setActionRow(loadButton, cancelButton)
+                m.editMessage(addMsg + "\n" + event.getClient().getWarning() + " This song's playlist contains **" + playlist.getTracks().size()
+                                + "** additional songs. Select " + LOAD + " to load the tracks.")
+                        .setComponents(ActionRow.of(loadButton, cancelButton))
                         .queue();
                 // wait for a button click
                 bot.getWaiter().waitForEvent(ButtonInteractionEvent.class,
@@ -547,7 +550,8 @@ public class PlayCmd extends MusicCommand {
                     if (DJCommand.checkDJPermission(event.getClient(), event)) {
 
                         handler.getPlayer().setPaused(false);
-                        event.reply(event.getClient().getSuccess() + "**Resumed playing " + handler.getPlayer().getPlayingTrack().getInfo().title + "**.").queue();
+                        event.reply(event.getClient().getSuccess() + "Resumed playback of **" + handler.getPlayer().getPlayingTrack().getInfo().title + "**.").queue();
+                        bot.getNowplayingHandler().onTrackUpdate(event.getGuild().getIdLong(), handler.getPlayer().getPlayingTrack(), handler);
 
                         Bot.updatePlayStatus(event.getGuild(), event.getGuild().getSelfMember(), PlayStatus.PLAYING);
                     } else
