@@ -44,24 +44,9 @@ Additionally, since DAVE is used, it is recommended to add `--enable-native-acce
 You can start this bot yourself using Docker without having to install Java and other dependencies.
 If using Docker, refer to [here](https://hub.docker.com/r/cyberrex/jmusicbot-jp).
 
-# Jenkins CI (ci.cosgy.dev)
+# Build with Github Action (Specific to this fork)
 
-This repository includes a `Jenkinsfile`.
-If you specify this repository in a Jenkins Pipeline job, the following will be executed:
-
-* `mvn --batch-mode --update-snapshots clean verify`
-* Archive publication of `target/*.jar`
-* If the `PUBLISH_DIR` environment variable is set, the artifacts will be copied to the specified directory
-
-Artifacts can be downloaded from the Jenkins build screen.
-
-# Test CI with GitHub Actions
-
-Unit tests are run on push or pull request to `develop`/`master` via `.github/workflows/maven.yml`.
-
-To run equivalent tests locally, use the following:
-
-* `./mvn --batch-mode --update-snapshots test`
+A GitHub action is included for building JMusicBot, which produces jar files for each supported platform. This has to be run manually via the Actions tab.
 
 # Note
 
