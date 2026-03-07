@@ -249,8 +249,7 @@ public final class YtDlpManager {
         // 1) Download the main program
         URI binUri = URI.create(GITHUB_LATEST_BASE + assetName);
         log.debug("Download URL: {}", binUri);
-        // Create a temporary file on the same drive/directory to avoid failures caused by 
-        // moving files between different drives (e.g., AppData -> D:\, etc.)
+        // Create a temporary file on the same drive/directory to avoid failures caused by moving files between different drives (e.g., AppData -> D:\, etc.)
         Path tmp = Files.createTempFile(binDir, "yt-dlp-", ".dl");
         log.debug("Temporary file: {}", tmp);
 
