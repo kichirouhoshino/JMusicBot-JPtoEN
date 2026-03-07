@@ -34,14 +34,34 @@ MusicBot uses a simple and user-friendly UI. Both setup and launch are easy.
 # Setting up
 
 This bot requires Java version 25 or higher.
-If Java is not installed, please download it from [here](https://www.oracle.com/java/technologies/downloads/).
-To run this bot yourself, please refer to the [Cosgy Dev Official Setup Guide](https://www.cosgy.dev/2019/09/06/jmusicbot-setup/).
-Also, to use DAVE, it is recommended to add `--enable-native-access=ALL-UNNAMED` when starting the bot.
+If Java is not installed, please download it from [here](https://www.oracle.com/jp/java/technologies/downloads/).
+Also, for audio extraction and conversion, please install `ffmpeg` / `ffprobe` in your environment (they are not bundled in the jar).
+To start this bot yourself, refer to the [Cosgy Dev official page](https://www.cosgy.dev/2019/09/06/jmusicbot-setup/).
+Additionally, since DAVE is used, it is recommended to add `--enable-native-access=ALL-UNNAMED` when starting the bot.
 
 # Setup Using Docker
 
 You can start this bot yourself using Docker without having to install Java and other dependencies.
 If using Docker, refer to [here](https://hub.docker.com/r/cyberrex/jmusicbot-jp).
+
+# Jenkins CI (ci.cosgy.dev)
+
+This repository includes a `Jenkinsfile`.
+If you specify this repository in a Jenkins Pipeline job, the following will be executed:
+
+* `mvn --batch-mode --update-snapshots clean verify`
+* Archive publication of `target/*.jar`
+* If the `PUBLISH_DIR` environment variable is set, the artifacts will be copied to the specified directory
+
+Artifacts can be downloaded from the Jenkins build screen.
+
+# Test CI with GitHub Actions
+
+Unit tests are run on push or pull request to `develop`/`master` via `.github/workflows/maven.yml`.
+
+To run equivalent tests locally, use the following:
+
+* `./mvn --batch-mode --update-snapshots test`
 
 # Note
 

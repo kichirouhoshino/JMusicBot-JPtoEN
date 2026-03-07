@@ -205,22 +205,33 @@ public final class YtDlpManager {
 
     /** Select an asset name suitable for the current platform */
     private static String pickAssetForCurrentPlatform() {
-        String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
-        String arch = System.getProperty("os.arch").toLowerCase(Locale.ROOT);
+        return pickAssetForPlatform(
+                System.getProperty("os.name"),
+                System.getProperty("os.arch")
+        );
+    }
+
+    static String pickAssetForPlatform(String osName, String archName) {
+        String os = osName.toLowerCase(Locale.ROOT);
+        String arch = archName.toLowerCase(Locale.ROOT);
 
         log.debug("Detecting platform: OS={}, Arch={}", os, arch);
-        if (os.contains("win")) {
+        if (os.contains("mac") || os.contains("darwin")) {
+            log.debug("Selecting macOS version");
+            return "yt-dlp_macos";
+        } else if (os.contains("win")) {
             if (arch.contains("aarch64") || arch.contains("arm64")) {
-                log.debug("Select Windows ARM64 Edition");
+                log.debug("Selecting Windows ARM64 Edition");
                 return "yt-dlp_arm64.exe";
             }
-            log.debug("Select Windows version");
+            log.debug("Selecting Windows version");
             return "yt-dlp.exe";
-        } else if (os.contains("mac") || os.contains("darwin")) {
-            log.debug("Select macOS version");
-            return "yt-dlp_macos";
         } else {
-            log.debug("Select Linux version");
+            if (arch.contains("aarch64") || arch.contains("arm64")) {
+                log.debug("Selecting Linux ARM64 version");
+                return "yt-dlp_linux_aarch64";
+            }
+            log.debug("Selecting Linux version");
             return "yt-dlp_linux";
         }
     }

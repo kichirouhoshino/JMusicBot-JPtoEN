@@ -55,6 +55,8 @@ public class PlayerManager extends DefaultAudioPlayerManager {
     }
 
     public void init() {
+        verifyFfmpegAvailability();
+
         try {
             Path botDir = Paths.get("").toAbsolutePath();
             YtDlpManager y = new YtDlpManager(botDir);
@@ -95,6 +97,38 @@ public class PlayerManager extends DefaultAudioPlayerManager {
         if (getConfiguration().getResamplingQuality() != AudioConfiguration.ResamplingQuality.HIGH) {
             logger.debug("Set ResamplingQuality to HIGH (previous: {})", getConfiguration().getResamplingQuality().name());
             getConfiguration().setResamplingQuality(AudioConfiguration.ResamplingQuality.HIGH);
+        }
+    }
+
+    private void verifyFfmpegAvailability() {
+        boolean ffmpegOk = isCommandAvailable("ffmpeg");
+        boolean ffprobeOk = isCommandAvailable("ffprobe");
+        if (ffmpegOk && ffprobeOk) {
+            logger.info("Detected ffmpeg / ffprobe. Using external commands.");
+            return;
+        }
+
+        if (!ffmpegOk) {
+            logger.warn("ffmpeg not found. Please install ffmpeg in your environment.");
+        }
+        if (!ffprobeOk) {
+            logger.warn("ffprobe not found. Please install ffprobe in your environment.");
+        }
+        logger.warn("Audio extraction/conversion for some sources may fail.");
+    }
+
+    private boolean isCommandAvailable(String command) {
+        try {
+            Process process = new ProcessBuilder(command, "-version")
+                    .redirectErrorStream(true)
+                    .start();
+            if (!process.waitFor(5, TimeUnit.SECONDS)) {
+                process.destroyForcibly();
+                return false;
+            }
+            return process.exitValue() == 0;
+        } catch (Exception ignored) {
+            return false;
         }
     }
 
@@ -208,31 +242,42 @@ public class PlayerManager extends DefaultAudioPlayerManager {
                 "--print", "after_move:filepath"
         );
 
+        String ytEmail = bot.getConfig().getYouTubeEmailAddress();
+        String ytPass = bot.getConfig().getYouTubePassword();
+        if (ytEmail != null && !ytEmail.isBlank() && ytPass != null && !ytPass.isBlank()) {
+            cmd.add("--username");
+            cmd.add(ytEmail);
+            cmd.add("--password");
+            cmd.add(ytPass);
+        }
+
         cmd.add(url);
 
-        ProcessBuilder pb = new ProcessBuilder(cmd);
-        pb.directory(botRoot.toFile());
-        pb.redirectErrorStream(true);
-        // Japanese path support: Fix Python (yt-dlp) output to UTF-8
-        pb.environment().put("PYTHONIOENCODING", "utf-8");
+        YtDlpRunResult result = null;
+        List<List<String>> retryExtras = List.of(
+                Collections.emptyList(),
+                List.of("--force-ipv4"),
+                List.of("--extractor-args", "youtube:player_client=tv,ios,web")
+        );
+        for (List<String> extra : retryExtras) {
+            List<String> attempt = new ArrayList<>(cmd.size() + extra.size());
+            attempt.addAll(cmd.subList(0, cmd.size() - 1));
+            attempt.addAll(extra);
+            attempt.add(cmd.get(cmd.size() - 1));
 
-        Process proc = pb.start();
-
-        String lastNonEmpty = null;
-        try (BufferedReader r = new BufferedReader(new InputStreamReader(proc.getInputStream(), StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = r.readLine()) != null) {
-                if (!line.isBlank()) lastNonEmpty = line.trim();
-                logger.debug("[yt-dlp] {}", line);
-            }
+            result = runYtDlp(botRoot, attempt);
+            if (result.exitCode == 0) break;
+            logger.warn("yt-dlp failed (exit={}, extra={}): {}", result.exitCode, extra, result.outputTail);
         }
 
-        if (!proc.waitFor(600, TimeUnit.SECONDS)) {
-            proc.destroyForcibly();
-            throw new RuntimeException("yt-dlp timeout (600s)");
+        if (result == null) throw new RuntimeException("yt-dlp execution failed: no result");
+        if (result.timedOut) throw new RuntimeException("yt-dlp timeout (600s)");
+        if (result.exitCode != 0) {
+            String msg = result.outputTail.isBlank() ? "" : " / output tail: " + result.outputTail;
+            throw new RuntimeException("yt-dlp exit code=" + result.exitCode + msg);
         }
-        if (proc.exitValue() != 0) throw new RuntimeException("yt-dlp exit code=" + proc.exitValue());
 
+        String lastNonEmpty = result.lastNonEmptyLine;
         if (lastNonEmpty == null) {
             String id = tryExtractYoutubeId(url);
             if (id == null) throw new IllegalStateException("Final path unknown (print is empty). ID extraction also failed");
@@ -249,6 +294,49 @@ public class PlayerManager extends DefaultAudioPlayerManager {
         if (!Files.isRegularFile(out)) throw new FileNotFoundException("No output exists: " + out);
         logger.info("yt-dlp completed: {}", out);
         return out;
+    }
+
+    private YtDlpRunResult runYtDlp(Path botRoot, List<String> cmd) throws Exception {
+        ProcessBuilder pb = new ProcessBuilder(cmd);
+        pb.directory(botRoot.toFile());
+        pb.redirectErrorStream(true);
+        // Support for Japanese paths: Fix Python (yt-dlp) output to UTF-8
+        pb.environment().put("PYTHONIOENCODING", "utf-8");
+
+        Process proc = pb.start();
+
+        String lastNonEmpty = null;
+        Deque<String> tail = new ArrayDeque<>();
+        try (BufferedReader r = new BufferedReader(new InputStreamReader(proc.getInputStream(), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = r.readLine()) != null) {
+                if (!line.isBlank()) lastNonEmpty = line.trim();
+                if (tail.size() >= 12) tail.removeFirst();
+                tail.addLast(line);
+                logger.debug("[yt-dlp] {}", line);
+            }
+        }
+
+        boolean finished = proc.waitFor(600, TimeUnit.SECONDS);
+        if (!finished) {
+            proc.destroyForcibly();
+            return new YtDlpRunResult(-1, true, lastNonEmpty, String.join(" | ", tail));
+        }
+        return new YtDlpRunResult(proc.exitValue(), false, lastNonEmpty, String.join(" | ", tail));
+    }
+
+    private static final class YtDlpRunResult {
+        final int exitCode;
+        final boolean timedOut;
+        final String lastNonEmptyLine;
+        final String outputTail;
+
+        YtDlpRunResult(int exitCode, boolean timedOut, String lastNonEmptyLine, String outputTail) {
+            this.exitCode = exitCode;
+            this.timedOut = timedOut;
+            this.lastNonEmptyLine = lastNonEmptyLine;
+            this.outputTail = outputTail == null ? "" : outputTail;
+        }
     }
 
     private String toYoutubeUrl(String input) {
