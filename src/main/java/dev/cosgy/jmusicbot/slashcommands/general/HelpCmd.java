@@ -21,112 +21,139 @@ import dev.cosgy.jmusicbot.framework.jdautilities.command.CommandEvent;
 import dev.cosgy.jmusicbot.framework.jdautilities.command.SlashCommand;
 import dev.cosgy.jmusicbot.framework.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 
+import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class HelpCmd extends SlashCommand {
+    private static final int MAX_EMBED_DESCRIPTION_LENGTH = 4000;
     public Bot bot;
 
     public HelpCmd(Bot bot) {
         this.bot = bot;
         this.name = "help";
-        this.help = "Displays the list of available commands.";
+        this.help = "Displays a list of commands.";
         this.aliases = bot.getConfig().getAliases(this.name);
     }
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        StringBuilder builder = new StringBuilder("**" + event.getJDA().getSelfUser().getName() + "** Command List:\n");
-        Category category = null;
-        List<Command> commands = event.getClient().getCommands();
-        for (Command command : commands) {
-            if (!command.isHidden() && (!command.isOwnerCommand() || event.getMember().isOwner())) {
-                if (!Objects.equals(category, command.getCategory())) {
-                    category = command.getCategory();
-                    builder.append("\n\n  __").append(category == null ? "No Category" : category.getName())
-                            .append("__:\n");
-                }
-                builder.append("\n`").append(event.getClient().getTextualPrefix())
-                        .append(event.getClient().getPrefix() == null ? " " : "").append(command.getName())
-                        .append(command.getArguments() == null ? "`" : " " + command.getArguments() + "`")
-                        .append(" - ").append(command.getHelp());
-            }
-        }
-        if (event.getClient().getServerInvite() != null)
-            builder.append("\n\nIf you need further help, you can join the official server: ")
-                    .append(event.getClient().getServerInvite());
+        List<MessageEmbed> embeds = buildHelpEmbeds(
+                event.getJDA().getSelfUser().getName(),
+                event.getClient().getCommands(),
+                event.getClient().getTextualPrefix(),
+                event.isOwner(),
+                event.getClient().getServerInvite(),
+                event.getMember() == null ? null : event.getMember().getColor()
+        );
 
-        List<String> messages = splitMessage(builder.toString());
-        for (int i = 0; i < messages.size(); i++) {
-            if (i == 0) {
-                event.reply(messages.get(i)).queue();
-            } else {
-                event.getHook().sendMessage(messages.get(i)).queue();
-            }
+        if (embeds.size() == 1) {
+            event.replyEmbeds(embeds.get(0)).queue();
+            return;
         }
+
+        event.deferReply().queue(hook -> {
+            hook.editOriginalEmbeds(embeds.get(0)).queue();
+            for (int i = 1; i < embeds.size(); i++) {
+                hook.sendMessageEmbeds(embeds.get(i)).queue();
+            }
+        });
     }
 
     public void execute(CommandEvent event) {
-        StringBuilder builder = new StringBuilder("**" + event.getJDA().getSelfUser().getName() + "** Command List:\n");
-        Category category = null;
-        List<Command> commands = event.getClient().getCommands();
-        for (Command command : commands) {
-            if (!command.isHidden() && (!command.isOwnerCommand() || event.isOwner())) {
-                if (!Objects.equals(category, command.getCategory())) {
-                    category = command.getCategory();
-                    builder.append("\n\n  __").append(category == null ? "No Category" : category.getName())
-                            .append("__:\n");
-                }
-                builder.append("\n`").append(event.getClient().getTextualPrefix())
-                        .append(event.getClient().getPrefix() == null ? " " : "").append(command.getName())
-                        .append(command.getArguments() == null ? "`" : " " + command.getArguments() + "`")
-                        .append(" - ").append(command.getHelp());
-            }
-        }
-        if (event.getClient().getServerInvite() != null)
-            builder.append("\n\nIf you need further help, you can join the official server: ")
-                    .append(event.getClient().getServerInvite());
+        List<MessageEmbed> embeds = buildHelpEmbeds(
+                event.getJDA().getSelfUser().getName(),
+                event.getClient().getCommands(),
+                event.getClient().getTextualPrefix(),
+                event.isOwner(),
+                event.getClient().getServerInvite(),
+                event.getSelfMember() == null ? null : event.getSelfMember().getColor()
+        );
 
-        List<String> messages = splitMessage(builder.toString());
         if (bot.getConfig().getHelpToDm()) {
-            for (int i = 0; i < messages.size(); i++) {
-                String msg = messages.get(i);
-                if (i == messages.size() - 1) {
-                    event.replyInDm(msg, unused -> {
-                        if (event.isFromType(ChannelType.TEXT))
-                            event.reactSuccess();
-                    }, t -> event.replyWarning("Unable to send help due to blocked direct messages."));
-                } else {
-                    event.replyInDm(msg);
+            event.getAuthor().openPrivateChannel().queue(channel -> {
+                for (MessageEmbed embed : embeds) {
+                    channel.sendMessageEmbeds(embed).queue();
                 }
-            }
+                if (event.isFromType(ChannelType.TEXT))
+                    event.reactSuccess();
+            }, t -> event.replyWarning("Unable to send help because you have blocked direct messages."));
         } else {
-            for (String msg : messages) {
-                event.reply(msg);
+            for (MessageEmbed embed : embeds) {
+                event.reply(embed);
             }
         }
     }
 
-    private List<String> splitMessage(String msg) {
-        List<String> messages = new java.util.ArrayList<>();
-        if (msg.length() <= 2000) {
-            messages.add(msg);
-            return messages;
+    private List<MessageEmbed> buildHelpEmbeds(String botName, List<Command> commands, String prefix, boolean isOwner, String serverInvite, Color color) {
+        List<String> descriptions = splitHelpDescriptions(commands, prefix, isOwner, serverInvite);
+        List<MessageEmbed> embeds = new ArrayList<>();
+        for (int i = 0; i < descriptions.size(); i++) {
+            EmbedBuilder embedBuilder = new EmbedBuilder()
+                    .setTitle(botName + " Command List")
+                    .setDescription(descriptions.get(i));
+            if (color != null)
+                embedBuilder.setColor(color);
+            if (descriptions.size() > 1)
+                embedBuilder.setFooter("Page " + (i + 1) + "/" + descriptions.size());
+            embeds.add(embedBuilder.build());
         }
-        String[] parts = msg.split("(?<=\\n)");
-        StringBuilder currentMsg = new StringBuilder();
-        for (String part : parts) {
-            if (currentMsg.length() + part.length() > 2000) {
-                messages.add(currentMsg.toString());
-                currentMsg = new StringBuilder();
+        return embeds;
+    }
+
+    private List<String> splitHelpDescriptions(List<Command> commands, String prefix, boolean isOwner, String serverInvite) {
+        List<String> pages = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        Category category = null;
+        for (Command command : commands) {
+            if (command.isHidden() || (command.isOwnerCommand() && !isOwner))
+                continue;
+
+            if (!Objects.equals(category, command.getCategory())) {
+                category = command.getCategory();
+                appendSection(pages, current, "\n\n__" + (category == null ? "No Category" : category.getName()) + "__:\n");
             }
-            currentMsg.append(part);
+
+            String visiblePrefix = prefix == null ? "" : prefix;
+            String cmd = "\n`" + visiblePrefix + command.getName()
+                    + (command.getArguments() == null ? "`" : " " + command.getArguments() + "`")
+                    + " - " + command.getHelp();
+            appendSection(pages, current, cmd);
         }
-        if (currentMsg.length() > 0) {
-            messages.add(currentMsg.toString());
+
+        if (serverInvite != null) {
+            appendSection(pages, current, "\n\nIf you need more help, you can also join the official server: " + serverInvite);
         }
-        return messages;
+
+        if (pages.isEmpty() && current.length() == 0) {
+            current.append("There are no commands available to display.");
+        }
+        if (current.length() > 0) {
+            pages.add(current.toString().trim());
+        }
+        return pages;
+    }
+
+    private void appendSection(List<String> pages, StringBuilder current, String section) {
+        if (section.length() > MAX_EMBED_DESCRIPTION_LENGTH) {
+            int start = 0;
+            while (start < section.length()) {
+                int end = Math.min(start + MAX_EMBED_DESCRIPTION_LENGTH, section.length());
+                appendSection(pages, current, section.substring(start, end));
+                start = end;
+            }
+            return;
+        }
+
+        if (current.length() + section.length() > MAX_EMBED_DESCRIPTION_LENGTH) {
+            pages.add(current.toString().trim());
+            current.setLength(0);
+        }
+        current.append(section);
     }
 }

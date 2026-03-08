@@ -11,7 +11,6 @@ MusicBot uses a simple and user-friendly UI. Both setup and launch are easy.
 
 * Translated all strings (and some comments), reference.conf and this README from Japanese to English
 * Modified the code for reading config.txt to accept settings from both JP and this fork
-* Modified the help command to split message into chunks, due to English strings being longer
 * Upstream's build behavior combines all platform natives into one jar. Modified to build platform-specific jars instead.
 
 [![Setup](http://i.imgur.com/VvXYp5j.png)](https://www.cosgy.dev/2019/09/06/jmusicbot-setup/)
