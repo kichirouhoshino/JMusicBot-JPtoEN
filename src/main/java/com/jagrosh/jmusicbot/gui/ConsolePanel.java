@@ -41,6 +41,8 @@ public class ConsolePanel extends JPanel {
     private final JLabel matchCountLabel;
     private final JLabel lineCountLabel;
     private final JLabel charCountLabel;
+    private final JProgressBar renderProgressBar;
+    private final JLabel backlogCountLabel;
     private final Highlighter.HighlightPainter highlightPainter;
     private final List<int[]> matches = new ArrayList<>();
     private int selectedMatch = -1;
@@ -67,6 +69,12 @@ public class ConsolePanel extends JPanel {
         matchCountLabel = new JLabel("0 matches");
         lineCountLabel = new JLabel();
         charCountLabel = new JLabel();
+        backlogCountLabel = new JLabel("Pending render: 0");
+        renderProgressBar = new JProgressBar();
+        renderProgressBar.setIndeterminate(true);
+        renderProgressBar.setVisible(false);
+        renderProgressBar.setStringPainted(true);
+        renderProgressBar.setString("Rendering asynchronously...");
         highlightPainter = new DefaultHighlighter.DefaultHighlightPainter(new Color(255, 232, 168));
 
         JScrollPane scrollPane = new JScrollPane(textArea);
@@ -81,6 +89,9 @@ public class ConsolePanel extends JPanel {
         add(createStatusBar(), BorderLayout.SOUTH);
 
         installListeners();
+        outputStream.setBacklogListener(this::updateBacklogProgress);
+        updatePauseButtonState();
+        updateMatchCountLabel();
         updateStats();
     }
 
@@ -104,46 +115,74 @@ public class ConsolePanel extends JPanel {
     }
 
     private JPanel createActionBar() {
-        JPanel actionBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        JPanel actionBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
 
-        JButton clear = new JButton("Clear");
-        JButton copy = new JButton("Copy All");
-
+        JButton clear = createActionButton("Clear", "Ctrl+L");
+        JButton copy = createActionButton("Copy", "Ctrl+Shift+C");
+        styleToggleButton(pauseButton);
+        pauseButton.setToolTipText("Pause/resume log rendering");
         pauseButton.addActionListener(e -> {
             outputStream.setPaused(pauseButton.isSelected());
-            pauseButton.setText(pauseButton.isSelected() ? "Resume" : "Pause");
+            updatePauseButtonState();
         });
-        clear.addActionListener(e -> clearConsole());
+
+        autoScroll.setFont(autoScroll.getFont().deriveFont(Font.PLAIN, 14f));
+        autoScroll.setToolTipText("Automatically scroll to end when new logs arrive");
+
+        clear.setToolTipText("Clear the console");
+        copy.setToolTipText("Copy current logs to clipboard");
+        clear.addActionListener(e -> clearConsoleWithConfirm());
         copy.addActionListener(e -> copyAllLogs());
 
         actionBar.add(pauseButton);
         actionBar.add(clear);
         actionBar.add(copy);
+        actionBar.add(Box.createHorizontalStrut(8));
         actionBar.add(autoScroll);
         return actionBar;
     }
 
     private JPanel createSearchBar() {
         JPanel searchBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-        JLabel label = new JLabel("Search");
-        JButton prev = new JButton("Prev");
-        JButton next = new JButton("Next");
+        searchBar.setBorder(BorderFactory.createTitledBorder("Log Search"));
+
+        JLabel label = new JLabel("Keyword");
+        label.setFont(label.getFont().deriveFont(Font.PLAIN, 14f));
+        searchField.setFont(searchField.getFont().deriveFont(Font.PLAIN, 14f));
+        searchField.setColumns(32);
+        searchField.setToolTipText("Enter: Next / Shift+Enter: Previous / Esc: Clear search");
+
+        JButton prev = createActionButton("Previous", "Shift+Enter");
+        JButton next = createActionButton("Next", "Enter");
+        JButton clearSearch = createActionButton("Clear Search", "Esc");
+        matchCountLabel.setFont(matchCountLabel.getFont().deriveFont(Font.BOLD, 14f));
 
         prev.addActionListener(e -> selectRelativeMatch(-1));
         next.addActionListener(e -> selectRelativeMatch(1));
+        clearSearch.addActionListener(e -> clearSearchInput());
 
         searchBar.add(label);
         searchBar.add(searchField);
         searchBar.add(prev);
         searchBar.add(next);
+        searchBar.add(clearSearch);
         searchBar.add(matchCountLabel);
         return searchBar;
     }
 
     private JPanel createStatusBar() {
-        JPanel status = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 0));
-        status.add(lineCountLabel);
-        status.add(charCountLabel);
+        JPanel status = new JPanel(new BorderLayout(10, 0));
+        JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 0));
+        left.add(lineCountLabel);
+        left.add(charCountLabel);
+        left.add(backlogCountLabel);
+
+        JPanel right = new JPanel(new BorderLayout());
+        right.add(renderProgressBar, BorderLayout.CENTER);
+        right.setPreferredSize(new Dimension(240, 24));
+
+        status.add(left, BorderLayout.WEST);
+        status.add(right, BorderLayout.EAST);
         return status;
     }
 
@@ -191,6 +230,60 @@ public class ConsolePanel extends JPanel {
                 searchField.selectAll();
             }
         });
+
+        textArea.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+                .put(KeyStroke.getKeyStroke("control L"), "clearConsole");
+        textArea.getActionMap().put("clearConsole", new AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                clearConsoleWithConfirm();
+            }
+        });
+
+        textArea.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+                .put(KeyStroke.getKeyStroke("ctrl shift C"), "copyConsole");
+        textArea.getActionMap().put("copyConsole", new AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                copyAllLogs();
+            }
+        });
+
+        textArea.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+                .put(KeyStroke.getKeyStroke("control P"), "togglePause");
+        textArea.getActionMap().put("togglePause", new AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                pauseButton.doClick();
+            }
+        });
+
+        searchField.getInputMap(JComponent.WHEN_FOCUSED)
+                .put(KeyStroke.getKeyStroke("ENTER"), "searchNext");
+        searchField.getActionMap().put("searchNext", new AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                selectRelativeMatch(1);
+            }
+        });
+
+        searchField.getInputMap(JComponent.WHEN_FOCUSED)
+                .put(KeyStroke.getKeyStroke("shift ENTER"), "searchPrev");
+        searchField.getActionMap().put("searchPrev", new AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                selectRelativeMatch(-1);
+            }
+        });
+
+        searchField.getInputMap(JComponent.WHEN_FOCUSED)
+                .put(KeyStroke.getKeyStroke("ESCAPE"), "clearSearch");
+        searchField.getActionMap().put("clearSearch", new AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                clearSearchInput();
+            }
+        });
     }
 
     private void afterTextChanged() {
@@ -215,7 +308,7 @@ public class ConsolePanel extends JPanel {
 
         String needle = searchField.getText();
         if (needle == null || needle.isBlank()) {
-            matchCountLabel.setText("0 matches");
+            updateMatchCountLabel();
             return;
         }
 
@@ -234,7 +327,7 @@ public class ConsolePanel extends JPanel {
             index = end;
         }
 
-        matchCountLabel.setText(matches.size() + " matches");
+        updateMatchCountLabel();
         if (!matches.isEmpty()) {
             selectedMatch = 0;
             focusCurrentMatch();
@@ -262,6 +355,68 @@ public class ConsolePanel extends JPanel {
         } catch (BadLocationException ignored) {
             // no-op
         }
-        matchCountLabel.setText((selectedMatch + 1) + "/" + matches.size()); // e.g. "2/5 matches"
+        updateMatchCountLabel();
+    }
+
+    private void updateBacklogProgress(int pendingMessages) {
+        backlogCountLabel.setText("Pending render: " + pendingMessages);
+        boolean loading = pendingMessages > 0;
+        renderProgressBar.setVisible(loading);
+        if (loading) {
+            renderProgressBar.setString("Rendering asynchronously... " + pendingMessages + " items");
+        }
+    }
+
+    private JButton createActionButton(String label, String shortcutText) {
+        JButton button = new JButton(label + "  " + shortcutText);
+        button.setFont(button.getFont().deriveFont(Font.PLAIN, 14f));
+        button.setMargin(new Insets(8, 12, 8, 12));
+        return button;
+    }
+
+    private void styleToggleButton(JToggleButton button) {
+        button.setFont(button.getFont().deriveFont(Font.BOLD, 14f));
+        button.setMargin(new Insets(8, 12, 8, 12));
+    }
+
+    private void updatePauseButtonState() {
+        if (pauseButton.isSelected()) {
+            pauseButton.setText("Resume  Ctrl+P");
+            pauseButton.setForeground(new Color(133, 32, 32));
+        } else {
+            pauseButton.setText("Pause  Ctrl+P");
+            pauseButton.setForeground(UIManager.getColor("Button.foreground"));
+        }
+    }
+
+    private void clearConsoleWithConfirm() {
+        int choice = JOptionPane.showConfirmDialog(
+            this,
+            "Clear the console. Are you sure?",
+            "Clear Console",
+            JOptionPane.OK_CANCEL_OPTION,
+            JOptionPane.WARNING_MESSAGE
+        );
+        if (choice == JOptionPane.OK_OPTION) {
+            clearConsole();
+        }
+    }
+
+    private void clearSearchInput() {
+        searchField.setText("");
+        searchField.requestFocusInWindow();
+        updateMatchCountLabel();
+    }
+
+    private void updateMatchCountLabel() {
+        if (matches.isEmpty()) {
+            matchCountLabel.setText("Matches: 0");
+            return;
+        }
+        if (selectedMatch >= 0 && selectedMatch < matches.size()) {
+            matchCountLabel.setText("Matches: " + matches.size() + "  (" + (selectedMatch + 1) + "/" + matches.size() + ")");
+            return;
+        }
+        matchCountLabel.setText("Matches: " + matches.size());
     }
 }
